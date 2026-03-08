@@ -290,7 +290,7 @@ function GeneratorWidget() {
     setGenerating(true);
     setTimeout(()=>{const seeds=seedsOverride!==undefined?seedsOverride:otherSeeds;setPw(buildPassword(len,prof,opts,seeds));setGenerating(false);},200);
   };
-  useEffect(()=>{generate(null);},[]);
+  useEffect(()=>{generate(null);},[]);// eslint-disable-line react-hooks/exhaustive-deps
   const toggleOpt=key=>setOpts(o=>({...o,[key]:!o[key]}));
   const handleProfClick=(id)=>{setProf(id);setShowOtherInput(false);setOtherSeeds(null);setOtherLabel("");setOtherValue("");};
   const handleOtherSubmit=()=>{const t=otherValue.trim();if(!t)return;trackCustomProfession(t);const seeds=deriveSeeds(t);setOtherSeeds(seeds);setOtherLabel(t);setShowOtherInput(false);generate(seeds);};
@@ -459,7 +459,7 @@ function AnimatedPassword() {
     else if(phase==="hold"){t=setTimeout(()=>setPhase("erasing"),400);}
     else{if(display.length>0)t=setTimeout(()=>setDisplay(display.slice(0,-1)),30);else{setIdx((idx+1)%passwords.length);setPhase("typing");}}
     return()=>clearTimeout(t);
-  },[display,phase,idx]);
+  },[display,phase,idx]);// eslint-disable-line react-hooks/exhaustive-deps
   return (
     <div aria-hidden="true" style={{fontFamily:"'IBM Plex Mono'",fontSize:"clamp(15px,2.2vw,22px)",letterSpacing:"0.08em",lineHeight:1,display:"flex",alignItems:"center",flexWrap:"wrap",gap:1,minHeight:32}}>
       {display.split("").map((c,i)=>{let color="#e8e8e8";if("!@#$%^&*-_=+".includes(c))color="#C8FF00";else if("0123456789".includes(c))color="#777";else if(c===c.toUpperCase()&&/[A-Z]/.test(c))color="#fff";return <span key={i} style={{color}}>{c}</span>;})}
@@ -706,7 +706,7 @@ export default function PassGeniLanding() {
           </div>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:16,paddingTop:24,borderTop:"1px solid #111"}}>
             <div style={{display:"flex",gap:28,flexWrap:"wrap"}}>
-              {["Privacy Policy","Terms","API Docs","Contact"].map(l=><a key={l} href="#" className="nav-link" style={{fontSize:12}}>{l}</a>)}
+              {["Privacy Policy","Terms","API Docs","Contact"].map(l=><a key={l} href="/#" className="nav-link" style={{fontSize:12}}>{l}</a>)}
             </div>
             <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#555",letterSpacing:"0.08em"}}>© 2025 PassGeni · Zero retention by design · passgeni.online</div>
           </div>
