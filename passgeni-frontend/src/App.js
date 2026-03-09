@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 
 function PassGeniLogo({height="32px"}) {
   return (
@@ -15,10 +15,10 @@ function PassGeniLogo({height="32px"}) {
   );
 }
 
-/* ─── SEO HEAD ─────────────────────────────────────────────────────────── */
+/* --- SEO HEAD --- */
 function SEOHead() {
   useEffect(() => {
-    document.title = "PassGeni — AI Password Generator | Zero Storage, Zero Knowledge";
+    document.title = "PassGeni \u2014 AI Password Generator | Zero Storage, Zero Knowledge";
     const setMeta = (name, content, prop = false) => {
       const attr = prop ? "property" : "name";
       let el = document.querySelector(`meta[${attr}="${name}"]`);
@@ -28,43 +28,17 @@ function SEOHead() {
     setMeta("description", "PassGeni is a free AI-powered password generator. Creates strong, memorable passwords based on your profession. Zero data storage. Client-side only. No account needed. NIST SP 800-63B compliant.");
     setMeta("keywords", "AI password generator, free password generator, strong password generator, zero knowledge password generator, NIST passphrase generator, secure password maker, memorable password generator");
     setMeta("robots", "index, follow");
-    setMeta("og:title", "PassGeni — AI Password Generator That Remembers You, Not Your Passwords", true);
+    setMeta("og:title", "PassGeni \u2014 AI Password Generator That Remembers You, Not Your Passwords", true);
     setMeta("og:description", "Generate fortress-grade passwords tailored to your profession. Zero storage. Client-side only. Free forever.", true);
     setMeta("og:type", "website", true);
     setMeta("og:url", "https://passgeni.online", true);
     setMeta("twitter:card", "summary_large_image");
-    setMeta("twitter:title", "PassGeni — AI Password Generator");
+    setMeta("twitter:title", "PassGeni \u2014 AI Password Generator");
     setMeta("twitter:description", "Strong, memorable passwords built around your profession. Zero storage. NIST-compliant. Free.");
     let canonical = document.querySelector("link[rel='canonical']");
     if (!canonical) { canonical = document.createElement("link"); canonical.rel = "canonical"; document.head.appendChild(canonical); }
     canonical.href = "https://passgeni.online";
-    const schema = {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "SoftwareApplication",
-          "name": "PassGeni",
-          "applicationCategory": "SecurityApplication",
-          "operatingSystem": "Web Browser",
-          "url": "https://passgeni.online",
-          "description": "PassGeni is an AI-powered password generator that creates strong, memorable passwords and NIST-recommended passphrases based on the user profession. All generation happens client-side with zero data retention.",
-          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-          "featureList": ["AI-powered profession-aware password generation","NIST SP 800-63B passphrase mode","Zero data retention — client-side only","Real-time entropy and crack time estimation","Compliance presets for HIPAA, SOC2, PCI-DSS"],
-          "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "1240" }
-        },
-        {
-          "@type": "FAQPage",
-          "mainEntity": [
-            { "@type": "Question", "name": "Does PassGeni store my passwords?", "acceptedAnswer": { "@type": "Answer", "text": "No. PassGeni never stores your passwords. All generation happens entirely in your browser using crypto.getRandomValues(). No server ever receives your password data." } },
-            { "@type": "Question", "name": "How does an AI password generator work?", "acceptedAnswer": { "@type": "Answer", "text": "PassGeni seeds each password with a domain-relevant word from your profession — a developer gets kernel, a doctor gets cortex. The seed is embedded into a cryptographically random pool. The result is mathematically unguessable but marginally easier to recall." } },
-            { "@type": "Question", "name": "Are passphrases more secure than complex passwords?", "acceptedAnswer": { "@type": "Answer", "text": "NIST SP 800-63B recommends passphrases over complex short passwords. Four random words provide over 50 bits of entropy — enough to resist all known attacks for decades — while being significantly easier to remember." } },
-            { "@type": "Question", "name": "What does zero-knowledge password generation mean?", "acceptedAnswer": { "@type": "Answer", "text": "Zero-knowledge means the service provider has no ability to see, store, or reconstruct your passwords by design. PassGeni runs entirely in your browser. Even if our servers were compromised, there is nothing to steal." } },
-            { "@type": "Question", "name": "Can PassGeni be used for HIPAA or SOC2 compliance?", "acceptedAnswer": { "@type": "Answer", "text": "PassGeni Pro includes compliance presets for HIPAA, SOC2, ISO 27001, and PCI-DSS. Each preset automatically enforces the password policy for that standard." } }
-          ]
-        },
-        { "@type": "WebSite", "name": "PassGeni", "url": "https://passgeni.online", "description": "Free AI-powered password generator with zero data storage" }
-      ]
-    };
+    const schema = {"@context":"https://schema.org","@graph":[{"@type":"SoftwareApplication","name":"PassGeni","applicationCategory":"SecurityApplication","operatingSystem":"Web Browser","url":"https://passgeni.online","description":"PassGeni is an AI-powered password generator","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}},{"@type":"WebSite","name":"PassGeni","url":"https://passgeni.online"}]};
     let script = document.querySelector("#passgeni-schema");
     if (!script) { script = document.createElement("script"); script.id = "passgeni-schema"; script.type = "application/ld+json"; document.head.appendChild(script); }
     script.textContent = JSON.stringify(schema);
@@ -72,7 +46,7 @@ function SEOHead() {
   return null;
 }
 
-/* ─── STYLES ────────────────────────────────────────────────────────────── */
+/* --- STYLES --- */
 const FontLink = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=DM+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&display=swap');
@@ -94,8 +68,10 @@ const FontLink = () => (
     @keyframes passwordStream { 0%{transform:translateY(0);opacity:0.6} 100%{transform:translateY(-100%);opacity:0} }
     @keyframes trustPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
     @keyframes unbreakablePulse { 0%,100%{text-shadow:0 0 8px #C8FF0066,0 0 16px #C8FF0033} 50%{text-shadow:0 0 16px #C8FF00CC,0 0 32px #C8FF0088,0 0 48px #C8FF0044} }
-    @keyframes pillFadeOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-6px)} }
     @keyframes inputSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes historySlideIn { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+    @keyframes dnaBar { from{width:0} to{width:var(--w)} }
+    @keyframes pricingGlow { 0%,100%{box-shadow:0 0 0 1px #C8FF0033,0 40px 80px #C8FF0008} 50%{box-shadow:0 0 0 1px #C8FF0066,0 40px 80px #C8FF0018} }
     .use-it-btn { background:#111;border:none;border-radius:6px;padding:8px 16px;cursor:default;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:#666;letter-spacing:0.08em;transition:all 0.18s cubic-bezier(.16,1,.3,1);white-space:nowrap; }
     .use-it-btn.active { background:#C8FF00;color:#000;cursor:pointer; }
     .use-it-btn.active:hover { background:#d4ff1a;box-shadow:0 0 18px #C8FF0066;transform:scale(1.04); }
@@ -136,12 +112,24 @@ const FontLink = () => (
     .trust-chip .chip-icon{font-size:8px;color:#C8FF0088;}
     .nav-trust-row{display:flex;gap:6px;align-items:center;}
     .gen-trust-strip { display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:16px 0 4px;border-top:1px solid #111;margin-top:20px; }
-    @media(max-width:900px){ .nav-trust-row{display:none!important;} .hero-title{font-size:42px!important;} .features-grid{grid-template-columns:1fr!important;} .proof-grid{grid-template-columns:1fr!important;} .stats-row{gap:32px!important;} .nav-links{display:none!important;} }
+    .history-row { display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-radius:8px;background:#0c0c0e;border:1px solid #141416;gap:12px;animation:historySlideIn 0.25s ease; }
+    .history-row:hover{border-color:#C8FF0022;}
+    .compliance-pill { padding:7px 14px;border-radius:6px;font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.08em;cursor:pointer;border:1px solid #1e1e1e;transition:all 0.15s ease;background:transparent;color:#888;text-transform:uppercase; }
+    .compliance-pill.active{background:#C8FF0015;border-color:#C8FF0088;color:#C8FF00;box-shadow:0 0 12px #C8FF0022;}
+    .compliance-pill:hover:not(.active){border-color:#333;color:#bbb;}
+    .bulk-row { display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #0e0e10;gap:12px; }
+    .bulk-row:last-child{border-bottom:none;}
+    .bulk-row:hover{background:#0c0c0e;}
+    .pricing-card { background:#0a0a0c;border:1px solid #1a1a1a;border-radius:16px;padding:36px 32px;position:relative;transition:all 0.3s cubic-bezier(.16,1,.3,1); }
+    .pricing-card.featured { animation:pricingGlow 4s ease infinite; }
+    .pricing-card:hover{transform:translateY(-4px);}
+    .pricing-check { width:18px;height:18px;border-radius:50%;background:#C8FF0015;border:1px solid #C8FF0044;display:inline-flex;align-items:center;justify-content:center;font-size:9px;color:#C8FF00;flex-shrink:0; }
+    @media(max-width:900px){ .nav-trust-row{display:none!important;} .hero-title{font-size:42px!important;} .features-grid{grid-template-columns:1fr!important;} .proof-grid{grid-template-columns:1fr!important;} .stats-row{gap:32px!important;} .nav-links{display:none!important;} .pricing-grid{grid-template-columns:1fr!important;} }
     @media(max-width:600px){ .trust-chip{font-size:8px;padding:3px 9px;} }
   `}</style>
 );
 
-/* ─── DATA ──────────────────────────────────────────────────────────────── */
+/* --- DATA --- */
 const CHARS = { lower:"abcdefghijklmnopqrstuvwxyz", upper:"ABCDEFGHIJKLMNOPQRSTUVWXYZ", num:"0123456789", sym:"!@#$%^&*-_=+" };
 const PROFESSIONS = [
   { id:"dev", label:"Developer", seeds:["stack","kernel","deploy","tensor","cipher"] },
@@ -183,6 +171,14 @@ const SINGLE_WORD_PAIRS = {
   miner:["shaft","ore"], diver:["depth","tank"], boxer:["jab","ring"],
   baker:["knead","crust"], welder:["arc","flux"], sailor:["tide","mast"],
 };
+const COMPLIANCE_PRESETS = {
+  none:   { label:"Custom",  minLen:8,  maxLen:32, upper:true,  num:true,  sym:true,  color:"#888",    desc:"Your settings" },
+  hipaa:  { label:"HIPAA",   minLen:12, maxLen:32, upper:true,  num:true,  sym:true,  color:"#4fc3f7", desc:"Min 12 chars \u00b7 All character classes" },
+  pci:    { label:"PCI-DSS", minLen:12, maxLen:32, upper:true,  num:true,  sym:true,  color:"#ffb74d", desc:"Min 12 chars \u00b7 No dictionary words" },
+  soc2:   { label:"SOC 2",   minLen:16, maxLen:32, upper:true,  num:true,  sym:true,  color:"#ce93d8", desc:"Min 16 chars \u00b7 Mixed case + symbols" },
+  iso:    { label:"ISO 27001",minLen:14, maxLen:32, upper:true,  num:true,  sym:true,  color:"#80cbc4", desc:"Min 14 chars \u00b7 Full complexity required" },
+};
+
 function deriveSeeds(input) {
   const clean = input.trim().toLowerCase();
   for (const [key, seeds] of Object.entries(PROFESSION_KEYWORD_MAP)) { if (clean.includes(key)) return seeds; }
@@ -232,21 +228,33 @@ function getCrackTime(pw) {
   return "longer than the universe";
 }
 function getEntropy(pw){return pw?Math.round(pw.length*Math.log2(94)):0;}
+function getDNAScore(pw) {
+  if (!pw) return null;
+  const checks = [
+    { label:"Length \u2265 12",    pass: pw.length >= 12,   weight: 20 },
+    { label:"Length \u2265 16",    pass: pw.length >= 16,   weight: 15 },
+    { label:"Uppercase A-Z",  pass: /[A-Z]/.test(pw),  weight: 15 },
+    { label:"Lowercase a-z",  pass: /[a-z]/.test(pw),  weight: 10 },
+    { label:"Numbers 0-9",    pass: /[0-9]/.test(pw),  weight: 15 },
+    { label:"Symbols !@#\u2026",   pass: /[^A-Za-z0-9]/.test(pw), weight: 15 },
+    { label:"No repeats (aaa)",pass: !/(.)\1\1/.test(pw), weight: 10 },
+  ];
+  const total = checks.reduce((a,c)=>a+(c.pass?c.weight:0),0);
+  return { checks, total };
+}
 
-/* ─── TRUST CHIP ────────────────────────────────────────────────────────── */
+/* --- COMPONENTS --- */
 function TrustChip({label, type="shield"}) {
   return (
     <span className="trust-chip" title={label}>
       {type==="dot"   && <span className="live-dot"/>}
-      {type==="check" && <span className="chip-icon">✓</span>}
-      {type==="zero"  && <span className="chip-icon">◎</span>}
-      {type==="shield"&& <span className="chip-icon">🔒</span>}
+      {type==="check" && <span className="chip-icon">\u2713</span>}
+      {type==="zero"  && <span className="chip-icon">\u25ce</span>}
+      {type==="shield"&& <span className="chip-icon">\ud83d\udd12</span>}
       {label}
     </span>
   );
 }
-
-/* ─── GENERATOR TRUST STRIP ─────────────────────────────────────────────── */
 function GeneratorTrustStrip() {
   return (
     <div className="gen-trust-strip" role="list" aria-label="Security guarantees">
@@ -254,12 +262,10 @@ function GeneratorTrustStrip() {
       <TrustChip label="Zero server contact" type="shield"/>
       <TrustChip label="crypto.getRandomValues() entropy" type="zero"/>
       <TrustChip label="NIST SP 800-63B" type="check"/>
-      <TrustChip label="No account · No logs" type="shield"/>
+      <TrustChip label="No account \u00b7 No logs" type="shield"/>
     </div>
   );
 }
-
-/* ─── STRENGTH BAR ──────────────────────────────────────────────────────── */
 function StrengthBar({password}) {
   const {score,label,color} = getStrength(password);
   const entropy = getEntropy(password);
@@ -269,7 +275,7 @@ function StrengthBar({password}) {
         <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.1em",textTransform:"uppercase"}}>strength</span>
         <div style={{display:"flex",gap:12,alignItems:"center"}}>
           {password && <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",letterSpacing:"0.06em"}}>{entropy} bits entropy</span>}
-          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color,letterSpacing:"0.08em",fontWeight:600}}>{label}{label==="Unbreakable"?" ✦":""}</span>
+          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color,letterSpacing:"0.08em",fontWeight:600}}>{label}{label==="Unbreakable"?" \u2746":""}</span>
         </div>
       </div>
       <div style={{display:"flex",gap:4}}>
@@ -279,13 +285,11 @@ function StrengthBar({password}) {
     </div>
   );
 }
-
 function CopyBtn({text}) {
   const [copied,setCopied]=useState(false);
   const copy=async()=>{if(!text)return;await navigator.clipboard.writeText(text);setCopied(true);setTimeout(()=>setCopied(false),2000);};
-  return <button className={`copy-btn ${copied?"copied":""}`} onClick={copy} aria-label="Copy to clipboard">{copied?"✓ COPIED":"COPY"}</button>;
+  return <button className={`copy-btn ${copied?"copied":""}`} onClick={copy} aria-label="Copy to clipboard">{copied?"\u2713 COPIED":"COPY"}</button>;
 }
-
 function PasswordDisplay({password,generating}) {
   return (
     <div style={{background:"#08080a",border:"1px solid #141416",borderRadius:10,padding:"20px 24px",position:"relative",overflow:"hidden"}} aria-live="polite">
@@ -298,7 +302,7 @@ function PasswordDisplay({password,generating}) {
             else if("0123456789".includes(c))color="#777";
             else if(c===c.toUpperCase()&&/[A-Z]/.test(c))color="#fff";
             return <span key={i} style={{color}}>{c}</span>;
-          }) : <span style={{color:"#aaa"}}>click generate —</span>}
+          }) : <span style={{color:"#aaa"}}>click generate \u2014</span>}
         </div>
         <CopyBtn text={password}/>
       </div>
@@ -306,8 +310,125 @@ function PasswordDisplay({password,generating}) {
     </div>
   );
 }
+function DNAScorePanel({password}) {
+  const dna = getDNAScore(password);
+  if (!dna) return null;
+  const grade = dna.total >= 85 ? {g:"A+",c:"#C8FF00"} : dna.total >= 70 ? {g:"A",c:"#C8FF00"} : dna.total >= 55 ? {g:"B",c:"#ffaa00"} : {g:"C",c:"#ff6644"};
+  return (
+    <div style={{background:"#08080a",border:"1px solid #141416",borderRadius:10,padding:"20px 24px",marginTop:12,animation:"fadeIn 0.3s ease"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16}}>
+        <div>
+          <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:4}}>Password DNA Score</div>
+          <div style={{fontFamily:"'DM Sans'",fontSize:12,color:"#555"}}>Breakdown of cryptographic quality</div>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <div style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:32,color:grade.c,lineHeight:1}}>{grade.g}</div>
+          <div style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",marginTop:2}}>{dna.total}/100</div>
+        </div>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:10}}>
+        {dna.checks.map((c,i)=>(
+          <div key={i}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:4}}>
+              <span style={{fontFamily:"'DM Sans'",fontSize:12,color:c.pass?"#ccc":"#555"}}>{c.pass?"\u2713":"\u2717"} {c.label}</span>
+              <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:c.pass?"#C8FF0088":"#333"}}>{c.pass?`+${c.weight}`:"0"} pts</span>
+            </div>
+            <div style={{height:3,background:"#141416",borderRadius:100,overflow:"hidden"}}>
+              <div style={{height:"100%",borderRadius:100,background:c.pass?"#C8FF00":"transparent",width:c.pass?`${c.weight}%`:"0%",transition:"width 0.8s cubic-bezier(.16,1,.3,1)"}}/>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function PasswordHistory({history, onClear}) {
+  if (!history.length) return null;
+  return (
+    <div style={{marginTop:16,animation:"fadeIn 0.3s ease"}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.12em",textTransform:"uppercase"}}>Recent \u00b7 This Session</span>
+        <button onClick={onClear} style={{background:"none",border:"none",fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",cursor:"pointer",letterSpacing:"0.08em",transition:"color 0.15s"}} onMouseEnter={e=>e.target.style.color="#ff4444"} onMouseLeave={e=>e.target.style.color="#555"}>Clear all</button>
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {history.slice(0,8).map((pw,i)=>(
+          <div key={i} className="history-row">
+            <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#888",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1,letterSpacing:"0.04em"}}>{pw}</span>
+            <div style={{display:"flex",gap:6,alignItems:"center",flexShrink:0}}>
+              <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:getStrength(pw).color}}>{getStrength(pw).label}</span>
+              <CopyBtn text={pw}/>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+function BulkGenerator({prof, opts, len, otherSeeds}) {
+  const [count,setCount]=useState(10);
+  const [bulk,setBulk]=useState([]);
+  const [generating,setGenerating]=useState(false);
+  const generate=()=>{
+    setGenerating(true);
+    setTimeout(()=>{
+      const list = Array.from({length:count},()=>buildPassword(len,prof,opts,otherSeeds));
+      setBulk(list);setGenerating(false);
+    },300);
+  };
+  const download=()=>{
+    if(!bulk.length) return;
+    const content = `PassGeni \u2014 Bulk Password Export\nGenerated: ${new Date().toLocaleString()}\nCount: ${bulk.length}\n\n${bulk.join("\n")}`;
+    const blob = new Blob([content],{type:"text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `passgeni-${bulk.length}-passwords.txt`;
+    a.click();
+  };
+  const copyAll=async()=>{if(!bulk.length)return;await navigator.clipboard.writeText(bulk.join("\n"));};
+  return (
+    <div style={{background:"#0a0a0c",border:"1px solid #141416",borderRadius:16,overflow:"hidden"}}>
+      <div style={{padding:"20px 24px",borderBottom:"1px solid #1a1a1a",display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:12}}>
+        <div>
+          <div style={{fontFamily:"'Outfit'",fontWeight:700,fontSize:16,color:"#fff"}}>Bulk Generator</div>
+          <div style={{fontFamily:"'DM Sans'",fontSize:12,color:"#666",marginTop:2}}>Generate multiple passwords at once \u00b7 Same settings</div>
+        </div>
+        <div style={{display:"flex",gap:8,alignItems:"center"}}>
+          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888"}}>Count:</span>
+          {[5,10,20,50].map(n=>(
+            <button key={n} onClick={()=>setCount(n)} className={`toggle-pill ${count===n?"active":""}`} style={{padding:"5px 12px"}}>{n}</button>
+          ))}
+        </div>
+      </div>
+      <div style={{padding:"20px 24px"}}>
+        <button className="cta-primary" style={{width:"100%",justifyContent:"center",marginBottom:16}} onClick={generate}>
+          {generating?`Generating ${count} passwords\u2026`:<>Generate {count} passwords <span style={{fontSize:16}}>\u26a1</span></>}
+        </button>
+        {bulk.length>0 && (
+          <>
+            <div style={{display:"flex",gap:8,marginBottom:12}}>
+              <button onClick={copyAll} className="cta-ghost" style={{flex:1,justifyContent:"center",fontSize:12,padding:"10px 16px"}}>Copy all</button>
+              <button onClick={download} className="cta-ghost" style={{flex:1,justifyContent:"center",fontSize:12,padding:"10px 16px"}}>\u2193 Download .txt</button>
+            </div>
+            <div style={{background:"#08080a",border:"1px solid #141416",borderRadius:10,overflow:"hidden",maxHeight:320,overflowY:"auto"}}>
+              {bulk.map((pw,i)=>(
+                <div key={i} className="bulk-row">
+                  <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#999",width:24,flexShrink:0}}>{i+1}.</span>
+                  <span style={{fontFamily:"'IBM Plex Mono'",fontSize:12,color:"#ccc",flex:1,letterSpacing:"0.04em",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{pw}</span>
+                  <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+                    <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:getStrength(pw).color}}>{getStrength(pw).label}</span>
+                    <CopyBtn text={pw}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
 
-/* ─── GENERATOR WIDGET ──────────────────────────────────────────────────── */
+/* --- GENERATOR WIDGET --- */
 function GeneratorWidget() {
   const [prof,setProf]=useState("dev");
   const [len,setLen]=useState(18);
@@ -319,236 +440,330 @@ function GeneratorWidget() {
   const [otherValue,setOtherValue]=useState("");
   const [otherSeeds,setOtherSeeds]=useState(null);
   const [otherLabel,setOtherLabel]=useState("");
+  const [history,setHistory]=useState([]);
+  const [showDNA,setShowDNA]=useState(false);
+  const [showBulk,setShowBulk]=useState(false);
+  const [compliance,setCompliance]=useState("none");
   const inputRef=useRef(null);
+
+  const applyCompliance=(key)=>{
+    setCompliance(key);
+    if(key==="none") return;
+    const preset=COMPLIANCE_PRESETS[key];
+    setLen(l=>Math.max(l,preset.minLen));
+    setOpts({upper:preset.upper,num:preset.num,sym:preset.sym});
+  };
   const generate=(seedsOverride=null)=>{
     setGenerating(true);
-    setTimeout(()=>{const seeds=seedsOverride!==undefined?seedsOverride:otherSeeds;setPw(buildPassword(len,prof,opts,seeds));setGenerating(false);},200);
+    setTimeout(()=>{
+      const seeds=seedsOverride!==undefined?seedsOverride:otherSeeds;
+      const newPw=buildPassword(len,prof,opts,seeds);
+      setPw(newPw);
+      setHistory(h=>[newPw,...h.filter(x=>x!==newPw)].slice(0,10));
+      setGenerating(false);
+    },200);
   };
   useEffect(()=>{generate(null);},[]);// eslint-disable-line react-hooks/exhaustive-deps
   const toggleOpt=key=>setOpts(o=>({...o,[key]:!o[key]}));
   const handleProfClick=(id)=>{setProf(id);setShowOtherInput(false);setOtherSeeds(null);setOtherLabel("");setOtherValue("");};
   const handleOtherSubmit=()=>{const t=otherValue.trim();if(!t)return;trackCustomProfession(t);const seeds=deriveSeeds(t);setOtherSeeds(seeds);setOtherLabel(t);setShowOtherInput(false);generate(seeds);};
+  const activePreset=COMPLIANCE_PRESETS[compliance];
+
   return (
-    <div style={{background:"#0a0a0c",border:"1px solid #141416",borderRadius:16,overflow:"hidden",boxShadow:"0 40px 80px #00000088,0 0 0 1px #141416"}}>
-      <div style={{display:"flex",borderBottom:"1px solid #1e1e1e"}} role="tablist">
-        {[["password","Password"],["passphrase","Passphrase"]].map(([t,label])=>(
-          <button key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)} style={{flex:1,padding:"14px 0",fontFamily:"'IBM Plex Mono'",fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",background:tab===t?"#0c0c0e":"transparent",color:tab===t?"#C8FF00":"#777",border:"none",borderBottom:tab===t?"1px solid #C8FF00":"1px solid transparent",cursor:"pointer",transition:"all 0.2s"}}>{label}</button>
-        ))}
+    <div style={{display:"flex",flexDirection:"column",gap:20}}>
+      {/* Compliance Bar */}
+      <div style={{background:"#0a0a0c",border:"1px solid #141416",borderRadius:12,padding:"16px 20px"}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",flexWrap:"wrap",gap:10,marginBottom:12}}>
+          <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.12em",textTransform:"uppercase"}}>Compliance Mode</div>
+          {compliance!=="none"&&<span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:activePreset.color,letterSpacing:"0.08em"}}>{activePreset.desc}</span>}
+        </div>
+        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+          {Object.entries(COMPLIANCE_PRESETS).map(([key,p])=>(
+            <button key={key} onClick={()=>applyCompliance(key)} className={`compliance-pill ${compliance===key?"active":""}`} style={compliance===key?{borderColor:p.color,color:p.color,background:`${p.color}11`}:{}}>{p.label}</button>
+          ))}
+        </div>
       </div>
-      <div style={{padding:"28px 28px 32px"}}>
-        {tab==="password" ? (
-          <>
-            <PasswordDisplay password={pw} generating={generating}/>
-            <div style={{marginTop:24,marginBottom:20}}>
-              <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
-                <label htmlFor="pw-len" style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.12em",textTransform:"uppercase"}}>length</label>
-                <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#C8FF00",fontWeight:600}}>{len} characters</span>
+
+      {/* Main Widget */}
+      <div style={{background:"#0a0a0c",border:"1px solid #141416",borderRadius:16,overflow:"hidden",boxShadow:"0 40px 80px #00000088,0 0 0 1px #141416"}}>
+        <div style={{display:"flex",borderBottom:"1px solid #1e1e1e"}} role="tablist">
+          {[["password","Password"],["passphrase","Passphrase"]].map(([t,label])=>(
+            <button key={t} role="tab" aria-selected={tab===t} onClick={()=>setTab(t)} style={{flex:1,padding:"14px 0",fontFamily:"'IBM Plex Mono'",fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase",background:tab===t?"#0c0c0e":"transparent",color:tab===t?"#C8FF00":"#777",border:"none",borderBottom:tab===t?"1px solid #C8FF00":"1px solid transparent",cursor:"pointer",transition:"all 0.2s"}}>{label}</button>
+          ))}
+        </div>
+        <div style={{padding:"28px 28px 32px"}}>
+          {tab==="password" ? (
+            <>
+              <PasswordDisplay password={pw} generating={generating}/>
+              <div style={{display:"flex",gap:8,marginTop:10,marginBottom:4}}>
+                <button onClick={()=>setShowDNA(d=>!d)} className={`toggle-pill ${showDNA?"active":""}`} style={{fontSize:10,padding:"5px 12px"}}>{showDNA?"Hide":"Show"} DNA Score</button>
+                <button onClick={()=>setShowBulk(b=>!b)} className={`toggle-pill ${showBulk?"active":""}`} style={{fontSize:10,padding:"5px 12px"}}>Bulk Generator</button>
               </div>
-              <input id="pw-len" type="range" min={8} max={32} value={len} onChange={e=>setLen(+e.target.value)}/>
-            </div>
-            <div style={{display:"flex",gap:8,marginBottom:24,flexWrap:"wrap"}} role="group">
-              {[["sym","Symbols"],["num","Numbers"],["upper","A-Z"]].map(([k,label])=>(
-                <button key={k} onClick={()=>toggleOpt(k)} className={`toggle-pill ${opts[k]?"active":""}`} aria-pressed={opts[k]}>{opts[k]?"✓ ":""}{label}</button>
-              ))}
-            </div>
-            <button className="cta-primary" style={{width:"100%",justifyContent:"center"}} onClick={()=>generate()}>
-              {generating?"Generating…":<>Generate secure password <span style={{fontSize:18}}>→</span></>}
-            </button>
-            <GeneratorTrustStrip/>
-          </>
-        ) : (
-          <PassphraseTab prof={prof} setProf={setProf} otherSeeds={otherSeeds} otherLabel={otherLabel}
-            showOtherInput={showOtherInput} setShowOtherInput={setShowOtherInput}
-            otherValue={otherValue} setOtherValue={setOtherValue}
-            inputRef={inputRef} handleProfClick={handleProfClick} handleOtherSubmit={handleOtherSubmit}/>
-        )}
+              {showDNA && <DNAScorePanel password={pw}/>}
+              <div style={{marginTop:20,marginBottom:20}}>
+                <div style={{display:"flex",justifyContent:"space-between",marginBottom:12}}>
+                  <label htmlFor="pw-len" style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.12em",textTransform:"uppercase"}}>length</label>
+                  <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#C8FF00",fontWeight:600}}>{len} characters</span>
+                </div>
+                <input id="pw-len" type="range" min={compliance!=="none"?activePreset.minLen:8} max={32} value={len} onChange={e=>setLen(+e.target.value)}/>
+              </div>
+              <div style={{display:"flex",gap:8,marginBottom:24,flexWrap:"wrap"}} role="group">
+                {[["sym","Symbols"],["num","Numbers"],["upper","A-Z"]].map(([k,label])=>(
+                  <button key={k} onClick={()=>toggleOpt(k)} className={`toggle-pill ${opts[k]?"active":""}`} aria-pressed={opts[k]}>{opts[k]?"\u2713 ":""}{label}</button>
+                ))}
+              </div>
+              <div style={{marginBottom:20}}>
+                <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#777",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:10}}>profession seed</div>
+                <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
+                  {PROFESSIONS.map(p=>(
+                    <button key={p.id} onClick={()=>handleProfClick(p.id)} className={`toggle-pill ${prof===p.id&&!otherSeeds?"active":""}`}>{p.label}</button>
+                  ))}
+                  <button onClick={()=>{setShowOtherInput(true);setTimeout(()=>inputRef.current?.focus(),60);}} className={`toggle-pill ${otherSeeds?"active":""}`} style={otherSeeds?{}:{borderColor:"#2a2a2a",borderStyle:"dashed",color:"#888"}}>
+                    {otherSeeds?`\u2746 ${otherLabel}`:"+ Other"}
+                  </button>
+                </div>
+                {showOtherInput&&(
+                  <div style={{marginTop:10,animation:"inputSlideIn 0.22s cubic-bezier(.16,1,.3,1)"}}>
+                    <div style={{display:"flex",gap:8,alignItems:"stretch",background:"#08080a",border:"1px solid #C8FF0044",borderRadius:8,padding:"4px 4px 4px 16px"}}>
+                      <input ref={inputRef} type="text" placeholder="e.g. Pilot, Plumber, Chef\u2026" value={otherValue} onChange={e=>setOtherValue(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")handleOtherSubmit();if(e.key==="Escape"){setShowOtherInput(false);setOtherValue("");}}} style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#fff",letterSpacing:"0.04em",padding:"10px 0"}}/>
+                      <button onClick={handleOtherSubmit} disabled={!otherValue.trim()} className={`use-it-btn ${otherValue.trim()?"active":""}`}>Use it \u2192</button>
+                    </div>
+                    <div style={{display:"flex",justifyContent:"space-between",marginTop:8,padding:"0 2px"}}>
+                      <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",letterSpacing:"0.08em"}}>AI extracts keywords from your profession</span>
+                      <button onClick={()=>{setShowOtherInput(false);setOtherValue("");}} style={{background:"none",border:"none",fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#C8FF0066",cursor:"pointer",letterSpacing:"0.06em",transition:"color 0.15s"}} onMouseEnter={e=>e.target.style.color="#C8FF00"} onMouseLeave={e=>e.target.style.color="#C8FF0066"}>\u2190 back</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <button className="cta-primary" style={{width:"100%",justifyContent:"center"}} onClick={()=>generate()}>
+                {generating?"Generating\u2026":<>Generate secure password <span style={{fontSize:18}}>\u2192</span></>}
+              </button>
+              <GeneratorTrustStrip/>
+              <PasswordHistory history={history} onClear={()=>setHistory([])}/>
+            </>
+          ) : (
+            <PassphraseTab prof={prof} setProf={setProf} otherSeeds={otherSeeds} otherLabel={otherLabel}
+              showOtherInput={showOtherInput} setShowOtherInput={setShowOtherInput}
+              otherValue={otherValue} setOtherValue={setOtherValue}
+              inputRef={inputRef} handleProfClick={handleProfClick} handleOtherSubmit={handleOtherSubmit}/>
+          )}
+        </div>
       </div>
+      {showBulk && <BulkGenerator prof={prof} opts={opts} len={len} otherSeeds={otherSeeds}/>}
     </div>
   );
 }
 
 function PassphraseTab({prof,setProf,otherSeeds,otherLabel,showOtherInput,setShowOtherInput,otherValue,setOtherValue,inputRef,handleProfClick,handleOtherSubmit}) {
-  // passphrase = [Word1]-[Adjective]-[3DigitNum]-[Word2]
-  const [parts,setParts]=useState(null); // {w1,adj,num,w2}
+  const [parts,setParts]=useState(null);
   const [generating,setGenerating]=useState(false);
-
+  const [history,setHistory]=useState([]);
   const pickRand=(arr)=>arr[Math.floor(Math.random()*arr.length)];
   const safeNum=()=>{
-    // avoid 007, 123, 420, 666, 000, current year, sequential runs
     const bad=new Set(["007","123","124","234","345","456","567","678","789","111","222","333","444","555","666","777","888","999","000","420","2024","2025","2026"]);
     let n;do{n=String(Math.floor(Math.random()*900)+100);}while(bad.has(n));
     return n;
   };
-
   const generate=(seedsOverride)=>{
     setGenerating(true);
     setTimeout(()=>{
       const seeds=seedsOverride!==undefined?seedsOverride:otherSeeds;
       let bank=seeds?[...seeds]:([...(PROFESSIONS.find(x=>x.id===prof)||PROFESSIONS[0]).seeds]);
       const w1=pickRand(bank);
-      // w2 must differ from w1
       const w2pool=bank.filter(w=>w!==w1);
       const w2=w2pool.length>0?pickRand(w2pool):pickRand(["vault","ghost","prime","sigma"]);
       const adj=pickRand(ADJECTIVES);
       const num=safeNum();
-      setParts({w1,adj,num,w2});
+      const p={w1,adj,num,w2};
+      setParts(p);
+      const pp=`${p.w1}-${p.adj}-${p.num}-${p.w2}`;
+      setHistory(h=>[pp,...h.filter(x=>x!==pp)].slice(0,8));
       setGenerating(false);
     },220);
   };
-
   const passphrase=parts?`${parts.w1}-${parts.adj}-${parts.num}-${parts.w2}`:"";
-  // Passphrase entropy estimate: treat each segment as independent
   const ppEntropy=parts?Math.round(Math.log2(40)*2+Math.log2(900)+Math.log2(8)):0;
   const isUnbreakable=ppEntropy>=40;
-
-  // Word segment coloring
   const WORD_COLORS=["#C8FF00","#e8e8e8","#aaa","#fff"];
-
   return (
     <>
-      {/* ── Output box ── */}
       <div style={{background:"#08080a",border:"1px solid #141416",borderRadius:10,padding:"20px 24px",marginBottom:24,minHeight:90,transition:"opacity 0.2s",opacity:generating?0.4:1}} aria-live="polite">
         {parts?(
           <>
-            {/* Word chips */}
             <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
               {[parts.w1,parts.adj,parts.num,parts.w2].map((seg,i)=>(
-                <span key={i} style={{background:"#111",border:`1px solid ${i===0||i===3?"#C8FF0033":"#1e1e1e"}`,borderRadius:6,padding:"8px 16px",fontFamily:"'IBM Plex Mono'",fontSize:15,color:WORD_COLORS[i],letterSpacing:"0.04em",transition:"all 0.3s"}}>{seg}</span>
+                <span key={i} style={{background:"#111",border:`1px solid ${i===0||i===3?"#C8FF0033":"#1e1e1e"}`,borderRadius:6,padding:"8px 16px",fontFamily:"'IBM Plex Mono'",fontSize:15,color:WORD_COLORS[i],letterSpacing:"0.04em"}}>{seg}</span>
               ))}
             </div>
-            {/* Full passphrase + copy */}
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
               <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#555",letterSpacing:"0.04em"}}>{passphrase}</span>
               <CopyBtn text={passphrase}/>
             </div>
-            {/* Strength row */}
             <div style={{borderTop:"1px solid #111",paddingTop:12}}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
                 <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.1em",textTransform:"uppercase"}}>strength</span>
                 <div style={{display:"flex",gap:10,alignItems:"center"}}>
                   <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",letterSpacing:"0.06em"}}>{ppEntropy}+ bits entropy</span>
-                  <span className={isUnbreakable?"unbreakable-label":""} style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#C8FF00",letterSpacing:"0.08em",fontWeight:600}}>
-                    {isUnbreakable?"Unbreakable ✦":"Strong"}
-                  </span>
+                  <span className={isUnbreakable?"unbreakable-label":""} style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#C8FF00",letterSpacing:"0.08em",fontWeight:600}}>{isUnbreakable?"Unbreakable \u2746":"Strong"}</span>
                 </div>
               </div>
-              <div style={{display:"flex",gap:4}}>
-                {[1,2,3,4].map(i=><div key={i} className="strength-seg" style={{background:"#C8FF00"}}/>)}
-              </div>
+              <div style={{display:"flex",gap:4}}>{[1,2,3,4].map(i=><div key={i} className="strength-seg" style={{background:"#C8FF00"}}/>)}</div>
               <div style={{marginTop:8,fontFamily:"'DM Sans'",fontSize:11,color:"#888"}}>Estimated crack time: <span style={{color:"#aaa"}}>longer than the universe</span></div>
             </div>
           </>
-        ):<span style={{fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#aaa"}}>generate a passphrase —</span>}
+        ):<span style={{fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#aaa"}}>generate a passphrase \u2014</span>}
       </div>
-
-      {/* ── Role selector ── */}
       <div style={{marginBottom:24}}>
         <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#777",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12,display:"flex",justifyContent:"space-between"}}>
           <span>your role</span>
-          {otherLabel&&!showOtherInput&&<span style={{color:"#C8FF0077",fontSize:9}}>✦ {otherLabel}</span>}
+          {otherLabel&&!showOtherInput&&<span style={{color:"#C8FF0077",fontSize:9}}>\u2746 {otherLabel}</span>}
         </div>
-
-        {/* Pill buttons */}
         {!showOtherInput&&(
-          <div style={{display:"flex",flexWrap:"wrap",gap:8,animation:"inputSlideIn 0.2s ease"}}>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8}}>
             {PROFESSIONS.map(p=>(
-              <button key={p.id} onClick={()=>{handleProfClick(p.id);}} className={`toggle-pill ${prof===p.id&&!otherSeeds?"active":""}`}>{p.label}</button>
+              <button key={p.id} onClick={()=>handleProfClick(p.id)} className={`toggle-pill ${prof===p.id&&!otherSeeds?"active":""}`}>{p.label}</button>
             ))}
-            <button
-              onClick={()=>{setShowOtherInput(true);setTimeout(()=>inputRef.current?.focus(),60);}}
-              className={`toggle-pill ${otherSeeds?"active":""}`}
-              style={otherSeeds?{}:{borderColor:"#2a2a2a",borderStyle:"dashed",color:"#888"}}>
-              {otherSeeds?`✦ ${otherLabel}`:"+ Other"}
+            <button onClick={()=>{setShowOtherInput(true);setTimeout(()=>inputRef.current?.focus(),60);}} className={`toggle-pill ${otherSeeds?"active":""}`} style={otherSeeds?{}:{borderColor:"#2a2a2a",borderStyle:"dashed",color:"#888"}}>
+              {otherSeeds?`\u2746 ${otherLabel}`:"+ Other"}
             </button>
           </div>
         )}
-
-        {/* Other input */}
         {showOtherInput&&(
           <div style={{animation:"inputSlideIn 0.22s cubic-bezier(.16,1,.3,1)"}}>
             <div style={{display:"flex",gap:8,alignItems:"stretch",background:"#08080a",border:"1px solid #C8FF0044",borderRadius:8,padding:"4px 4px 4px 16px",boxShadow:"0 0 0 1px #C8FF0011"}}>
-              <input
-                ref={inputRef}
-                type="text"
-                placeholder="e.g. Pilot, Plumber, Chef…"
-                value={otherValue}
-                onChange={e=>setOtherValue(e.target.value)}
-                onKeyDown={e=>{if(e.key==="Enter")handleOtherSubmit();if(e.key==="Escape"){setShowOtherInput(false);setOtherValue("");}}}
-                style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#fff",letterSpacing:"0.04em",padding:"10px 0"}}
-              />
-              <button
-                onClick={handleOtherSubmit}
-                disabled={!otherValue.trim()}
-                className={`use-it-btn ${otherValue.trim()?"active":""}`}>
-                Use it →
-              </button>
+              <input ref={inputRef} type="text" placeholder="e.g. Pilot, Plumber, Chef\u2026" value={otherValue} onChange={e=>setOtherValue(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")handleOtherSubmit();if(e.key==="Escape"){setShowOtherInput(false);setOtherValue("");}}} style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#fff",letterSpacing:"0.04em",padding:"10px 0"}}/>
+              <button onClick={handleOtherSubmit} disabled={!otherValue.trim()} className={`use-it-btn ${otherValue.trim()?"active":""}`}>Use it \u2192</button>
             </div>
             <div style={{display:"flex",justifyContent:"space-between",marginTop:8,padding:"0 2px"}}>
               <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",letterSpacing:"0.08em"}}>AI extracts keywords from your profession</span>
-              <button onClick={()=>{setShowOtherInput(false);setOtherValue("");}} style={{background:"none",border:"none",fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#C8FF0066",cursor:"pointer",letterSpacing:"0.06em",transition:"color 0.15s"}} onMouseEnter={e=>e.target.style.color="#C8FF00"} onMouseLeave={e=>e.target.style.color="#C8FF0066"}>← back</button>
+              <button onClick={()=>{setShowOtherInput(false);setOtherValue("");}} style={{background:"none",border:"none",fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#C8FF0066",cursor:"pointer",letterSpacing:"0.06em"}} onMouseEnter={e=>e.target.style.color="#C8FF00"} onMouseLeave={e=>e.target.style.color="#C8FF0066"}>\u2190 back</button>
             </div>
           </div>
         )}
       </div>
-
       <button className="cta-primary" style={{width:"100%",justifyContent:"center"}} onClick={()=>generate()}>
-        {generating?"Generating…":<>Generate passphrase <span style={{fontSize:18}}>→</span></>}
+        {generating?"Generating\u2026":<>Generate passphrase <span style={{fontSize:18}}>\u2192</span></>}
       </button>
       <p style={{fontFamily:"'DM Sans'",fontSize:11,color:"#aaa",textAlign:"center",marginTop:14,letterSpacing:"0.04em"}}>
-        Recommended by <strong style={{color:"#bbb"}}>NIST SP 800-63B</strong> · Easier to remember · Just as strong
+        Recommended by <strong style={{color:"#bbb"}}>NIST SP 800-63B</strong> \u00b7 Easier to remember \u00b7 Just as strong
       </p>
       <GeneratorTrustStrip/>
+      <PasswordHistory history={history} onClear={()=>setHistory([])}/>
     </>
   );
 }
 
-/* ─── TICKER ────────────────────────────────────────────────────────────── */
+/* --- PRICING --- */
+function PricingSection() {
+  const plans = [
+    {
+      name:"Free", price:"$0", period:"/forever",
+      tagline:"For individuals who take security seriously.",
+      color:"#888", featured:false, cta:"Start generating", ctaHref:"#generator",
+      features:["Unlimited password generation","Passphrase mode (NIST 800-63B)","6 profession seeds","Password DNA Score","Password History (session)","Bulk generate up to 10","Zero data retention"],
+      missing:["Compliance presets","Team dashboard","REST API","Custom profession library"],
+    },
+    {
+      name:"Pro", price:"$7", period:"/month",
+      tagline:"For professionals who generate credentials daily.",
+      color:"#C8FF00", featured:true, cta:"Start free trial", ctaHref:"#waitlist", badge:"Most Popular",
+      features:["Everything in Free","HIPAA \u00b7 PCI-DSS \u00b7 SOC 2 \u00b7 ISO 27001","Bulk generate up to 500","REST API (1,000 calls/day)","Custom profession vocabulary","Export history as CSV","Password rotation reminders","Priority email support"],
+      missing:["Team dashboard","Shared policy engine"],
+    },
+    {
+      name:"Team", price:"$29", period:"/month",
+      tagline:"For security teams managing credentials at scale.",
+      color:"#ce93d8", featured:false, cta:"Contact sales", ctaHref:"#waitlist",
+      features:["Everything in Pro","Up to 25 seats included","Shared compliance policy engine","Team password health dashboard","REST API (unlimited calls)","SSO / SAML 2.0 (coming soon)","Audit logs & compliance reports","Dedicated Slack support"],
+      missing:[],
+    },
+  ];
+  return (
+    <section id="pricing" style={{padding:"clamp(80px,10vw,120px) clamp(20px,5vw,60px)",maxWidth:1200,margin:"0 auto"}} aria-labelledby="pricing-h2">
+      <div style={{textAlign:"center",marginBottom:64}}>
+        <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>pricing</div>
+        <h2 id="pricing-h2" style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(28px,4vw,48px)",color:"#fff",letterSpacing:"-0.02em",marginBottom:16}}>Simple pricing.<br/><span style={{color:"#C8FF00"}}>No surprises.</span></h2>
+        <p style={{fontFamily:"'DM Sans'",fontSize:15,color:"#888",maxWidth:480,margin:"0 auto"}}>Free forever for individuals. Pro and Team when you need compliance, API access, and scale.</p>
+      </div>
+      <div className="pricing-grid" style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20,alignItems:"start"}}>
+        {plans.map((plan)=>(
+          <div key={plan.name} className={`pricing-card ${plan.featured?"featured":""}`} style={plan.featured?{border:`1px solid ${plan.color}44`}:{}}>
+            {plan.badge && (
+              <div style={{position:"absolute",top:-1,left:"50%",transform:"translateX(-50%)",background:"#C8FF00",color:"#000",fontFamily:"'IBM Plex Mono'",fontSize:9,fontWeight:700,letterSpacing:"0.12em",padding:"4px 16px",borderRadius:"0 0 8px 8px",whiteSpace:"nowrap"}}>{plan.badge}</div>
+            )}
+            <div style={{marginBottom:24,paddingTop:plan.badge?16:0}}>
+              <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:plan.color,letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:8}}>{plan.name}</div>
+              <div style={{display:"flex",alignItems:"baseline",gap:4,marginBottom:8}}>
+                <span style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:40,color:"#fff",letterSpacing:"-0.03em"}}>{plan.price}</span>
+                <span style={{fontFamily:"'DM Sans'",fontSize:13,color:"#666"}}>{plan.period}</span>
+              </div>
+              <p style={{fontFamily:"'DM Sans'",fontSize:13,color:"#888",lineHeight:1.6}}>{plan.tagline}</p>
+            </div>
+            <a href={plan.ctaHref} className={plan.featured?"cta-primary":"cta-ghost"} style={{width:"100%",justifyContent:"center",marginBottom:28,display:"flex",fontSize:14,padding:"13px 20px",boxSizing:"border-box"}}>{plan.cta}</a>
+            <div style={{borderTop:"1px solid #141416",paddingTop:20}}>
+              {plan.features.map((f,i)=>(
+                <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10}}>
+                  <span className="pricing-check">\u2713</span>
+                  <span style={{fontFamily:"'DM Sans'",fontSize:13,color:"#ccc",lineHeight:1.5}}>{f}</span>
+                </div>
+              ))}
+              {plan.missing?.slice(0,2).map((f,i)=>(
+                <div key={i} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:10,opacity:0.35}}>
+                  <span style={{width:18,height:18,flexShrink:0,display:"inline-flex",alignItems:"center",justifyContent:"center",fontSize:9,color:"#555"}}>\u2014</span>
+                  <span style={{fontFamily:"'DM Sans'",fontSize:13,color:"#555",lineHeight:1.5}}>{f}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+      <p style={{textAlign:"center",fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#555",marginTop:32,letterSpacing:"0.08em"}}>All plans \u00b7 Zero data retention \u00b7 Client-side generation \u00b7 Cancel anytime</p>
+    </section>
+  );
+}
+
+/* --- TICKER --- */
 function Ticker() {
-  const items=["Zero Data Retention","Profession-Aware AI","Quantum-Ready Entropy","NIST SP 800-63B","256-bit Minimum","No Account Needed","Client-Side Only","Open Audit Mode","Zero Knowledge"];
+  const items=["Zero Data Retention","Profession-Aware AI","Quantum-Ready Entropy","NIST SP 800-63B","256-bit Minimum","No Account Needed","Client-Side Only","HIPAA \u00b7 PCI-DSS \u00b7 SOC 2","Zero Knowledge"];
   const doubled=[...items,...items];
   return (
     <div style={{borderTop:"1px solid #1e1e1e",borderBottom:"1px solid #1e1e1e",padding:"14px 0",overflow:"hidden"}} aria-hidden="true">
       <div className="ticker-inner">
         {doubled.map((item,i)=>(
-          <span key={i} style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:i%2===0?"#2a2a2a":"#C8FF00",letterSpacing:"0.1em",textTransform:"uppercase",padding:"0 32px",whiteSpace:"nowrap"}}>
-            {i%2===0?item:"✦"}
-          </span>
+          <span key={i} style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:i%2===0?"#2a2a2a":"#C8FF00",letterSpacing:"0.1em",textTransform:"uppercase",padding:"0 32px",whiteSpace:"nowrap"}}>{i%2===0?item:"\u2746"}</span>
         ))}
       </div>
     </div>
   );
 }
 
-/* ─── FAQ ───────────────────────────────────────────────────────────────── */
+/* --- FAQ --- */
 function FAQ() {
   const [open,setOpen]=useState(null);
   const items=[
-    { q:"Does PassGeni store my passwords?", a:"Never — and it is technically impossible for us to. Every password is generated in your browser using JavaScript's crypto.getRandomValues() API. No data is sent to any server. We do not have a database of passwords because none is ever created. You can verify this by opening DevTools and checking the Network tab while generating." },
-    { q:"How does AI make passwords more memorable?", a:"PassGeni seeds each password with a domain-relevant word from your profession. A developer might get 'kernel' buried in the character string. A doctor might get 'cortex'. The cryptographic randomness wrapping it stays identical to a fully random password — but you are 30% more likely to recognize it on sight, which means fewer resets." },
-    { q:"Are passphrases as secure as complex passwords?", a:"More so, in many cases. NIST Special Publication 800-63B — the US federal security standard — specifically recommends passphrases over complex short passwords. Four random words provides over 50 bits of entropy. That resists all known brute-force and dictionary attacks for decades, while being easy enough to type on a TV remote." },
-    { q:"What does zero knowledge mean for a password generator?", a:"It means we have zero ability to know, store, or reconstruct your passwords — by design. Zero-knowledge is not a policy we enforce; it is an architectural guarantee. PassGeni runs entirely client-side. Even if our entire infrastructure was compromised tomorrow, the attacker would find nothing related to your passwords. There is simply nothing to steal." },
-    { q:"Can I use PassGeni for HIPAA or SOC2 compliance?", a:"Pro mode (coming soon) includes compliance presets for HIPAA, SOC2, ISO 27001, and PCI-DSS. Each preset automatically enforces the password policy for that standard — minimum length, required character sets, and rotation guidance. No more manually cross-referencing policy documents before every provisioning step." },
+    { q:"Does PassGeni store my passwords?", a:"Never \u2014 and it is technically impossible for us to. Every password is generated in your browser using JavaScript's crypto.getRandomValues() API. No data is sent to any server. We do not have a database of passwords because none is ever created. You can verify this by opening DevTools and checking the Network tab while generating." },
+    { q:"How does AI make passwords more memorable?", a:"PassGeni seeds each password with a domain-relevant word from your profession. A developer might get 'kernel' buried in the character string. A doctor might get 'cortex'. The cryptographic randomness wrapping it stays identical to a fully random password \u2014 but you are 30% more likely to recognize it on sight, which means fewer resets." },
+    { q:"Are passphrases as secure as complex passwords?", a:"More so, in many cases. NIST Special Publication 800-63B \u2014 the US federal security standard \u2014 specifically recommends passphrases over complex short passwords. Four random words provides over 50 bits of entropy. That resists all known brute-force and dictionary attacks for decades, while being easy enough to type on a TV remote." },
+    { q:"What does zero knowledge mean for a password generator?", a:"It means we have zero ability to know, store, or reconstruct your passwords \u2014 by design. Zero-knowledge is not a policy we enforce; it is an architectural guarantee. PassGeni runs entirely client-side. Even if our entire infrastructure was compromised tomorrow, the attacker would find nothing related to your passwords." },
+    { q:"Can I use PassGeni for HIPAA or SOC2 compliance?", a:"Pro mode (coming soon) includes compliance presets for HIPAA, SOC2, ISO 27001, and PCI-DSS. Each preset automatically enforces the password policy for that standard \u2014 minimum length, required character sets, and rotation guidance." },
+    { q:"What is the Password DNA Score?", a:"DNA Score is PassGeni's proprietary quality metric. It grades your password across 7 cryptographic checks \u2014 length thresholds, character class diversity, and repeat-character detection \u2014 and weights them by security impact. A+ means your password passes all checks. It is a fast human-readable health signal in addition to entropy analysis." },
   ];
   return (
     <div style={{maxWidth:680,margin:"0 auto"}}>
       {items.map((item,i)=>(
-        <div key={i} className="faq-item" onClick={()=>setOpen(open===i?null:i)} itemScope itemType="https://schema.org/Question">
+        <div key={i} className="faq-item" onClick={()=>setOpen(open===i?null:i)}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",gap:24}}>
-            <h3 itemProp="name" style={{fontFamily:"'Outfit'",fontSize:16,fontWeight:700,color:open===i?"#C8FF00":"#fff",margin:0}}>{item.q}</h3>
+            <h3 style={{fontFamily:"'Outfit'",fontSize:16,fontWeight:700,color:open===i?"#C8FF00":"#fff",margin:0}}>{item.q}</h3>
             <span style={{color:"#C8FF00",fontSize:20,flexShrink:0,transition:"transform 0.2s",transform:open===i?"rotate(45deg)":"none"}}>+</span>
           </div>
-          {open===i&&(
-            <div itemScope itemType="https://schema.org/Answer" itemProp="acceptedAnswer">
-              <p itemProp="text" style={{fontFamily:"'DM Sans'",fontSize:14,color:"#aaa",lineHeight:1.85,marginTop:16,animation:"fadeIn 0.3s ease"}}>{item.a}</p>
-            </div>
-          )}
+          {open===i&&<p style={{fontFamily:"'DM Sans'",fontSize:14,color:"#aaa",lineHeight:1.85,marginTop:16,animation:"fadeIn 0.3s ease"}}>{item.a}</p>}
         </div>
       ))}
     </div>
   );
 }
 
-/* ─── HERO ──────────────────────────────────────────────────────────────── */
+/* --- HERO --- */
 const STREAM_CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
 function PasswordStream({left,delay,duration,opacity}) {
   const len=18+Math.floor(Math.random()*10);
@@ -583,7 +798,7 @@ function HeroSection() {
       <div style={{position:"relative",zIndex:10,textAlign:"center",maxWidth:860}}>
         <div className="fade-up" style={{display:"inline-flex",alignItems:"center",gap:10,background:"#0c0c0e",border:"1px solid #1a1a1a",borderRadius:100,padding:"8px 20px",marginBottom:40}}>
           <div style={{width:7,height:7,borderRadius:"50%",background:"#C8FF00",boxShadow:"0 0 12px #C8FF00",animation:"blink 2s ease infinite"}}/>
-          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#999",letterSpacing:"0.14em",textTransform:"uppercase"}}>Free forever · No account · No tracking</span>
+          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#999",letterSpacing:"0.14em",textTransform:"uppercase"}}>Free forever \u00b7 No account \u00b7 No tracking</span>
         </div>
         <h1 id="hero-headline" className="fade-up-2" style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(44px,7.5vw,96px)",lineHeight:1.0,letterSpacing:"-0.04em",color:"#fff",marginBottom:0}}>
           Your password<br/>
@@ -591,36 +806,31 @@ function HeroSection() {
           <span style={{color:"#C8FF00"}}>this easy to crack.</span>
         </h1>
         <div className="fade-up-3" style={{margin:"48px auto",background:"#08080a",border:"1px solid #1a1a1a",borderRadius:12,padding:"20px 32px",display:"inline-flex",alignItems:"center",gap:20,maxWidth:"100%"}}>
-          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#aaa",letterSpacing:"0.12em",textTransform:"uppercase",whiteSpace:"nowrap"}}>generating →</span>
+          <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#aaa",letterSpacing:"0.12em",textTransform:"uppercase",whiteSpace:"nowrap"}}>generating \u2192</span>
           <AnimatedPassword/>
         </div>
         <p className="fade-up-3" style={{fontSize:"clamp(15px,1.8vw,18px)",color:"#aaa",lineHeight:1.85,maxWidth:560,margin:"0 auto 48px"}}>
           Most password generators create strings you will copy, paste, and reset within a week.
-          PassGeni uses AI to build passwords around your profession —
-          strong enough to resist modern attacks, human enough to actually remember.
+          PassGeni uses AI to build passwords around your profession \u2014 strong enough to resist modern attacks, human enough to actually remember.
         </p>
         <div className="fade-up-4" style={{display:"flex",gap:14,justifyContent:"center",flexWrap:"wrap",marginBottom:56}}>
-          <a href="#generator" className="cta-primary" style={{fontSize:16,padding:"18px 36px"}}>Generate my password <span style={{fontSize:20}}>↓</span></a>
-          <a href="#how" className="cta-ghost" style={{fontSize:15}}>How it works</a>
+          <a href="#generator" className="cta-primary" style={{fontSize:16,padding:"18px 36px"}}>Generate my password <span style={{fontSize:20}}>\u2193</span></a>
+          <a href="#pricing" className="cta-ghost" style={{fontSize:15}}>View pricing</a>
         </div>
-        <div className="fade-up-4" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"clamp(16px,3vw,36px)",flexWrap:"wrap"}} role="list">
-          {[{icon:"◈",label:"Zero storage"},{icon:"✦",label:"Client-side only"},{icon:"⬡",label:"NIST SP 800-63B"},{icon:"◎",label:"Zero knowledge"},{icon:"⚡",label:"No account needed"}].map(({icon,label})=>(
-            <div key={label} role="listitem" style={{display:"flex",alignItems:"center",gap:8}}>
+        <div className="fade-up-4" style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"clamp(16px,3vw,36px)",flexWrap:"wrap"}}>
+          {[{icon:"\u25c8",label:"Zero storage"},{icon:"\u2746",label:"Client-side only"},{icon:"\u2b21",label:"NIST SP 800-63B"},{icon:"\u25ce",label:"Zero knowledge"},{icon:"\u26a1",label:"No account needed"}].map(({icon,label})=>(
+            <div key={label} style={{display:"flex",alignItems:"center",gap:8}}>
               <span aria-hidden="true" style={{color:"#C8FF0055",fontSize:14}}>{icon}</span>
               <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#aaa",letterSpacing:"0.1em",textTransform:"uppercase"}}>{label}</span>
             </div>
           ))}
         </div>
       </div>
-      <div aria-hidden="true" style={{position:"absolute",bottom:32,left:"50%",transform:"translateX(-50%)",display:"flex",flexDirection:"column",alignItems:"center",gap:8,animation:"fadeIn 1s 1s both"}}>
-        <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#aaa",letterSpacing:"0.16em",textTransform:"uppercase"}}>scroll</span>
-        <div style={{width:1,height:40,background:"linear-gradient(to bottom,#C8FF0044,transparent)",animation:"blink 2s ease infinite"}}/>
-      </div>
     </section>
   );
 }
 
-/* ─── MAIN EXPORT ───────────────────────────────────────────────────────── */
+/* --- MAIN EXPORT --- */
 export default function PassGeniLanding() {
   const [email,setEmail]=useState("");
   const [submitted,setSubmitted]=useState(false);
@@ -631,15 +841,12 @@ export default function PassGeniLanding() {
       <div style={{background:"#060608",color:"#e0e0e0",fontFamily:"'DM Sans', sans-serif",minHeight:"100vh"}}>
         <FontLink/>
 
-        {/* ── HEADER with Trust Signals ── */}
+        {/* HEADER */}
         <header>
           <nav style={{position:"fixed",top:0,left:0,right:0,zIndex:999,display:"flex",alignItems:"center",justifyContent:"space-between",padding:"0 clamp(20px,5vw,60px)",height:64,background:"rgba(6,6,8,0.92)",backdropFilter:"blur(24px) saturate(1.5)",borderBottom:"1px solid #1e1e1e"}} aria-label="Main navigation">
             <div style={{display:"flex",alignItems:"center",gap:20}}>
-              <a href="/" style={{textDecoration:"none"}}>
-                <PassGeniLogo height="32px"/>
-              </a>
-              {/* NAV TRUST CHIPS */}
-              <div className="nav-trust-row" aria-label="Security badges">
+              <a href="/" style={{textDecoration:"none"}}><PassGeniLogo height="32px"/></a>
+              <div className="nav-trust-row">
                 <TrustChip label="Zero storage" type="dot"/>
                 <TrustChip label="NIST compliant" type="check"/>
                 <TrustChip label="Client-side only" type="shield"/>
@@ -647,9 +854,10 @@ export default function PassGeniLanding() {
             </div>
             <div className="nav-links" style={{display:"flex",gap:32,alignItems:"center"}}>
               <a href="#features" className="nav-link">Features</a>
+              <a href="#pricing" className="nav-link">Pricing</a>
               <a href="#how" className="nav-link">How it works</a>
               <a href="#faq" className="nav-link">FAQ</a>
-              <button className="cta-primary" style={{padding:"10px 22px",fontSize:13}}>Get Pro — free trial</button>
+              <a href="#pricing" className="cta-primary" style={{padding:"10px 22px",fontSize:13}}>Get Pro \u2014 free trial</a>
             </div>
           </nav>
         </header>
@@ -659,8 +867,8 @@ export default function PassGeniLanding() {
         <main>
           <HeroSection/>
 
-          {/* ── STATS ── */}
-          <section aria-label="PassGeni statistics" style={{borderTop:"1px solid #1e1e1e",borderBottom:"1px solid #1e1e1e"}}>
+          {/* STATS */}
+          <section aria-label="Statistics" style={{borderTop:"1px solid #1e1e1e",borderBottom:"1px solid #1e1e1e"}}>
             <div className="stats-row" style={{maxWidth:1200,margin:"0 auto",padding:"clamp(40px,5vw,60px) clamp(20px,5vw,60px)",display:"flex",justifyContent:"space-around",gap:40,flexWrap:"wrap"}}>
               {[{n:"10M+",l:"Passwords generated"},{n:"0",l:"Bytes of your data stored"},{n:"256-bit",l:"Minimum entropy standard"},{n:"<1s",l:"Generation time"}].map(({n,l})=>(
                 <div key={l} style={{textAlign:"center"}}>
@@ -671,17 +879,17 @@ export default function PassGeniLanding() {
             </div>
           </section>
 
-          {/* ── GENERATOR ── */}
-          <section id="generator" style={{padding:"clamp(80px,10vw,120px) clamp(20px,5vw,60px)",maxWidth:720,margin:"0 auto"}} aria-labelledby="gen-h2">
+          {/* GENERATOR */}
+          <section id="generator" style={{padding:"clamp(80px,10vw,120px) clamp(20px,5vw,60px)",maxWidth:760,margin:"0 auto"}} aria-labelledby="gen-h2">
             <div style={{textAlign:"center",marginBottom:48}}>
-              <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>try it now — free</div>
+              <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>try it now \u2014 free</div>
               <h2 id="gen-h2" style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(28px,4vw,44px)",color:"#fff",letterSpacing:"-0.02em"}}>Your turn.</h2>
               <p style={{fontFamily:"'DM Sans'",fontSize:14,color:"#888",marginTop:12}}>Generate a strong password in under 3 seconds. No signup. No ads. Nothing stored.</p>
             </div>
             <GeneratorWidget/>
           </section>
 
-          {/* ── HOW IT WORKS ── */}
+          {/* HOW IT WORKS */}
           <section id="how" style={{padding:"clamp(80px,10vw,120px) clamp(20px,5vw,60px)",maxWidth:1200,margin:"0 auto"}} aria-labelledby="how-h2">
             <div style={{marginBottom:64}}>
               <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>how it works</div>
@@ -689,9 +897,9 @@ export default function PassGeniLanding() {
             </div>
             <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"1px",background:"#1a1a1a"}} className="features-grid">
               {[
-                {step:"01",title:"Tell us your role",body:"Your profession shapes the seed word. A doctor gets medical terms. A developer gets tech patterns. It makes passwords 30% easier to recall without reducing cryptographic strength by a single bit.",accent:"Role → Seed word"},
-                {step:"02",title:"Set your preferences",body:"Length, symbols, case sensitivity. The slider goes up to 32 characters. The toggles match any site policy automatically — no more manually adjusting after the fact.",accent:"Prefs → Character pool"},
-                {step:"03",title:"AI assembles the fortress",body:"The seed embeds into a cryptographically random character pool via crypto.getRandomValues(), then gets shuffled. The result is mathematically unguessable and vaguely recognisable to you.",accent:"Shuffle → Your password"},
+                {step:"01",title:"Tell us your role",body:"Your profession shapes the seed word. A doctor gets medical terms. A developer gets tech patterns. It makes passwords 30% easier to recall without reducing cryptographic strength by a single bit.",accent:"Role \u2192 Seed word"},
+                {step:"02",title:"Set your preferences",body:"Length, symbols, case sensitivity. The slider goes up to 32 characters. Pick a compliance preset for HIPAA, PCI-DSS, SOC 2 or ISO 27001 and the settings auto-configure.",accent:"Prefs \u2192 Character pool"},
+                {step:"03",title:"AI assembles the fortress",body:"The seed embeds into a cryptographically random character pool via crypto.getRandomValues(), then gets shuffled. The result is mathematically unguessable and vaguely recognisable to you.",accent:"Shuffle \u2192 Your password"},
               ].map(({step,title,body,accent})=>(
                 <article key={step} style={{background:"#0a0a0c",padding:"40px 36px"}} className="feature-card">
                   <div style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#C8FF00",letterSpacing:"0.1em",marginBottom:20}}>{step}</div>
@@ -703,7 +911,7 @@ export default function PassGeniLanding() {
             </div>
           </section>
 
-          {/* ── FEATURES ── */}
+          {/* FEATURES */}
           <section id="features" style={{padding:"0 clamp(20px,5vw,60px) clamp(80px,10vw,120px)",maxWidth:1200,margin:"0 auto"}} aria-labelledby="feat-h2">
             <div style={{marginBottom:64}}>
               <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>what is inside</div>
@@ -711,12 +919,12 @@ export default function PassGeniLanding() {
             </div>
             <div className="features-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(300px,1fr))",gap:16}}>
               {[
-                {icon:"◈",title:"Zero storage — a technical guarantee, not a policy",body:"Generation runs entirely in your browser via crypto.getRandomValues(). No server ever processes your password. Not even an encrypted version. This is not a privacy promise we could break — it is an architectural constraint."},
-                {icon:"✦",title:"NIST-recommended passphrase mode",body:"NIST SP 800-63B recommends passphrases over complex strings. Four random words from your profession vocabulary gives 50+ bits of entropy — harder to crack, significantly easier to recall and type."},
-                {icon:"⬡",title:"Profession-aware AI seeding",body:"A lawyer password might carry 'nexus'. A designer might carry 'bezier'. The cryptographic security is identical to fully random output. The human memorability is meaningfully higher."},
-                {icon:"◎",title:"Real-time entropy analysis",body:"Not a red/green bar. Actual bit entropy, estimated crack time against brute-force, dictionary, and GPU cluster attacks — recalculated live as you adjust settings."},
-                {icon:"⚡",title:"Compliance presets for HIPAA, SOC2, PCI-DSS (Pro)",body:"Each standard has specific password requirements. Pro mode auto-applies the right constraints — length, character sets, rotation guidance — for your security framework."},
-                {icon:"⊞",title:"REST API for developers and AI pipelines (Pro)",body:"As autonomous AI agents multiply, they all need secure credentials on demand. PassGeni API generates compliant passwords programmatically for onboarding flows, test data, and M2M authentication."},
+                {icon:"\u25c8",title:"Zero storage \u2014 a technical guarantee, not a policy",body:"Generation runs entirely in your browser via crypto.getRandomValues(). No server ever processes your password. Not even an encrypted version."},
+                {icon:"\u2746",title:"NIST-recommended passphrase mode",body:"NIST SP 800-63B recommends passphrases over complex strings. Four random words from your profession vocabulary gives 50+ bits of entropy."},
+                {icon:"\u2b21",title:"Profession-aware AI seeding",body:"A lawyer password might carry 'nexus'. A designer might carry 'bezier'. The cryptographic security is identical to fully random output. The human memorability is meaningfully higher."},
+                {icon:"\u25ce",title:"Password DNA Score",body:"Not a red/green bar. A 7-point quality audit \u2014 length thresholds, character class diversity, repeat detection \u2014 graded A+ to C with per-check breakdown and weighted scoring."},
+                {icon:"\u26a1",title:"Compliance presets (HIPAA, SOC2, PCI-DSS, ISO 27001)",body:"One click sets the minimum length, required character classes, and strength floor for your security framework. No more cross-referencing policy documents."},
+                {icon:"\u229e",title:"Bulk Generator + .txt export",body:"Generate 5, 10, 20, or 50 passwords in one shot. Copy all to clipboard or download as a clean .txt file for onboarding flows, test environments, and team provisioning."},
               ].map(({icon,title,body})=>(
                 <article key={title} className="feature-card">
                   <div style={{fontSize:22,marginBottom:18,color:"#C8FF00"}}>{icon}</div>
@@ -727,11 +935,14 @@ export default function PassGeniLanding() {
             </div>
           </section>
 
-          {/* ── SOCIAL PROOF ── */}
-          <section style={{padding:"0 clamp(20px,5vw,60px) clamp(80px,10vw,120px)",maxWidth:1200,margin:"0 auto"}} aria-labelledby="proof-h2">
+          {/* PRICING */}
+          <PricingSection/>
+
+          {/* SOCIAL PROOF */}
+          <section style={{padding:"0 clamp(20px,5vw,60px) clamp(80px,10vw,120px)",maxWidth:1200,margin:"0 auto"}}>
             <div style={{marginBottom:48}}>
               <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>what people say</div>
-              <h2 id="proof-h2" style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(26px,3.5vw,40px)",color:"#fff",letterSpacing:"-0.02em"}}>Real people. Actual opinions.</h2>
+              <h2 style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(26px,3.5vw,40px)",color:"#fff",letterSpacing:"-0.02em"}}>Real people. Actual opinions.</h2>
             </div>
             <div className="proof-grid" style={{display:"grid",gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))",gap:16}}>
               {[
@@ -739,50 +950,44 @@ export default function PassGeniLanding() {
                 {name:"Marcus T.",role:"Freelance Designer",stars:5,text:"The passphrase mode is what got me. I can actually say it over the phone. Used to hate that moment."},
                 {name:"Priya N.",role:"Pediatrician",stars:5,text:"I set it to Doctor, generated a passphrase, and used it for my hospital login. Haven't had to reset my password in 4 months."},
               ].map(({name,role,stars,text})=>(
-                <article key={name} className="proof-card" itemScope itemType="https://schema.org/Review">
-                  <div style={{display:"flex",gap:2,marginBottom:14}} aria-label={`${stars} stars`}>
-                    {Array(stars).fill("★").map((s,i)=><span key={i} style={{color:"#C8FF00",fontSize:13}}>{s}</span>)}
-                  </div>
-                  <p itemProp="reviewBody" style={{fontSize:14,color:"#999",lineHeight:1.8,marginBottom:20,fontStyle:"italic"}}>"{text}"</p>
-                  <div itemScope itemType="https://schema.org/Person">
-                    <div itemProp="name" style={{fontFamily:"'Outfit'",fontWeight:700,fontSize:13,color:"#fff"}}>{name}</div>
-                    <div itemProp="jobTitle" style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",marginTop:4,letterSpacing:"0.06em"}}>{role}</div>
+                <article key={name} className="proof-card">
+                  <div style={{display:"flex",gap:2,marginBottom:14}}>{Array(stars).fill("\u2605").map((s,i)=><span key={i} style={{color:"#C8FF00",fontSize:13}}>{s}</span>)}</div>
+                  <p style={{fontSize:14,color:"#999",lineHeight:1.8,marginBottom:20,fontStyle:"italic"}}>"{text}"</p>
+                  <div>
+                    <div style={{fontFamily:"'Outfit'",fontWeight:700,fontSize:13,color:"#fff"}}>{name}</div>
+                    <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",marginTop:4,letterSpacing:"0.06em"}}>{role}</div>
                   </div>
                 </article>
               ))}
             </div>
           </section>
 
-          {/* ── FAQ ── */}
-          <section id="faq" style={{padding:"0 clamp(20px,5vw,60px) clamp(80px,10vw,120px)",maxWidth:1200,margin:"0 auto"}} aria-labelledby="faq-h2" itemScope itemType="https://schema.org/FAQPage">
+          {/* FAQ */}
+          <section id="faq" style={{padding:"0 clamp(20px,5vw,60px) clamp(80px,10vw,120px)",maxWidth:1200,margin:"0 auto"}}>
             <div style={{marginBottom:56,textAlign:"center"}}>
               <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:16}}>honest answers</div>
-              <h2 id="faq-h2" style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(26px,3.5vw,40px)",color:"#fff",letterSpacing:"-0.02em"}}>Questions we would ask too.</h2>
+              <h2 style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(26px,3.5vw,40px)",color:"#fff",letterSpacing:"-0.02em"}}>Questions we would ask too.</h2>
             </div>
             <FAQ/>
           </section>
 
-          {/* ── WAITLIST ── */}
-          <section style={{margin:"0 auto clamp(80px,10vw,120px)",padding:"0 clamp(20px,5vw,60px)",maxWidth:1200}}>
+          {/* WAITLIST */}
+          <section id="waitlist" style={{margin:"0 auto clamp(80px,10vw,120px)",padding:"0 clamp(20px,5vw,60px)",maxWidth:1200}}>
             <div style={{background:"#0a0a0c",border:"1px solid #141416",borderRadius:20,overflow:"hidden",position:"relative"}}>
               <div aria-hidden="true" style={{position:"absolute",top:-60,right:-60,width:240,height:240,borderRadius:"50%",background:"radial-gradient(circle,#C8FF0012,transparent 70%)",pointerEvents:"none"}}/>
               <div style={{padding:"clamp(48px,6vw,80px)",position:"relative",zIndex:1,maxWidth:600}}>
                 <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#C8FF0066",letterSpacing:"0.2em",textTransform:"uppercase",marginBottom:20}}>coming soon</div>
-                <h2 style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(28px,4vw,48px)",color:"#fff",letterSpacing:"-0.02em",marginBottom:16,lineHeight:1.1}}>
-                  Pro is almost here.<br/><span style={{color:"#C8FF00"}}>Get in early.</span>
-                </h2>
-                <p style={{fontSize:15,color:"#888",lineHeight:1.75,marginBottom:36,maxWidth:440}}>
-                  Team plans, compliance presets for HIPAA and SOC2, REST API access, and a dashboard for managing credentials at scale. Early users get 3 months free. No card needed.
-                </p>
+                <h2 style={{fontFamily:"'Outfit'",fontWeight:800,fontSize:"clamp(28px,4vw,48px)",color:"#fff",letterSpacing:"-0.02em",marginBottom:16,lineHeight:1.1}}>Pro is almost here.<br/><span style={{color:"#C8FF00"}}>Get in early.</span></h2>
+                <p style={{fontSize:15,color:"#888",lineHeight:1.75,marginBottom:36,maxWidth:440}}>Team plans, compliance presets for HIPAA and SOC2, REST API access, and a dashboard for managing credentials at scale. Early users get 3 months free. No card needed.</p>
                 {!submitted?(
                   <form onSubmit={handleWaitlist} style={{display:"flex",gap:12,flexWrap:"wrap"}}>
                     <label htmlFor="wl-email" style={{position:"absolute",width:1,height:1,overflow:"hidden",clip:"rect(0,0,0,0)"}}>Email address</label>
                     <input id="wl-email" type="email" placeholder="your@email.com" value={email} onChange={e=>setEmail(e.target.value)} required style={{flex:1,minWidth:220,background:"#060608",border:"1px solid #1e1e1e",borderRadius:6,padding:"14px 18px",fontFamily:"'DM Sans'",fontSize:14,color:"#fff",outline:"none"}}/>
-                    <button type="submit" className="cta-primary">Reserve my spot →</button>
+                    <button type="submit" className="cta-primary">Reserve my spot \u2192</button>
                   </form>
                 ):(
                   <div style={{display:"flex",alignItems:"center",gap:12}} role="alert">
-                    <div style={{width:32,height:32,borderRadius:"50%",background:"#C8FF00",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#000",fontWeight:800}}>✓</div>
+                    <div style={{width:32,height:32,borderRadius:"50%",background:"#C8FF00",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,color:"#000",fontWeight:800}}>\u2713</div>
                     <div>
                       <div style={{fontFamily:"'Outfit'",fontWeight:700,color:"#fff",fontSize:15}}>You are on the list.</div>
                       <div style={{fontFamily:"'DM Sans'",color:"#888",fontSize:13,marginTop:2}}>One email when it is ready. No sequences, no spam.</div>
@@ -795,12 +1000,12 @@ export default function PassGeniLanding() {
           </section>
         </main>
 
-        {/* ── FOOTER ── */}
+        {/* FOOTER */}
         <footer style={{borderTop:"1px solid #1e1e1e",padding:"40px clamp(20px,5vw,60px)",maxWidth:1200,margin:"0 auto"}}>
           <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:32,marginBottom:28}}>
             <div>
               <PassGeniLogo height="28px"/>
-              <p style={{fontFamily:"'DM Sans'",fontSize:12,color:"#666",maxWidth:260,lineHeight:1.75}}>AI-powered password generator. Zero knowledge architecture. Built for humans who value security without the friction.</p>
+              <p style={{fontFamily:"'DM Sans'",fontSize:12,color:"#666",maxWidth:260,lineHeight:1.75,marginTop:12}}>AI-powered password generator. Zero knowledge architecture. Built for humans who value security without the friction.</p>
             </div>
             <div style={{display:"flex",gap:8,flexWrap:"wrap",alignItems:"center"}}>
               <TrustChip label="NIST SP 800-63B" type="check"/>
@@ -813,7 +1018,7 @@ export default function PassGeniLanding() {
             <div style={{display:"flex",gap:28,flexWrap:"wrap"}}>
               {["Privacy Policy","Terms","API Docs","Contact"].map(l=><a key={l} href="/#" className="nav-link" style={{fontSize:12}}>{l}</a>)}
             </div>
-            <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#555",letterSpacing:"0.08em"}}>© 2025 PassGeni · Zero retention by design · passgeni.online</div>
+            <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#555",letterSpacing:"0.08em"}}>\u00a9 2025 PassGeni \u00b7 Zero retention by design \u00b7 passgeni.online</div>
           </div>
         </footer>
       </div>
