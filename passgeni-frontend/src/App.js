@@ -93,6 +93,14 @@ const FontLink = () => (
     @keyframes ringExpand { 0%{transform:translate(-50%,-50%) scale(0.7);opacity:0.5} 100%{transform:translate(-50%,-50%) scale(2.2);opacity:0} }
     @keyframes passwordStream { 0%{transform:translateY(0);opacity:0.6} 100%{transform:translateY(-100%);opacity:0} }
     @keyframes trustPulse { 0%,100%{opacity:0.7} 50%{opacity:1} }
+    @keyframes unbreakablePulse { 0%,100%{text-shadow:0 0 8px #C8FF0066,0 0 16px #C8FF0033} 50%{text-shadow:0 0 16px #C8FF00CC,0 0 32px #C8FF0088,0 0 48px #C8FF0044} }
+    @keyframes pillFadeOut { from{opacity:1;transform:translateY(0)} to{opacity:0;transform:translateY(-6px)} }
+    @keyframes inputSlideIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+    .use-it-btn { background:#111;border:none;border-radius:6px;padding:8px 16px;cursor:default;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:700;color:#666;letter-spacing:0.08em;transition:all 0.18s cubic-bezier(.16,1,.3,1);white-space:nowrap; }
+    .use-it-btn.active { background:#C8FF00;color:#000;cursor:pointer; }
+    .use-it-btn.active:hover { background:#d4ff1a;box-shadow:0 0 18px #C8FF0066;transform:scale(1.04); }
+    .use-it-btn.active:active { transform:scale(0.97); }
+    .unbreakable-label { animation: unbreakablePulse 2s ease infinite; }
     .fade-up  { animation: slideUp 0.7s cubic-bezier(.16,1,.3,1) forwards; }
     .fade-up-2{ animation: slideUp 0.7s 0.1s cubic-bezier(.16,1,.3,1) both; }
     .fade-up-3{ animation: slideUp 0.7s 0.2s cubic-bezier(.16,1,.3,1) both; }
@@ -165,12 +173,23 @@ function trackCustomProfession(input) {
   customProfessionLog.push(entry);
   console.log("[PassGeni] Custom profession:", entry);
 }
+const ADJECTIVES = ["vivid","neon","stark","swift","iron","ghost","prime","ultra","bold","nova","apex","echo","flux","grim","keen","lone","pure","raw","void","zero","dark","deep","fast","high","sharp","cool","hard","soft","bright","calm"];
+const SINGLE_WORD_PAIRS = {
+  pilot:["sky","wing"], chef:["mise","flame"], driver:["route","gear"],
+  barber:["taper","blade"], nurse:["pulse","care"], farmer:["seed","crop"],
+  writer:["prose","draft"], artist:["chroma","brush"], singer:["chord","lyric"],
+  coder:["stack","loop"], hacker:["cipher","root"], trader:["alpha","bid"],
+  lawyer:["clause","writ"], judge:["bench","rule"], guard:["patrol","watch"],
+  miner:["shaft","ore"], diver:["depth","tank"], boxer:["jab","ring"],
+  baker:["knead","crust"], welder:["arc","flux"], sailor:["tide","mast"],
+};
 function deriveSeeds(input) {
   const clean = input.trim().toLowerCase();
   for (const [key, seeds] of Object.entries(PROFESSION_KEYWORD_MAP)) { if (clean.includes(key)) return seeds; }
+  for (const [key, seeds] of Object.entries(SINGLE_WORD_PAIRS)) { if (clean.includes(key)) return seeds; }
   const words = clean.split(/\s+/).filter(w=>w.length>3);
-  if (words.length >= 2) return [words[0].slice(0,7), words[1].slice(0,7)];
-  if (words.length === 1) return [words[0].slice(0,7), "secure"];
+  if (words.length >= 2) return [words[0].slice(0,8), words[1].slice(0,8)];
+  if (words.length === 1) return [words[0].slice(0,8), ["nexus","vault","sigma","prime","omega"][Math.floor(Math.random()*5)]];
   return ["cipher","vault"];
 }
 const COLORS = ["crimson","cobalt","amber","onyx","jade","slate","ivory","azure"];
@@ -349,60 +368,131 @@ function GeneratorWidget() {
 }
 
 function PassphraseTab({prof,setProf,otherSeeds,otherLabel,showOtherInput,setShowOtherInput,otherValue,setOtherValue,inputRef,handleProfClick,handleOtherSubmit}) {
-  const [words,setWords]=useState([]);
-  const generate=(seedsOverride)=>{
-    const seeds=seedsOverride!==undefined?seedsOverride:otherSeeds;
-    let bank=seeds?[...seeds,"iron","vault","lock","shield","ghost","cipher","storm"]:[...(PROFESSIONS.find(x=>x.id===prof)||PROFESSIONS[0]).seeds,"iron","vault","lock","shield","ghost","cipher","storm"];
-    const out=[];
-    while(out.length<4){const w=bank[Math.floor(Math.random()*bank.length)];if(!out.includes(w))out.push(w);}
-    setWords(out);
+  // passphrase = [Word1]-[Adjective]-[3DigitNum]-[Word2]
+  const [parts,setParts]=useState(null); // {w1,adj,num,w2}
+  const [generating,setGenerating]=useState(false);
+
+  const pickRand=(arr)=>arr[Math.floor(Math.random()*arr.length)];
+  const safeNum=()=>{
+    // avoid 007, 123, 420, 666, 000, current year, sequential runs
+    const bad=new Set(["007","123","124","234","345","456","567","678","789","111","222","333","444","555","666","777","888","999","000","420","2024","2025","2026"]);
+    let n;do{n=String(Math.floor(Math.random()*900)+100);}while(bad.has(n));
+    return n;
   };
-  const passphrase=words.join("-");
+
+  const generate=(seedsOverride)=>{
+    setGenerating(true);
+    setTimeout(()=>{
+      const seeds=seedsOverride!==undefined?seedsOverride:otherSeeds;
+      let bank=seeds?[...seeds]:([...(PROFESSIONS.find(x=>x.id===prof)||PROFESSIONS[0]).seeds]);
+      const w1=pickRand(bank);
+      // w2 must differ from w1
+      const w2pool=bank.filter(w=>w!==w1);
+      const w2=w2pool.length>0?pickRand(w2pool):pickRand(["vault","ghost","prime","sigma"]);
+      const adj=pickRand(ADJECTIVES);
+      const num=safeNum();
+      setParts({w1,adj,num,w2});
+      setGenerating(false);
+    },220);
+  };
+
+  const passphrase=parts?`${parts.w1}-${parts.adj}-${parts.num}-${parts.w2}`:"";
+  // Passphrase entropy estimate: treat each segment as independent
+  const ppEntropy=parts?Math.round(Math.log2(40)*2+Math.log2(900)+Math.log2(8)):0;
+  const isUnbreakable=ppEntropy>=40;
+
+  // Word segment coloring
+  const WORD_COLORS=["#C8FF00","#e8e8e8","#aaa","#fff"];
+
   return (
     <>
-      <div style={{background:"#08080a",border:"1px solid #141416",borderRadius:10,padding:"20px 24px",marginBottom:24,minHeight:90}} aria-live="polite">
-        {words.length>0?(
+      {/* ── Output box ── */}
+      <div style={{background:"#08080a",border:"1px solid #141416",borderRadius:10,padding:"20px 24px",marginBottom:24,minHeight:90,transition:"opacity 0.2s",opacity:generating?0.4:1}} aria-live="polite">
+        {parts?(
           <>
-            <div style={{display:"flex",gap:10,flexWrap:"wrap",marginBottom:14}}>
-              {words.map((w,i)=><span key={i} style={{background:"#111",border:"1px solid #1e1e1e",borderRadius:6,padding:"8px 16px",fontFamily:"'IBM Plex Mono'",fontSize:15,color:"#fff",letterSpacing:"0.04em"}}>{w}</span>)}
+            {/* Word chips */}
+            <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:14}}>
+              {[parts.w1,parts.adj,parts.num,parts.w2].map((seg,i)=>(
+                <span key={i} style={{background:"#111",border:`1px solid ${i===0||i===3?"#C8FF0033":"#1e1e1e"}`,borderRadius:6,padding:"8px 16px",fontFamily:"'IBM Plex Mono'",fontSize:15,color:WORD_COLORS[i],letterSpacing:"0.04em",transition:"all 0.3s"}}>{seg}</span>
+              ))}
             </div>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#888"}}>{passphrase}</span>
+            {/* Full passphrase + copy */}
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:14}}>
+              <span style={{fontFamily:"'IBM Plex Mono'",fontSize:11,color:"#555",letterSpacing:"0.04em"}}>{passphrase}</span>
               <CopyBtn text={passphrase}/>
+            </div>
+            {/* Strength row */}
+            <div style={{borderTop:"1px solid #111",paddingTop:12}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                <span style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#888",letterSpacing:"0.1em",textTransform:"uppercase"}}>strength</span>
+                <div style={{display:"flex",gap:10,alignItems:"center"}}>
+                  <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",letterSpacing:"0.06em"}}>{ppEntropy}+ bits entropy</span>
+                  <span className={isUnbreakable?"unbreakable-label":""} style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#C8FF00",letterSpacing:"0.08em",fontWeight:600}}>
+                    {isUnbreakable?"Unbreakable ✦":"Strong"}
+                  </span>
+                </div>
+              </div>
+              <div style={{display:"flex",gap:4}}>
+                {[1,2,3,4].map(i=><div key={i} className="strength-seg" style={{background:"#C8FF00"}}/>)}
+              </div>
+              <div style={{marginTop:8,fontFamily:"'DM Sans'",fontSize:11,color:"#888"}}>Estimated crack time: <span style={{color:"#aaa"}}>longer than the universe</span></div>
             </div>
           </>
         ):<span style={{fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#aaa"}}>generate a passphrase —</span>}
       </div>
+
+      {/* ── Role selector ── */}
       <div style={{marginBottom:24}}>
         <div style={{fontFamily:"'IBM Plex Mono'",fontSize:10,color:"#777",letterSpacing:"0.12em",textTransform:"uppercase",marginBottom:12,display:"flex",justifyContent:"space-between"}}>
           <span>your role</span>
-          {otherLabel&&<span style={{color:"#C8FF0077",fontSize:9}}>✦ {otherLabel}</span>}
+          {otherLabel&&!showOtherInput&&<span style={{color:"#C8FF0077",fontSize:9}}>✦ {otherLabel}</span>}
         </div>
+
+        {/* Pill buttons */}
         {!showOtherInput&&(
-          <div style={{display:"flex",flexWrap:"wrap",gap:8,animation:"fadeIn 0.2s ease"}}>
-            {PROFESSIONS.map(p=><button key={p.id} onClick={()=>handleProfClick(p.id)} className={`toggle-pill ${prof===p.id&&!otherSeeds?"active":""}`}>{p.label}</button>)}
-            <button onClick={()=>{setShowOtherInput(true);setTimeout(()=>inputRef.current?.focus(),50);}} className={`toggle-pill ${otherSeeds?"active":""}`} style={otherSeeds?{}:{borderColor:"#2a2a2a",borderStyle:"dashed",color:"#888"}}>
+          <div style={{display:"flex",flexWrap:"wrap",gap:8,animation:"inputSlideIn 0.2s ease"}}>
+            {PROFESSIONS.map(p=>(
+              <button key={p.id} onClick={()=>{handleProfClick(p.id);}} className={`toggle-pill ${prof===p.id&&!otherSeeds?"active":""}`}>{p.label}</button>
+            ))}
+            <button
+              onClick={()=>{setShowOtherInput(true);setTimeout(()=>inputRef.current?.focus(),60);}}
+              className={`toggle-pill ${otherSeeds?"active":""}`}
+              style={otherSeeds?{}:{borderColor:"#2a2a2a",borderStyle:"dashed",color:"#888"}}>
               {otherSeeds?`✦ ${otherLabel}`:"+ Other"}
             </button>
           </div>
         )}
+
+        {/* Other input */}
         {showOtherInput&&(
-          <div style={{animation:"fadeIn 0.2s ease"}}>
-            <div style={{display:"flex",gap:8,alignItems:"stretch",background:"#08080a",border:"1px solid #C8FF0033",borderRadius:8,padding:"4px 4px 4px 16px"}}>
-              <input ref={inputRef} type="text" placeholder="e.g. Pilot, Plumber, Chef…" value={otherValue} onChange={e=>setOtherValue(e.target.value)}
+          <div style={{animation:"inputSlideIn 0.22s cubic-bezier(.16,1,.3,1)"}}>
+            <div style={{display:"flex",gap:8,alignItems:"stretch",background:"#08080a",border:"1px solid #C8FF0044",borderRadius:8,padding:"4px 4px 4px 16px",boxShadow:"0 0 0 1px #C8FF0011"}}>
+              <input
+                ref={inputRef}
+                type="text"
+                placeholder="e.g. Pilot, Plumber, Chef…"
+                value={otherValue}
+                onChange={e=>setOtherValue(e.target.value)}
                 onKeyDown={e=>{if(e.key==="Enter")handleOtherSubmit();if(e.key==="Escape"){setShowOtherInput(false);setOtherValue("");}}}
-                style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#fff",letterSpacing:"0.04em",padding:"8px 0"}}/>
-              <button onClick={handleOtherSubmit} disabled={!otherValue.trim()} style={{background:otherValue.trim()?"#C8FF00":"#111",border:"none",borderRadius:6,padding:"8px 16px",cursor:otherValue.trim()?"pointer":"default",fontFamily:"'IBM Plex Mono'",fontSize:11,fontWeight:700,color:otherValue.trim()?"#000":"#666",letterSpacing:"0.08em",transition:"all 0.15s",whiteSpace:"nowrap"}}>Use it →</button>
+                style={{flex:1,background:"transparent",border:"none",outline:"none",fontFamily:"'IBM Plex Mono'",fontSize:13,color:"#fff",letterSpacing:"0.04em",padding:"10px 0"}}
+              />
+              <button
+                onClick={handleOtherSubmit}
+                disabled={!otherValue.trim()}
+                className={`use-it-btn ${otherValue.trim()?"active":""}`}>
+                Use it →
+              </button>
             </div>
             <div style={{display:"flex",justifyContent:"space-between",marginTop:8,padding:"0 2px"}}>
-              <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#aaa",letterSpacing:"0.08em"}}>AI extracts keywords from your profession</span>
-              <button onClick={()=>{setShowOtherInput(false);setOtherValue("");}} style={{background:"none",border:"none",fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#777",cursor:"pointer",letterSpacing:"0.06em"}}>← back</button>
+              <span style={{fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#555",letterSpacing:"0.08em"}}>AI extracts keywords from your profession</span>
+              <button onClick={()=>{setShowOtherInput(false);setOtherValue("");}} style={{background:"none",border:"none",fontFamily:"'IBM Plex Mono'",fontSize:9,color:"#C8FF0066",cursor:"pointer",letterSpacing:"0.06em",transition:"color 0.15s"}} onMouseEnter={e=>e.target.style.color="#C8FF00"} onMouseLeave={e=>e.target.style.color="#C8FF0066"}>← back</button>
             </div>
           </div>
         )}
       </div>
+
       <button className="cta-primary" style={{width:"100%",justifyContent:"center"}} onClick={()=>generate()}>
-        Generate passphrase <span style={{fontSize:18}}>→</span>
+        {generating?"Generating…":<>Generate passphrase <span style={{fontSize:18}}>→</span></>}
       </button>
       <p style={{fontFamily:"'DM Sans'",fontSize:11,color:"#aaa",textAlign:"center",marginTop:14,letterSpacing:"0.04em"}}>
         Recommended by <strong style={{color:"#bbb"}}>NIST SP 800-63B</strong> · Easier to remember · Just as strong
