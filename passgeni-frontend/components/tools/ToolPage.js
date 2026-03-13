@@ -159,25 +159,4 @@ export default function ToolPage({
       </main>
     </PageLayout>
   );
-}          <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(28px,4vw,48px)", color: "#fff", letterSpacing: "-0.02em", marginBottom: 16, lineHeight: 1.1 }}>
-            {headline}
-          </h1>
-
-          {subheadline && (
-            <p style={{ fontFamily: "var(--font-body)", fontSize: 16, color: "#888", lineHeight: 1.8, marginBottom: 40, maxWidth: 580 }}>
-              {subheadline}
-            </p>
-          )}
-        </div>
-
-        {/* ── Tool content (passed as children) ───────────── */}
-        <div style={{ maxWidth: 760, margin: "0 auto", padding: "0 var(--page-pad)" }}>
-          {children}
-        </div>
-
-        {/* ── Generator CTA at bottom ─────────────────────── */}
-        {showGeneratorCTA && <GeneratorCTA />}
-      </main>
-    </PageLayout>
-  );
 }

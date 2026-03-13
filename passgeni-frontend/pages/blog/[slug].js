@@ -2,17 +2,10 @@
 // PASSGENI — BLOG POST PAGE TEMPLATE
 // passgeni.ai/blog/[slug]
 // =============================================================
-// Loads post metadata from content/blog.js
-// Loads post content from content/blog/[slug].js
-// Generates static pages at build time.
-// =============================================================
 
 import PageLayout from "../../components/layout/PageLayout.js";
 import { ALL_POSTS, getPostBySlug, getRelatedPosts } from "../../content/blog.js";
 import { getFAQSchema } from "../../seo/schema.js";
-
-// ─── SHARED PROSE COMPONENTS ─────────────────────────────────
-// (Same primitives as guide pages)
 
 function PostMeta({ post }) {
   return (
@@ -30,7 +23,6 @@ function PostMeta({ post }) {
   );
 }
 
-// ─── BLOG FAQ SECTION ─────────────────────────────────────────
 function BlogFAQ({ items }) {
   if (!items?.length) return null;
   return (
@@ -48,13 +40,11 @@ function BlogFAQ({ items }) {
   );
 }
 
-
+function RelatedPosts({ posts }) {
   if (!posts?.length) return null;
   return (
     <section style={{ marginTop: 64, paddingTop: 40, borderTop: "1px solid #141416" }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>
-        More posts
-      </div>
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 20 }}>More posts</div>
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         {posts.map((p) => (
           <a key={p.slug} href={`/blog/${p.slug}`} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px", background: "#0a0a0c", border: "1px solid #141416", borderRadius: 10, textDecoration: "none", transition: "border-color 0.2s", gap: 16 }}
@@ -70,7 +60,6 @@ function BlogFAQ({ items }) {
   );
 }
 
-// ─── PAGE ─────────────────────────────────────────────────────
 export default function BlogPostPage({ post, related, contentHtml }) {
   if (!post) {
     return (
@@ -86,15 +75,12 @@ export default function BlogPostPage({ post, related, contentHtml }) {
 
   const schema = [
     {
-      "@context":      "https://schema.org",
-      "@type":         "BlogPosting",
-      "headline":      post.title,
-      "description":   post.metaDescription,
-      "url":           `https://passgeni.ai/blog/${post.slug}`,
-      "datePublished": post.publishedAt,
-      "dateModified":  post.publishedAt,
-      "author":        { "@type": "Organization", "name": "PassGeni", "url": "https://passgeni.ai" },
-      "publisher":     { "@type": "Organization", "name": "PassGeni", "logo": { "@type": "ImageObject", "url": "https://passgeni.ai/logo.png" } },
+      "@context": "https://schema.org", "@type": "BlogPosting",
+      "headline": post.title, "description": post.metaDescription,
+      "url": `https://passgeni.ai/blog/${post.slug}`,
+      "datePublished": post.publishedAt, "dateModified": post.publishedAt,
+      "author": { "@type": "Organization", "name": "PassGeni", "url": "https://passgeni.ai" },
+      "publisher": { "@type": "Organization", "name": "PassGeni", "logo": { "@type": "ImageObject", "url": "https://passgeni.ai/logo.png" } },
     },
     ...(post.faq?.length ? [getFAQSchema(post.faq)] : []),
   ];
@@ -102,10 +88,8 @@ export default function BlogPostPage({ post, related, contentHtml }) {
   return (
     <PageLayout title={post.metaTitle} description={post.metaDescription} canonical={`https://passgeni.ai/blog/${post.slug}`} schema={schema}>
       <main style={{ maxWidth: 720, margin: "0 auto", padding: "60px var(--page-pad) 80px" }}>
-
-        {/* Breadcrumb */}
         <nav aria-label="Breadcrumb" style={{ marginBottom: 28 }}>
-          <a href="/"    style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#888", textDecoration: "none" }}>PassGeni</a>
+          <a href="/" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#888", textDecoration: "none" }}>PassGeni</a>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#444", margin: "0 8px" }}>→</span>
           <a href="/blog" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#888", textDecoration: "none" }}>Blog</a>
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#444", margin: "0 8px" }}>→</span>
@@ -136,39 +120,28 @@ export default function BlogPostPage({ post, related, contentHtml }) {
         </article>
 
         <BlogFAQ items={post.faq} />
-
         <RelatedPosts posts={related} />
 
         <div style={{ marginTop: 56, textAlign: "center" }}>
           <a href="/blog" className="btn-ghost" style={{ marginRight: 12 }}>← All posts</a>
           <a href="/#generator" className="btn-primary" style={{ animation: "none" }}>Generate password →</a>
         </div>
-
       </main>
     </PageLayout>
   );
 }
 
 export async function getStaticPaths() {
-  return {
-    paths:    ALL_POSTS.map((p) => ({ params: { slug: p.slug } })),
-    fallback: false,
-  };
+  return { paths: ALL_POSTS.map((p) => ({ params: { slug: p.slug } })), fallback: false };
 }
 
 export async function getStaticProps({ params }) {
   const post    = getPostBySlug(params.slug);
   const related = getRelatedPosts(params.slug, 3);
-
   let contentHtml = null;
   try {
-    const mod   = require(`../../content/blog/${params.slug}.js`);
+    const mod = require(`../../content/blog/${params.slug}.js`);
     contentHtml = mod.contentHtml || null;
-  } catch {
-    // Content file not written yet
-  }
-
-  return {
-    props: { post: post || null, related, contentHtml },
-  };
+  } catch {}
+  return { props: { post: post || null, related, contentHtml } };
 }

@@ -8,7 +8,7 @@
 // =============================================================
 
 import { useState } from "react";
-import PageLayout from "../../components/layout/PageLayout.js";
+import PageLayout from "../components/layout/PageLayout.js";
 
 // ─── CONSTANTS ────────────────────────────────────────────────
 const BASE_URL = "https://passgeni.ai/api/v1";
