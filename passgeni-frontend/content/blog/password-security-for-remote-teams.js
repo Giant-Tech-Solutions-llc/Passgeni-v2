@@ -19,4 +19,4 @@ export const contentHtml = `
 
 <h2>Gap 5: Inconsistent onboarding and offboarding</h2>
 <p>When someone leaves a remote team, how confident are you that all their credentials are rotated? In an office, you can physically check. Remotely, offboarding credential rotation is often incomplete. Use PassGeni's Team API to generate new credentials for system accounts during offboarding, and your password manager's audit log to identify all accounts a departing employee had access to.</p>
-\`;
+`;

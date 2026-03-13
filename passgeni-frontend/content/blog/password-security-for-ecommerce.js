@@ -12,4 +12,4 @@ export const contentHtml = `
 
 <h2>The shortcut that actually works</h2>
 <p>PassGeni's <a href="/tools/policy-generator">Policy Generator</a> produces a PCI-DSS v4.0 aligned password policy document that you can hand to your QSA. It's not a substitution for implementation — you still need to actually use compliant passwords — but it satisfies the documented policy requirement that PCI-DSS requires you to have in writing.</p>
-\`;
+`;

@@ -16,4 +16,4 @@ export const contentHtml = `
 
 <h2>Client credential handling</h2>
 <p>Never store client passwords in email, notes, or plain text files. Use a password manager with client-specific vaults and defined access controls. When clients need to share credentials with you, send them a PassGeni Secure Share link to upload them through — it creates an encrypted channel they can understand and trust.</p>
-\`;
+`;

@@ -16,4 +16,4 @@ export const contentHtml = `
 
 <h2>The integration to add regardless of which you choose</h2>
 <p>Pair your team password manager with PassGeni's Team API for programmatic credential generation in onboarding workflows. Generate NIST-compliant credentials for new service accounts automatically, with compliance preset enforcement baked in. The combination — human-facing vault management plus API-level generation — covers both your manual and automated credential needs.</p>
-\`;
+`;

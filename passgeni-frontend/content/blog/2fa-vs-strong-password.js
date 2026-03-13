@@ -18,4 +18,4 @@ export const contentHtml = `
 
 <h2>The priority order if you have to choose</h2>
 <p>For email accounts: prioritise 2FA. Email account access lets attackers reset every other password. For everything else: strong unique password first, then 2FA as the second layer. Never use the same password twice regardless of 2FA status — credential stuffing doesn't care about 2FA if the site doesn't implement rate limiting.</p>
-\`;
+`;

@@ -14,4 +14,4 @@ export const contentHtml = `
 <h2>When to actually change your password</h2>
 <p>There are four legitimate reasons to change a password: the site was breached and your credentials may have been exposed; you shared the password with someone and that access should be revoked; you typed the password on an untrusted device; or you suspect your device has malware.</p>
 <p>Outside of these cases, changing a strong unique password that hasn't been compromised provides no security benefit and actively encourages the patterns that make passwords weaker.</p>
-\`;
+`;

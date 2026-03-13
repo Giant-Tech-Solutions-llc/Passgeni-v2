@@ -13,4 +13,4 @@ export const contentHtml = `
 <h2>The breach checker as your first line of defence</h2>
 <p>PassGeni's <a href="/tools/breach-checker">breach checker</a> uses k-anonymity to check your passwords against 12+ billion compromised credentials without revealing your actual password. If a password comes back as compromised, change it immediately — on that site and every other site where you used it.</p>
 <p>Run your important passwords through the breach checker now. Your email, banking, and any work credentials should be checked first. A positive result isn't the end of the world — it's information you need to act on.</p>
-\`;
+`;

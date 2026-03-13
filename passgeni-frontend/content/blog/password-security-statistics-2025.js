@@ -13,4 +13,4 @@ export const contentHtml = `
 
 <h2>What actually works</h2>
 <p>Studies consistently show that three interventions reduce credential-based breach risk by over 90% when combined: password manager adoption (unique passwords per account), breach monitoring with prompt remediation, and 2FA on email accounts specifically. None of these require advanced technical knowledge. The gap is consistently adoption, not information. Use PassGeni's <a href="/tools/breach-checker">breach checker</a> to assess your current exposure and the <a href="/#generator">generator</a> to fix what needs fixing.</p>
-\`;
+`;

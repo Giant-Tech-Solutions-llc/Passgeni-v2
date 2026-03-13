@@ -12,4 +12,4 @@ export const contentHtml = `
 
 <h2>Enforcement without surveillance</h2>
 <p>Password policy enforcement via surveillance (keyloggers, periodic password audits) is both ineffective and corrosive to trust. Effective enforcement comes from tooling: a mandated password manager that enforces generation rules, SSO where possible to reduce the number of individual credentials, and a password audit tool that checks for weak or reused credentials during onboarding and annual reviews.</p>
-\`;
+`;

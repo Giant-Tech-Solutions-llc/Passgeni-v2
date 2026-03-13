@@ -13,4 +13,4 @@ export const contentHtml = `
 <h2>How to verify a tool's zero-knowledge claim</h2>
 <p>Any tool claiming zero-knowledge should be verifiable, not taken on faith. For client-side tools like PassGeni: check the Network tab and confirm no password data leaves the browser. For server-side vaults like 1Password: look for audit reports from independent security firms and SRP-based authentication in the technical documentation. For tools you can't verify: treat the claim as marketing, not security architecture.</p>
 <p>The PassGeni <a href="/guides/what-is-zero-knowledge-architecture">zero-knowledge guide</a> covers the full architecture in detail — including the specific browser APIs used and how to audit them yourself.</p>
-\`;
+`;

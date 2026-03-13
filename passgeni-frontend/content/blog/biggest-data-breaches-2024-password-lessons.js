@@ -16,4 +16,4 @@ export const contentHtml = `
 
 <h2>The common thread</h2>
 <p>None of 2024's major credential-based breaches required novel attack techniques. They exploited the same three gaps that have driven breaches for a decade: missing 2FA, weak service account credentials, and password reuse. The technology to prevent all three exists and is largely free. The gap is consistently implementation and enforcement, not tooling.</p>
-\`;
+`;

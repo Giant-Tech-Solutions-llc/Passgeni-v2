@@ -16,4 +16,4 @@ export const contentHtml = `
 <h2>Migrating legacy MD5 hashes</h2>
 <p>If you inherited a system with MD5 password hashes, migrate on login: when a user successfully authenticates with their MD5 hash, immediately re-hash their plaintext password with Argon2 and update the stored value. Over time your database migrates from MD5 to Argon2 without requiring a forced password reset or a plaintext password export.</p>
 <p>The PassGeni Team API stores all API key hashes as SHA-256 with a high-entropy random salt — appropriate for API keys (which are longer and more random than user passwords) but not a substitute for Argon2 on user password storage.</p>
-\`;
+`;

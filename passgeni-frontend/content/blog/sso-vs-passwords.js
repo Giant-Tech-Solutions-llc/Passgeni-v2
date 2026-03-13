@@ -18,4 +18,4 @@ export const contentHtml = `
 
 <h2>The practical setup</h2>
 <p>Use SSO where available, with a hardware security key as the second factor for your identity provider. For non-SSO applications, generate strong unique passwords with PassGeni and store them in your password manager. Never use the same password for your SSO provider as anything else — it's the most valuable credential in your stack.</p>
-\`;
+`;

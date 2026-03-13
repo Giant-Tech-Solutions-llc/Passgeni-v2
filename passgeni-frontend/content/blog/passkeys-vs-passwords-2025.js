@@ -14,4 +14,4 @@ export const contentHtml = `
 
 <h2>The right answer in 2025</h2>
 <p>Use passkeys wherever they're available and well-implemented. Keep strong unique passwords for everything else — which is still most things. The presence of passkeys on some services doesn't reduce the need for strong password hygiene on services that haven't made the switch. PassGeni remains relevant precisely because the transition will take years, not months.</p>
-\`;
+`;

@@ -16,4 +16,4 @@ export const contentHtml = `
 
 <h2>The practical implication for your organisation</h2>
 <p>If your IT policy still requires 90-day rotation, mandatory symbols, and blocks passwords over 12 characters, it's now out of step with NIST guidance. PassGeni's <a href="/tools/policy-generator">Policy Generator</a> produces NIST 800-63B aligned password policies for free — with citations and implementation guidance. Use it to update your written policy and bring your enforcement in line with the current standard.</p>
-\`;
+`;

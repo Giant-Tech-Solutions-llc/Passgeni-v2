@@ -16,4 +16,4 @@ export const contentHtml = `
 
 <h2>Tools for healthcare teams</h2>
 <p>PassGeni's <a href="/tools/policy-generator">Policy Generator</a> produces HIPAA-aligned written password policies in minutes — useful for the documentation requirement of HIPAA's Security Rule. The <a href="/tools/audit">Password Audit Tool</a> can batch-check existing team credentials for entropy and breach exposure without storing any password data.</p>
-\`;
+`;

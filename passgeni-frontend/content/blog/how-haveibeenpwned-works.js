@@ -20,4 +20,4 @@ export const contentHtml = `
 <h2>What it means when a password is flagged</h2>
 <p>A flagged password doesn't mean your account was specifically breached — it means the password appears in at least one breach dataset. The count shown tells you how many times it appeared. "password" appears over 9 million times. Even a single appearance means the password is in attacker wordlists and should never be used.</p>
 <p>Change any flagged password immediately on every site where you've used it. Use PassGeni to generate a replacement with verified high entropy.</p>
-\`;
+`;

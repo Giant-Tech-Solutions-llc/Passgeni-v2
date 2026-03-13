@@ -25,4 +25,4 @@ export const contentHtml = `
   <li>Back up your 2FA backup codes and store them in your password manager.</li>
   <li>Review app permissions on your phone — revoke any apps that have access to more than they need.</li>
 </ol>
-\`;
+`;

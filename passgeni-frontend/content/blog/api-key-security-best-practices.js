@@ -22,4 +22,4 @@ export const contentHtml = `
 
 <h2>Leak detection</h2>
 <p>Set up GitHub secret scanning (free for public repos, available for private repos with Advanced Security). Configure AWS CloudTrail, GCP Audit Logs, or equivalent for unusual API call patterns. Services like GitGuardian monitor commits in real time for credential patterns. For critical keys, set up alerts on first-use from a new IP range.</p>
-\`;
+`;

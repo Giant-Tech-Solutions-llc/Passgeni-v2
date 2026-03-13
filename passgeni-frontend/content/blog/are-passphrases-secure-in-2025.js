@@ -14,4 +14,4 @@ export const contentHtml = `
 <h2>When passphrases fail</h2>
 <p>Passphrases underperform in three scenarios: sites with short password length limits (some still cap at 16 characters, which cuts a 5-word passphrase); systems that require symbols and numbers in a way that forces awkward modification of the passphrase; and cases where the user selects words non-randomly (favourites, song lyrics, proper names).</p>
 <p>For maximum compatibility, PassGeni's passphrase mode can output in a hyphenated format (correct-horse-battery-staple) or with a number and symbol appended for sites that require them — while preserving the core entropy.</p>
-\`;
+`;

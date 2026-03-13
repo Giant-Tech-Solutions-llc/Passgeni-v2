@@ -19,4 +19,4 @@ export const contentHtml = `
 <h2>What PassGeni's "Unbreakable" rating means</h2>
 <p>PassGeni labels passwords as "Unbreakable" when they exceed 120 bits of entropy. At that level, even a nation-state with a dedicated GPU cluster running for a century has less than a 1-in-10^15 chance of finding the password through brute force. The crack time estimate shows "longer than the universe" — which, given the math, is accurate.</p>
 <p>The <a href="/#generator">generator</a> defaults to 18 characters with full character set enabled, which consistently reaches the Unbreakable threshold. The DNA Score breaks down exactly which properties contribute to this and what could be improved.</p>
-\`;
+`;
