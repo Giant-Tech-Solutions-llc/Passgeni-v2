@@ -674,3 +674,66 @@ input[type=range]::-webkit-slider-thumb { -webkit-appearance:none;width:16px;hei
 @media (max-width: 600px) {
   .trust-chip { font-size: 8px; padding: 3px 9px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   UNICORN PULSE — Hero Generation Box
+   Subtle breathing glow on the "Generating →" animated box.
+   4s ease-in-out loop, barely perceptible scale lift (1.005x).
+   ═══════════════════════════════════════════════════════════════ */
+@keyframes subtlePulse {
+  0%   { box-shadow: 0 0 15px 2px rgba(204,255,0,0.15); transform: scale(1); }
+  50%  { box-shadow: 0 0 25px 8px rgba(204,255,0,0.30); transform: scale(1.005); }
+  100% { box-shadow: 0 0 15px 2px rgba(204,255,0,0.15); transform: scale(1); }
+}
+
+.generation-box {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(204,255,0,0.3);
+  border-radius: 12px;
+  padding: 24px 32px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: subtlePulse 4s ease-in-out infinite;
+  will-change: transform, box-shadow;
+  transition: border-color 0.3s ease;
+}
+.generation-box:hover {
+  border-color: rgba(204,255,0,0.8);
+  animation-play-state: paused;
+}
+
+/* Hero Section spacing improvements */
+.hero-generation-wrap {
+  margin-top: clamp(32px, 4vw, 48px);
+  margin-bottom: clamp(32px, 4vw, 48px);
+}
+
+/* "Free Forever" trust tag — repositioned below generator */
+.hero-trust-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: #0c0c0e;
+  border: 1px solid #1a1a1a;
+  border-radius: 100px;
+  padding: 8px 20px;
+  margin-bottom: 20px;
+}
+
+/* Sub-copy punch-up */
+.hero-subcopy {
+  font-family: var(--font-body);
+  font-size: clamp(15px,1.8vw,18px);
+  color: #aaa;
+  line-height: 1.75;
+  max-width: 520px;
+  margin: 0 auto 48px;
+}
+
+/* "View Pricing" ghost button — thicker border for visibility */
+.cta-ghost {
+  border-width: 1.5px !important;
+}
+.cta-ghost:hover {
+  background: rgba(255,255,255,0.04) !important;
+}
