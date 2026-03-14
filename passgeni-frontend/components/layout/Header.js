@@ -1,56 +1,100 @@
 // =============================================================
-// PASSGENI — HEADER / NAVIGATION
+// PASSGENI — HEADER / NAVIGATION (Redesign V2)
+// Frosted glass · live dot · scroll-aware border · mobile drawer
 // =============================================================
-
+import { useState, useEffect } from "react";
 import { NAV } from "../../content/copy.js";
-import { TrustChip } from "../ui/index.js";
 import PassGeniLogo from "./Logo.js";
 
 export default function Header() {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Close drawer on resize to desktop
+  useEffect(() => {
+    const onResize = () => { if (window.innerWidth > 900) setMobileOpen(false); };
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
   return (
     <header>
       <nav
-        style={{
-          position:       "fixed",
-          top:            0,
-          left:           0,
-          right:          0,
-          zIndex:         999,
-          display:        "flex",
-          alignItems:     "center",
-          justifyContent: "space-between",
-          padding:        "0 var(--page-pad)",
-          height:         64,
-          background:     "rgba(6,6,8,0.92)",
-          backdropFilter: "blur(24px) saturate(1.5)",
-          borderBottom:   "1px solid #1e1e1e",
-        }}
+        className={`nav-root ${scrolled ? "scrolled" : ""}`}
         aria-label="Main navigation"
       >
-        {/* ── Left: Logo + Trust chips ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
-          <a href="/" style={{ textDecoration: "none" }}>
-            <PassGeniLogo height="32px" />
-          </a>
-          <div className="nav-trust-row" style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <TrustChip label="Zero storage"   type="dot"    />
-            <TrustChip label="NIST compliant" type="check"  />
-            <TrustChip label="Client-side"    type="shield" />
-          </div>
-        </div>
+        {/* ── Left: Logo + live dot ── */}
+        <a href="/" className="nav-logo" aria-label="PassGeni home">
+          <PassGeniLogo height="30px" />
+          <div className="nav-logo-dot" aria-hidden="true" />
+        </a>
 
-        {/* ── Right: Nav links + CTA ── */}
-        <div className="nav-links" style={{ display: "flex", gap: 32, alignItems: "center" }}>
+        {/* ── Center: Nav links (desktop) ── */}
+        <div className="nav-links-row" role="list">
           {NAV.links.map((link) => (
-            <a key={link.label} href={link.href} className="nav-link">
+            <a
+              key={link.label}
+              href={link.href}
+              className="nav-link"
+              role="listitem"
+            >
               {link.label}
             </a>
           ))}
-          <a href={NAV.ctaHref} className="btn-primary" style={{ padding: "10px 22px", fontSize: 13 }}>
+        </div>
+
+        {/* ── Right: CTA + mobile hamburger ── */}
+        <div className="nav-right">
+          <a
+            href={NAV.ctaHref}
+            className="btn-primary"
+            style={{ padding: "9px 20px", fontSize: 11 }}
+          >
             {NAV.ctaButton}
           </a>
+          <button
+            className={`nav-hamburger ${mobileOpen ? "open" : ""}`}
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+          >
+            <span />
+            <span />
+            <span />
+          </button>
         </div>
       </nav>
+
+      {/* ── Mobile drawer ── */}
+      <div
+        className={`mobile-nav-drawer ${mobileOpen ? "open" : ""}`}
+        aria-hidden={!mobileOpen}
+      >
+        {NAV.links.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+            className="mobile-nav-link"
+            onClick={() => setMobileOpen(false)}
+          >
+            {link.label}
+          </a>
+        ))}
+        <a
+          href={NAV.ctaHref}
+          className="btn-primary"
+          style={{ marginTop: 24, justifyContent: "center", fontSize: 13, padding: "14px 28px" }}
+          onClick={() => setMobileOpen(false)}
+        >
+          {NAV.ctaButton}
+        </a>
+      </div>
     </header>
   );
 }
