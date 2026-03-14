@@ -552,3 +552,5 @@ export default function DashboardPage() {
     </PageLayout>
   );
 }
+
+export async function getServerSideProps() { return { props: {} }; }

@@ -45,3 +45,5 @@ export default function AuthErrorPage() {
     </PageLayout>
   );
 }
+
+export async function getServerSideProps() { return { props: {} }; }

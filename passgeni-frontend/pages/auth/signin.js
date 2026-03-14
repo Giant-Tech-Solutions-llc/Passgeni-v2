@@ -145,3 +145,5 @@ export default function SignInPage() {
     </PageLayout>
   );
 }
+
+export async function getServerSideProps() { return { props: {} }; }
