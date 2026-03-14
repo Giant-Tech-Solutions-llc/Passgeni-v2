@@ -2,6 +2,7 @@
   --color-bg: #060608;
   --color-surface: #0a0a0c;
   --color-surface2: #0c0c0e;
+  --color-bg-card: #0a0a0c;
   --color-border: #141416;
   --color-border2: #1e1e1e;
   --color-text: #e8e8e8;
@@ -12,6 +13,8 @@
   --font-mono: 'IBM Plex Mono', monospace;
   --page-pad: clamp(20px, 5vw, 80px);
   --section-gap: clamp(80px, 10vw, 140px);
+  --section-pad: clamp(80px, 10vw, 140px);
+  --card-pad: 24px;
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
@@ -29,7 +32,7 @@ h1,h2,h3,h4,h5,h6 { font-family: var(--font-heading); font-weight: 800; letter-s
 .btn-ghost:hover { border-color: #444; background: rgba(255,255,255,.04); }
 .section { padding: var(--section-gap) var(--page-pad); }
 .section-label { font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 16px; }
-.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: 24px; transition: border-color .25s; }
+.card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 16px; padding: var(--card-pad); transition: border-color .25s; }
 .card:hover { border-color: var(--color-border2); }
 .copy-btn { background: transparent; border: 1px solid var(--color-border2); color: var(--color-muted); border-radius: 6px; padding: 8px 16px; font-family: var(--font-mono); font-size: 11px; cursor: pointer; transition: all .2s; }
 .copy-btn:hover { border-color: #444; color: var(--color-text); }
