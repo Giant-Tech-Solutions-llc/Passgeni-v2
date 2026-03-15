@@ -1,103 +1,78 @@
-import{useState,useEffect}from"react";
-import{NAV}from"../../content/copy.js";
+import{FOOTER}from"../../content/copy.js";
 import PassGeniLogo from"./Logo.js";
 
-const TICKER=["Zero Data Retention","Quantum-Ready Entropy","256-bit Minimum","Client-Side Only","Post-Quantum Ready","Zero Knowledge","NIST SP 800-63B","FIPS 140-3 Aligned","No Account Needed","DoD Compliant"];
+const COLS=[
+  {h:"Product",links:[{l:"Generator",href:"#generator"},{l:"Tools",href:"/tools"},{l:"Guides",href:"/guides"},{l:"Blog",href:"/blog"},{l:"Changelog",href:"/changelog"}]},
+  {h:"Compliance",links:[{l:"HIPAA",href:"/guides/hipaa-password-policy"},{l:"PCI-DSS",href:"/guides/pci-dss-password-rules"},{l:"SOC 2",href:"/guides/soc2-password-standards"},{l:"Post-Quantum",href:"/guides/post-quantum-passwords"},{l:"NIST SP 800-63B",href:"/guides/nist-password-guidelines"}]},
+  {h:"Company",links:[{l:"Pricing",href:"#pricing"},{l:"API",href:"/api"},{l:"Privacy",href:"/privacy"},{l:"Terms",href:"/terms"},{l:"Contact",href:"mailto:hello@passgeni.ai"}]},
+];
 
-export default function Header(){
-  const[scrolled,setScrolled]=useState(false);
-  const[open,setOpen]=useState(false);
-  const[active,setActive]=useState("");
-
-  useEffect(()=>{
-    const fn=()=>setScrolled(window.scrollY>24);
-    window.addEventListener("scroll",fn,{passive:true});
-    return()=>window.removeEventListener("scroll",fn);
-  },[]);
-
-  useEffect(()=>{
-    const fn=()=>{if(window.innerWidth>900)setOpen(false);};
-    window.addEventListener("resize",fn);
-    return()=>window.removeEventListener("resize",fn);
-  },[]);
-
-  useEffect(()=>{
-    document.body.style.overflow=open?"hidden":"";
-    return()=>{document.body.style.overflow="";};
-  },[open]);
-
-  const doubled=[...TICKER,...TICKER];
-
+export default function Footer(){
   return(
-    <>
-      <header>
-        <nav className={`nav-root${scrolled?" scrolled":""}`} aria-label="Main navigation">
-          {/* Logo */}
-          <a href="/" className="nav-logo" aria-label="PassGeni home">
-            <PassGeniLogo height="28px"/>
-            <div className="nav-logo-dot" aria-hidden="true"/>
-          </a>
+    <footer style={{position:"relative",overflow:"hidden",borderTop:"1px solid rgba(200,255,0,0.08)"}}>
+      <div aria-hidden style={{position:"absolute",bottom:-10,left:"50%",transform:"translateX(-50%)",fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(60px,14vw,200px)",color:"rgba(200,255,0,0.016)",letterSpacing:"-.04em",whiteSpace:"nowrap",pointerEvents:"none",userSelect:"none",lineHeight:1}}>PassGeni</div>
 
-          {/* Desktop links */}
-          <div className="nav-links-row" role="list">
-            {NAV.links.map(l=>(
-              <a key={l.label} href={l.href}
-                className={`nav-link${active===l.href?" active":""}`}
-                role="listitem"
-                onClick={()=>setActive(l.href)}
-              >{l.label}</a>
-            ))}
+      <div style={{maxWidth:1200,margin:"0 auto",padding:"clamp(40px,6vw,64px) var(--pad) clamp(32px,4vw,40px)",position:"relative",zIndex:1}}>
+        <div className="footer-grid" style={{marginBottom:"clamp(32px,5vw,52px)"}}>
+          {/* Brand */}
+          <div>
+            <PassGeniLogo height="26px"/>
+            <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",maxWidth:240,lineHeight:1.75,marginTop:14}}>
+              {FOOTER?.description||"AI-powered password generation. Zero storage. Client-side only."}
+            </p>
+            <div style={{display:"flex",gap:6,marginTop:16,flexWrap:"wrap"}}>
+              {["NIST","FIPS","SOC 2","HIPAA","PCI-DSS"].map(b=>(
+                <span key={b} style={{fontFamily:"var(--font-body)",fontSize:9,fontWeight:700,letterSpacing:".1em",color:"var(--muted)",border:"1px solid rgba(200,255,0,0.12)",borderRadius:4,padding:"3px 8px"}}>{b}</span>
+              ))}
+            </div>
           </div>
+          {/* Link cols */}
+          {COLS.map(col=>(
+            <div key={col.h}>
+              <div style={{fontFamily:"var(--font-body)",fontSize:11,fontWeight:700,letterSpacing:".12em",textTransform:"uppercase",color:"var(--text)",marginBottom:18}}>{col.h}</div>
+              <div style={{display:"flex",flexDirection:"column",gap:11}}>
+                {col.links.map(link=>(
+                  <a key={link.l} href={link.href}
+                    style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",transition:"color .15s",lineHeight:1.4}}
+                    onMouseEnter={e=>e.currentTarget.style.color="var(--accent)"}
+                    onMouseLeave={e=>e.currentTarget.style.color="var(--muted)"}
+                  >{link.l}</a>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
 
-          {/* Right side */}
-          <div className="nav-right">
-            <a href="/auth/signin" className="nav-signin">Sign In</a>
-            <a href={NAV.ctaHref} className="btn-primary" style={{padding:"9px 18px",fontSize:11}}>
-              Try Free
-            </a>
-            <button
-              className={`nav-hamburger${open?" open":""}`}
-              onClick={()=>setOpen(v=>!v)}
-              aria-label={open?"Close menu":"Open menu"}
-              aria-expanded={open}
-            >
-              <span/><span/><span/>
-            </button>
+        {/* Bottom bar */}
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",paddingTop:20,borderTop:"1px solid rgba(200,255,0,0.07)",flexWrap:"wrap",gap:12}}>
+          <div style={{fontFamily:"var(--font-body)",fontSize:"clamp(9px,1.5vw,11px)",color:"var(--muted-2)",letterSpacing:".04em",display:"flex",gap:6,alignItems:"center",flexWrap:"wrap"}}>
+            <span>© 2021 – 2026 PassGeni</span>
+            <span style={{opacity:.4}}>·</span>
+            <span>Zero retention by design</span>
+            <span style={{opacity:.4}}>·</span>
+            <a href="https://passgeni.ai" target="_blank" rel="noopener noreferrer"
+              style={{color:"var(--accent)",transition:"opacity .2s"}}
+              onMouseEnter={e=>e.currentTarget.style.opacity=".7"}
+              onMouseLeave={e=>e.currentTarget.style.opacity="1"}
+            >passgeni.ai</a>
           </div>
-        </nav>
-
-        {/* Ticker strip */}
-        <div className="ticker-wrap" style={{marginTop:60}} role="marquee" aria-label="Feature highlights">
-          <div className="ticker-track">
-            {doubled.map((item,i)=>(
-              <span key={i} className="ticker-item">{item}</span>
+          <div style={{display:"flex",gap:"clamp(10px,2vw,16px)",alignItems:"center",flexWrap:"wrap"}}>
+            <span style={{fontFamily:"var(--font-body)",fontSize:"clamp(9px,1.5vw,11px)",color:"var(--muted-2)",display:"flex",alignItems:"center",gap:5}}>
+              Made with{" "}
+              <span style={{color:"#ff3b3b",animation:"heartBlink 1.2s ease-in-out infinite",display:"inline-block",fontSize:13}}>♥</span>
+              {" "}for security
+            </span>
+            {[{l:"X",href:"https://x.com/passgeni_ai"},{l:"GH",href:"https://github.com/passgeni"}].map(s=>(
+              <a key={s.l} href={s.href} target="_blank" rel="noopener noreferrer"
+                style={{fontFamily:"var(--font-body)",fontSize:11,fontWeight:600,color:"var(--muted-2)",width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(200,255,0,0.1)",borderRadius:7,transition:"color .15s,border-color .15s"}}
+                aria-label={s.l}
+                onMouseEnter={e=>{e.currentTarget.style.color="var(--accent)";e.currentTarget.style.borderColor="rgba(200,255,0,.3)";}}
+                onMouseLeave={e=>{e.currentTarget.style.color="var(--muted-2)";e.currentTarget.style.borderColor="rgba(200,255,0,.1)";}}
+              >{s.l}</a>
             ))}
           </div>
         </div>
-      </header>
-
-      {/* Mobile drawer */}
-      <nav
-        className={`mobile-nav-drawer${open?" open":""}`}
-        aria-hidden={!open}
-        aria-label="Mobile navigation"
-      >
-        {NAV.links.map(l=>(
-          <a key={l.label} href={l.href} className="mobile-nav-link"
-            onClick={()=>setOpen(false)}
-          >{l.label}</a>
-        ))}
-        <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:12}}>
-          <a href="/auth/signin" className="btn-ghost"
-            style={{justifyContent:"center",fontSize:15,padding:"14px"}}
-            onClick={()=>setOpen(false)}
-          >Sign In</a>
-          <a href={NAV.ctaHref} className="btn-primary"
-            style={{justifyContent:"center",fontSize:15,padding:"14px"}}
-            onClick={()=>setOpen(false)}
-          >Try Free</a>
-        </div>
-      </nav>
-    </>
+      </div>
+    </footer>
   );
 }
