@@ -1,40 +1,55 @@
-// Temporary Gemini API key test endpoint — DELETE after testing
+// Gemini API key test — DELETE after testing
 export default async function handler(req, res) {
   const key = process.env.PassGeni_Gemini_APIKEY;
-  if (!key) return res.status(500).json({ ok: false, error: 'Key not found in env vars' });
+  if (!key) return res.status(500).json({ ok: false, error: 'Key not found in env' });
 
-  const MODEL = 'gemini-2.0-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${key}`;
+  // Step 1: List all available models for this key
+  const listRes = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models?key=${key}`
+  );
+  const listData = await listRes.json();
+  const allModels = listData.models?.map(m => m.name) || [];
+  const flash2Models = allModels.filter(m => m.includes('2.0') || m.includes('flash'));
 
-  let genResult = null;
-  try {
-    const r = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: 'Reply with exactly one word: WORKING' }] }],
-        generationConfig: { maxOutputTokens: 10, temperature: 0 }
-      })
-    });
+  // Step 2: Try gemini-2.0 variants in order
+  const candidates = [
+    'gemini-2.0-flash-001',
+    'gemini-2.0-flash-lite',
+    'gemini-2.0-flash-lite-001',
+    'gemini-2.0-flash-exp',
+    'gemini-2.0-pro-exp',
+    'gemini-1.5-flash',
+  ];
+
+  const tries = {};
+  let workingModel = null;
+  let workingReply = null;
+
+  for (const model of candidates) {
+    const r = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: 'Say only: WORKING' }] }],
+          generationConfig: { maxOutputTokens: 5, temperature: 0 }
+        })
+      }
+    );
     const data = await r.json();
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-    genResult = {
-      httpStatus: r.status,
-      ok: r.ok,
-      reply: reply || null,
-      error: r.ok ? null : (data?.error?.message || JSON.stringify(data?.error)),
-      errorCode: r.ok ? null : data?.error?.code,
-      usageMetadata: data?.usageMetadata || null,
-    };
-  } catch (e) {
-    genResult = { ok: false, error: e.message };
+    tries[model] = { status: r.status, ok: r.ok, reply: reply || data?.error?.message };
+    if (r.ok) { workingModel = model; workingReply = reply; break; }
   }
 
   return res.status(200).json({
-    model: MODEL,
-    keyFound: true,
     keyPrefix: key.slice(0, 10) + '...',
     keyLength: key.length,
-    generation: genResult,
+    availableFlashModels: flash2Models,
+    totalModels: allModels.length,
+    workingModel,
+    workingReply,
+    tries,
   });
       }
