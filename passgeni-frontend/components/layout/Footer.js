@@ -4,7 +4,7 @@ import PassGeniLogo from"./Logo.js";
 const COLS=[
   {h:"Product",links:[{l:"Generator",href:"#generator"},{l:"Tools",href:"/tools"},{l:"Guides",href:"/guides"},{l:"Blog",href:"/blog"},{l:"Changelog",href:"/changelog"}]},
   {h:"Compliance",links:[{l:"HIPAA",href:"/guides/hipaa-password-policy"},{l:"PCI-DSS",href:"/guides/pci-dss-password-rules"},{l:"SOC 2",href:"/guides/soc2-password-standards"},{l:"Post-Quantum",href:"/guides/post-quantum-passwords"},{l:"NIST SP 800-63B",href:"/guides/nist-password-guidelines"}]},
-  {h:"Company",links:[{l:"Pricing",href:"#pricing"},{l:"API",href:"/api"},{l:"Privacy",href:"/privacy"},{l:"Terms",href:"/terms"},{l:"Contact",href:"mailto:hello@passgeni.ai"}]},
+  {h:"Company",links:[{l:"Pricing",href:"#pricing"},{l:"API",href:"/api"},{l:"Privacy",href:"/privacy"},{l:"Terms",href:"/terms"},{l:"Refund Policy",href:"/refund"},{l:"Contact",href:"mailto:hello@passgeni.ai"}]},
 ];
 
 export default function Footer(){

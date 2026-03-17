@@ -22,6 +22,7 @@ const STATIC_PAGES = [
   { url: "/tools/policy-generator",  priority: "0.85", changefreq: "monthly" },
   { url: "/tools/secure-share",      priority: "0.8",  changefreq: "monthly" },
   { url: "/tools/wifi-qr",           priority: "0.8",  changefreq: "monthly" },
+  { url: "/refund",                  priority: "0.5",  changefreq: "monthly" },
 ];
 
 function buildSitemap() {
