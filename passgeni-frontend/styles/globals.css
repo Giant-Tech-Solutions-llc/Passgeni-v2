@@ -190,3 +190,29 @@ input[type="range"]::-moz-range-thumb{width:20px;height:20px;border-radius:50%;b
 .callout strong{color:var(--accent)}
 .callout.warning{background:rgba(255,68,68,.05);border-color:rgba(255,68,68,.2);border-left-color:var(--danger)}
 .callout.warning strong{color:var(--danger)}
+/* ─── BLOG ARTICLE CONTENT ─────────────────────────────────────────── */
+.blog-content{font-family:var(--font-body);line-height:1.9;color:var(--muted)}
+.blog-content section{margin-bottom:56px}
+.blog-content h2{font-family:var(--font-heading);font-weight:800;font-size:clamp(18px,2.2vw,24px);color:var(--text);letter-spacing:-0.02em;margin:0 0 20px;padding-top:32px;border-top:1px solid var(--border)}
+.blog-content section:first-child h2{border-top:none;padding-top:0}
+.blog-content p{font-size:var(--text-base);color:var(--muted);line-height:1.9;margin-bottom:20px}
+.blog-content ul,.blog-content ol{padding:0;margin:0 0 24px;list-style:none;display:flex;flex-direction:column;gap:10px}
+.blog-content li{display:flex;gap:12px;align-items:flex-start;font-size:var(--text-base);color:var(--muted);line-height:1.8}
+.blog-content li::before{content:'◈';color:var(--accent);font-size:10px;flex-shrink:0;margin-top:6px}
+.blog-content a{color:var(--accent);text-decoration:none;border-bottom:1px solid rgba(200,255,0,.25);transition:border-color .15s}
+.blog-content a:hover{border-bottom-color:var(--accent)}
+.blog-content strong{color:var(--text);font-weight:600}
+/* ─── BLOG SIDEBAR ──────────────────────────────────────────────────── */
+.toc-sidebar{position:sticky;top:88px;background:#0a0a0c;border:1px solid #141416;border-radius:12px;padding:20px}
+/* ─── SOCIAL SHARE ──────────────────────────────────────────────────── */
+.social-share{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+/* ─── REACTION WIDGET ───────────────────────────────────────────────── */
+.reaction-widget{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+/* ─── FAQ ACCORDION ─────────────────────────────────────────────────── */
+.blog-faq-item{border-bottom:1px solid var(--border);padding:20px 0;cursor:pointer;user-select:none;-webkit-user-select:none;transition:opacity .15s}
+.blog-faq-item:last-child{border-bottom:none}
+/* ─── CTA ALIAS (used in blog/Layout) ───────────────────────────────── */
+.cta-primary{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#000;font-family:var(--font-body);font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:12px 28px;border-radius:8px;border:none;cursor:pointer;transition:opacity .2s,transform .15s;white-space:nowrap;text-decoration:none}
+.cta-primary:hover{opacity:.88;transform:translateY(-1px)}
+/* ─── PAGINATION NAV FIX ─────────────────────────────────────────────── */
+.pagination-btn.nav{width:auto;padding:0 14px}

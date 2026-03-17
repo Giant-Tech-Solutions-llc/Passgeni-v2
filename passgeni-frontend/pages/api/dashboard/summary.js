@@ -43,11 +43,10 @@ export default async function handler(req, res) {
     const ago30 = new Date(Date.now() - 30 * 86_400_000).toISOString().split("T")[0];
 
     const [
-      { data: customer,     error: e1 },
-      { data: keys,         error: e2 },
-      { data: usageToday,   error: e3 },
-      { data: usageHistory, error: e4 },
-      { data: teamMembers,  error: e5 },
+      { data: customer,    error: e1 },
+      { data: keys,        error: e2 },
+      { data: teamMembers, error: e5 },
+      { data: allKeyIds,   error: ekid },
     ] = await Promise.all([
       db.from("customers").select("*").eq("id", customerId).single(),
 
@@ -57,30 +56,39 @@ export default async function handler(req, res) {
         .eq("is_active", true)
         .order("created_at"),
 
-      // Today's usage across all active keys for this customer
-      db.from("usage_daily")
-        .select("call_count, key_id")
-        .eq("date", today)
-        .in("key_id",
-          db.from("api_keys").select("id").eq("customer_id", customerId)
-        ),
-
-      // 30 days of history
-      db.from("usage_daily")
-        .select("date, call_count")
-        .gte("date", ago30)
-        .in("key_id",
-          db.from("api_keys").select("id").eq("customer_id", customerId)
-        )
-        .order("date"),
-
       db.from("team_members")
         .select("*")
         .eq("customer_id", customerId)
         .order("invited_at"),
+
+      // Fetch key IDs as plain array first (subquery builders not supported in .in())
+      db.from("api_keys").select("id").eq("customer_id", customerId),
     ]);
 
     if (e1) throw e1;
+    if (ekid) throw ekid;
+
+    const keyIdArray = (allKeyIds || []).map((r) => r.id);
+
+    const [
+      { data: usageToday,   error: e3 },
+      { data: usageHistory, error: e4 },
+    ] = await Promise.all([
+      keyIdArray.length
+        ? db.from("usage_daily")
+            .select("call_count, key_id")
+            .eq("date", today)
+            .in("key_id", keyIdArray)
+        : Promise.resolve({ data: [], error: null }),
+
+      keyIdArray.length
+        ? db.from("usage_daily")
+            .select("date, call_count")
+            .gte("date", ago30)
+            .in("key_id", keyIdArray)
+            .order("date")
+        : Promise.resolve({ data: [], error: null }),
+    ]);
 
     const plan  = customer.plan       || "free";
     const limit = plan === "team" ? 5000 : 50;

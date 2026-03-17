@@ -201,6 +201,29 @@ function HighlightKeywords({ text, keywords }) {
   );
 }
 
+/* ─── Inline renderer: supports [text](url) links + keyword highlights ─── */
+function renderInline(text, keywords = []) {
+  const LINK = /\[([^\]]+)\]\(([^)]+)\)/g;
+  const segments = [];
+  let last = 0;
+  let m;
+  while ((m = LINK.exec(text)) !== null) {
+    if (m.index > last) segments.push({ type: 'text', content: text.slice(last, m.index) });
+    segments.push({ type: 'link', label: m[1], href: m[2] });
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) segments.push({ type: 'text', content: text.slice(last) });
+  return segments.map((seg, i) => {
+    if (seg.type === 'link') {
+      const ext = seg.href.startsWith('http');
+      return ext
+        ? <a key={i} href={seg.href} target="_blank" rel="noopener noreferrer">{seg.label}</a>
+        : <Link key={i} href={seg.href}>{seg.label}</Link>;
+    }
+    return <HighlightKeywords key={i} text={seg.content} keywords={keywords} />;
+  });
+}
+
 /* ─── Reaction Widget ─── */
 function ReactionWidget() {
   const [reactions, setReactions] = useState({ helpful: 0, interesting: 0, shared: 0 });
@@ -421,22 +444,19 @@ export default function BlogPost({ post }) {
                 <section key={i} id={`section-${i}`}>
                   <h2>{section.title}</h2>
                   {section.body.split('\n\n').map((para, j) => {
-                    // Bold keywords
                     const keywords = post.keywords || [];
                     if (para.startsWith('- ') || para.startsWith('• ')) {
-                      const items = para.split('\n').map(l => l.replace(/^[-•]\s*/, ''));
+                      const items = para.split('\n').filter(Boolean).map(l => l.replace(/^[-•]\s*/, ''));
                       return (
                         <ul key={j}>
                           {items.map((item, k) => (
-                            <li key={k}><HighlightKeywords text={item} keywords={keywords} /></li>
+                            <li key={k}>{renderInline(item, keywords)}</li>
                           ))}
                         </ul>
                       );
                     }
                     return (
-                      <p key={j}>
-                        <HighlightKeywords text={para} keywords={keywords} />
-                      </p>
+                      <p key={j}>{renderInline(para, keywords)}</p>
                     );
                   })}
                 </section>
