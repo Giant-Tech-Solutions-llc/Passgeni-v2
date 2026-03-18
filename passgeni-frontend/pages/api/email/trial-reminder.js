@@ -5,8 +5,8 @@
 // Called by a cron job (Vercel Cron or external scheduler)
 // to notify customers whose trial ends in exactly 3 days.
 //
-// Also handles Stripe's customer.subscription.trial_will_end
-// webhook event (fires 3 days before trial end by default).
+// Also handles Paddle's subscription.trialing webhook event
+// (fires when trial is active, 3 days before end).
 //
 // Auth: INTERNAL_SECRET header
 // =============================================================
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  // Mode 1: explicit email + days from Stripe webhook forwarding
+  // Mode 1: explicit email + days from Paddle webhook forwarding
   if (req.body?.email && req.body?.daysRemaining) {
     const { email, daysRemaining } = req.body;
     const tmpl = teamTrialReminder(email, daysRemaining);

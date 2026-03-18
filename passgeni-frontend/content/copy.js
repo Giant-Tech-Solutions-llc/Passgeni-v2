@@ -246,7 +246,7 @@ export const PRICING = {
       color:    "#C8FF00",
       featured: true,
       cta:      "Start free trial",
-      ctaHref:  "/auth/signin?callbackUrl=/api/lemonsqueezy/checkout",
+      ctaHref:  "/auth/signin?callbackUrl=/checkout",
       badge:    "Most Popular",
       features: [
         "Everything in Free",

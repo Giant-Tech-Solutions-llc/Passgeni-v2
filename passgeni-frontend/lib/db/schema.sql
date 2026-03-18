@@ -5,7 +5,7 @@
 -- under your project → SQL Editor → New query.
 --
 -- Tables:
---   customers      — one row per paying Lemon Squeezy customer
+--   customers      — one row per paying Paddle customer
 --   api_keys       — keys issued per customer (up to 5)
 --   usage_logs     — one row per API call (for audit + analytics)
 --   usage_daily    — aggregated daily usage per key (fast lookup)
@@ -18,22 +18,22 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ─── CUSTOMERS ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS customers (
-  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  ls_customer_id      TEXT UNIQUE NOT NULL,
-  ls_subscription_id  TEXT,
-  email               TEXT NOT NULL,
-  name                TEXT,
-  plan                TEXT NOT NULL DEFAULT 'free',  -- 'free' | 'team'
-  plan_status         TEXT NOT NULL DEFAULT 'active', -- 'active' | 'trialing' | 'past_due' | 'canceled'
-  trial_end           TIMESTAMPTZ,
-  current_period_end  TIMESTAMPTZ,
-  created_at          TIMESTAMPTZ NOT NULL DEFAULT now(),
-  updated_at          TIMESTAMPTZ NOT NULL DEFAULT now()
+  id                     UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  paddle_customer_id     TEXT UNIQUE,
+  paddle_subscription_id TEXT,
+  email                  TEXT NOT NULL,
+  name                   TEXT,
+  plan                   TEXT NOT NULL DEFAULT 'free',  -- 'free' | 'team'
+  plan_status            TEXT NOT NULL DEFAULT 'active', -- 'active' | 'trialing' | 'past_due' | 'canceled'
+  trial_end              TIMESTAMPTZ,
+  current_period_end     TIMESTAMPTZ,
+  created_at             TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at             TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
--- Index for fast Lemon Squeezy webhook lookups
-CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_ls_id ON customers (ls_customer_id);
-CREATE INDEX IF NOT EXISTS idx_customers_email ON customers (email);
+-- Index for fast Paddle webhook lookups
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_paddle_id ON customers (paddle_customer_id) WHERE paddle_customer_id IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS idx_customers_email ON customers (email);
 
 -- Auto-update updated_at on any row change
 CREATE OR REPLACE FUNCTION update_updated_at()
@@ -105,7 +105,7 @@ CREATE INDEX IF NOT EXISTS idx_usage_logs_key ON usage_logs (key_id, called_at D
 CREATE INDEX IF NOT EXISTS idx_usage_logs_customer ON usage_logs (customer_id, called_at DESC);
 
 -- ─── TEAM MEMBERS ────────────────────────────────────────────
--- Seats under a Team plan. Owner = the Lemon Squeezy customer.
+-- Seats under a Team plan. Owner = the Paddle customer.
 CREATE TABLE IF NOT EXISTS team_members (
   id           UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   customer_id  UUID NOT NULL REFERENCES customers(id) ON DELETE CASCADE,
@@ -121,15 +121,43 @@ CREATE TABLE IF NOT EXISTS team_members (
 CREATE INDEX IF NOT EXISTS idx_team_members_customer ON team_members (customer_id);
 CREATE INDEX IF NOT EXISTS idx_team_members_email ON team_members (email);
 
+-- ─── NEXTAUTH USERS ──────────────────────────────────────────
+-- Lightweight identity table used by the custom Supabase adapter.
+-- Separate from `customers` — a user exists as soon as they sign in once,
+-- whether or not they have a paid customer record.
+CREATE TABLE IF NOT EXISTS nextauth_users (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  email          TEXT UNIQUE NOT NULL,
+  email_verified TIMESTAMPTZ,
+  created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_nextauth_users_email ON nextauth_users (email);
+
+-- ─── VERIFICATION TOKENS ─────────────────────────────────────
+-- Short-lived magic-link tokens created by NextAuth EmailProvider.
+-- Each token is deleted on first use (single-use).
+CREATE TABLE IF NOT EXISTS verification_tokens (
+  identifier TEXT        NOT NULL,
+  token      TEXT        NOT NULL,
+  expires    TIMESTAMPTZ NOT NULL,
+  PRIMARY KEY (identifier, token)
+);
+
+-- Index for fast expiry cleanup (optional cron)
+CREATE INDEX IF NOT EXISTS idx_verification_tokens_expires ON verification_tokens (expires);
+
 -- ─── ROW LEVEL SECURITY ───────────────────────────────────────
 -- Supabase RLS: server-side code uses the service_role key (bypasses RLS).
 -- Client-side code (if any) would be restricted. We're server-only, so this
 -- is a secondary safety layer.
-ALTER TABLE customers    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE api_keys     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE usage_daily  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE usage_logs   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE team_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE customers          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE api_keys           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usage_daily        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usage_logs         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE team_members       ENABLE ROW LEVEL SECURITY;
+ALTER TABLE nextauth_users     ENABLE ROW LEVEL SECURITY;
+ALTER TABLE verification_tokens ENABLE ROW LEVEL SECURITY;
 
 -- Service role (our backend) bypasses RLS — no policies needed for server use.
 -- If you add Supabase Auth in future, add per-user policies here.

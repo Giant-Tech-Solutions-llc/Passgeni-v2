@@ -28,7 +28,7 @@ export default function PrivacyPage() {
         <p style={P}>For the <strong style={{ color: "#fff" }}>free tools</strong> (generator, breach checker, strength checker, secure share, WiFi QR, audit, policy generator): we collect nothing. Zero. Your browser does all the work.</p>
         <p style={P}>For the <strong style={{ color: "#fff" }}>Team API plan</strong>, we collect:</p>
         <ul style={{ paddingLeft: 24, marginBottom: 24 }}>
-          {["Your email address (for account authentication via magic link)", "Billing information processed by Stripe — we never see your card number", "API call counts per day (not the passwords generated, just the count)", "API key hashes (we store only the SHA-256 hash, never the raw key)"].map(item => <li key={item} style={LI}>{item}</li>)}
+          {["Your email address (for account authentication via magic link)", "Billing information processed by Paddle — we never see your card number", "API call counts per day (not the passwords generated, just the count)", "API key hashes (we store only the SHA-256 hash, never the raw key)"].map(item => <li key={item} style={LI}>{item}</li>)}
         </ul>
 
         <h2 style={H2}>Breach checker privacy</h2>

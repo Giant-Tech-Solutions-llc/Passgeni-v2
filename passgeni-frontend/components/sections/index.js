@@ -292,7 +292,7 @@ export function WaitlistSection(){
           <h2 style={{fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(26px,5vw,56px)",color:"var(--text)",letterSpacing:"-.03em",marginBottom:16,lineHeight:1.05,whiteSpace:"pre-line"}}>{WAITLIST.headline}</h2>
           <p style={{fontSize:"clamp(15px,2vw,17px)",color:"var(--muted)",lineHeight:1.75,marginBottom:"clamp(28px,4vw,40px)"}}>{WAITLIST.body}</p>
           <div style={{display:"flex",gap:"clamp(10px,2vw,14px)",flexWrap:"wrap",alignItems:"center",justifyContent:"center",marginBottom:"clamp(20px,3vw,28px)"}}>
-            <a href="/auth/signin?callbackUrl=/api/lemonsqueezy/checkout" className="btn-primary" style={{fontSize:"clamp(13px,2vw,16px)",padding:"clamp(14px,2vw,17px) clamp(24px,4vw,36px)"}}>{WAITLIST.ctaButton}</a>
+            <a href="/auth/signin?callbackUrl=/checkout" className="btn-primary" style={{fontSize:"clamp(13px,2vw,16px)",padding:"clamp(14px,2vw,17px) clamp(24px,4vw,36px)"}}>{WAITLIST.ctaButton}</a>
             <a href="/api-docs" className="btn-ghost">View API docs →</a>
           </div>
           <div style={{display:"flex",gap:"clamp(12px,3vw,24px)",flexWrap:"wrap",justifyContent:"center"}}>

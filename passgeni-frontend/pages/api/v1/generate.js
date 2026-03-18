@@ -190,9 +190,7 @@ export default async function handler(req, res) {
           const wasBelow100 = ((usedToday)    / TEAM_LIMIT) * 100 < 100;
           const shouldAlert = (pct >= 80 && wasBelow80) || (pct >= 100 && wasBelow100);
           if (shouldAlert) {
-            const customer = await import("../../../lib/db/client.js")
-              .then(({ findCustomerByStripeId }) => null) // we already have customerId
-              .catch(() => null);
+            // customerId already in scope from key validation above
             // Minimal: just fire internal alert endpoint (handles dedup)
             const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://passgeni.ai";
             fetch(`${baseUrl}/api/usage/alert`, {
