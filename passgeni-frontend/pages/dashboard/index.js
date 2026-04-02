@@ -375,12 +375,12 @@ export default function DashboardPage() {
   }, [status, fetchData]);
 
   const openBillingPortal = async () => {
-    if (!data?.lsCustomerId) return;
+    if (!data?.paddleCustomerId) return;
     setBillingLoading(true);
     try {
-      const res  = await fetch("/api/lemonsqueezy/portal", {
+      const res  = await fetch("/api/paddle/portal", {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body:   JSON.stringify({ customerId: data.lsCustomerId }),
+        body:   JSON.stringify({ customerId: data.paddleCustomerId }),
       });
       const json = await res.json();
       if (json.url) window.location.href = json.url;
@@ -426,8 +426,8 @@ export default function DashboardPage() {
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
             <a href="/api" className="btn-ghost" style={{ fontSize: 13, padding: "10px 18px" }}>API Docs</a>
-            <button onClick={openBillingPortal} disabled={billingLoading || !data.lsCustomerId} className="btn-ghost"
-              style={{ fontSize: 13, padding: "10px 18px", cursor: "pointer", opacity: !data.lsCustomerId ? 0.4 : 1 }}>
+            <button onClick={openBillingPortal} disabled={billingLoading || !data.paddleCustomerId} className="btn-ghost"
+              style={{ fontSize: 13, padding: "10px 18px", cursor: "pointer", opacity: !data.paddleCustomerId ? 0.4 : 1 }}>
               {billingLoading ? "Loading…" : "Billing →"}
             </button>
             <button onClick={() => signOut({ callbackUrl: "/" })}

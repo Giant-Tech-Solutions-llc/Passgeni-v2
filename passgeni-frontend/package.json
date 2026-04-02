@@ -18,8 +18,7 @@
     "qrcode": "^1.5.3",
     "react": "^18",
     "react-dom": "^18",
-    "resend": "^3.2.0",
-    "@lemonsqueezy/lemonsqueezy.js": "^3.3.1"
+    "resend": "^3.2.0"
   },
   "devDependencies": {
     "eslint": "^8",

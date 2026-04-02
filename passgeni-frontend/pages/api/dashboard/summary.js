@@ -125,7 +125,7 @@ export default async function handler(req, res) {
       periodEnd:        customer.current_period_end,
       email:            customer.email,
       name:             customer.name,
-      lsCustomerId:     customer.ls_customer_id,
+      paddleCustomerId: customer.paddle_customer_id,
       keys:             keys        || [],
       usageToday:       todayTotal,
       usageLimit:       limit,

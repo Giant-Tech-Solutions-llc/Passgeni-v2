@@ -1,3 +1,5 @@
 passgeni-frontend/.env
 passgeni-frontend/.env.local
 passgeni-frontend/.env.production
+
+.vercel

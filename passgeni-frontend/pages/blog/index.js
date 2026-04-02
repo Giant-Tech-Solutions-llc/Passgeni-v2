@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import Layout from '../../components/Layout';
+import BlogHeroSVG from '../../components/BlogHeroSVG';
 import { BLOG_POSTS } from '../../data/blogPosts';  // centralised data
 
 const POSTS_PER_PAGE = 9;
@@ -37,18 +38,11 @@ function BlogCard({ post, featured = false }) {
     <Link href={`/blog/${post.slug}`} className="blog-card" style={featured ? { gridColumn: 'span 2' } : {}}>
       {/* Hero image */}
       <div style={{ position: 'relative', overflow: 'hidden', aspectRatio: featured ? '21/9' : '16/9', background: '#0c0c0e' }}>
-        <img
-          src={post.heroImage || `https://images.unsplash.com/photo-${post.unsplashId}?auto=format&fit=crop&w=800&q=60`}
-          alt={post.title}
-          className="blog-card-image"
-          loading="lazy"
-          style={{ transition: 'transform 0.4s ease' }}
-          onMouseEnter={e => e.target.style.transform = 'scale(1.04)'}
-          onMouseLeave={e => e.target.style.transform = 'scale(1)'}
-        />
+        <BlogHeroSVG category={post.category} slug={post.slug} title={post.title}
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} />
         <div style={{
           position: 'absolute', inset: 0,
-          background: 'linear-gradient(to top, #060608aa 0%, transparent 50%)',
+          background: 'linear-gradient(to top, #060608cc 0%, transparent 60%)',
           pointerEvents: 'none',
         }} />
       </div>

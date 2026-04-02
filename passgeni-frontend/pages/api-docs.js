@@ -241,7 +241,7 @@ export default function APIDocsPage() {
   const startCheckout = async () => {
     setCheckoutLoading(true);
     try {
-      const res  = await fetch("/api/lemonsqueezy/checkout", {
+      const res  = await fetch("/api/paddle/checkout", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({}),

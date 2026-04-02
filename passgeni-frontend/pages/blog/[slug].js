@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import Head from 'next/head';
 import Layout from '../../components/Layout';
+import BlogHeroSVG from '../../components/BlogHeroSVG';
 import { BLOG_POSTS } from '../../data/blogPosts';
 
 /* ─── Reading Progress Bar ─── */
@@ -294,12 +295,9 @@ function RelatedPosts({ currentSlug, category }) {
               onMouseEnter={e => { e.currentTarget.style.borderColor = '#C8FF0033'; e.currentTarget.style.transform = 'translateY(-2px)'; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = '#141416'; e.currentTarget.style.transform = 'none'; }}
             >
-              <img
-                src={post.heroImage || `https://images.unsplash.com/photo-${post.unsplashId}?auto=format&fit=crop&w=400&q=50`}
-                alt={post.title}
-                style={{ width: '100%', aspectRatio: '16/9', objectFit: 'cover', display: 'block' }}
-                loading="lazy"
-              />
+              <div style={{ width: '100%', aspectRatio: '16/9', overflow: 'hidden', background: '#060608' }}>
+                <BlogHeroSVG category={post.category} slug={post.slug} title={post.title} />
+              </div>
               <div style={{ padding: '16px 18px' }}>
                 <p style={{ fontFamily: 'var(--font-heading)', fontWeight: 700, fontSize: 14, color: '#fff', lineHeight: 1.35, marginBottom: 8 }}>
                   {post.title}
@@ -376,25 +374,16 @@ export default function BlogPost({ post }) {
       <ReadingProgressBar />
 
       {/* ── HERO IMAGE ── */}
-      <div style={{ width: '100%', maxHeight: 480, overflow: 'hidden', background: '#0a0a0c', position: 'relative' }}>
-        <img
-          src={post.heroImage || `https://images.unsplash.com/photo-${post.unsplashId}?auto=format&fit=crop&w=1400&q=70`}
-          alt={post.title}
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', maxHeight: 480 }}
-          priority="true"
-        />
-        <div style={{
-          position: 'absolute', inset: 0,
-          background: 'linear-gradient(to bottom, transparent 40%, #060608 100%)',
-        }} />
+      <div className="blog-post-hero">
+        <BlogHeroSVG category={post.category} slug={post.slug} title={post.title} />
       </div>
 
       {/* ── CONTENT WRAPPER ── */}
-      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(20px,5vw,60px)' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '0 clamp(16px,4vw,60px)' }}>
 
         {/* Breadcrumb */}
-        <nav aria-label="Breadcrumb" style={{ padding: '24px 0 0', marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 10, color: '#555', letterSpacing: '0.08em' }}>
+        <nav aria-label="Breadcrumb" style={{ padding: '20px 0 0', marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontFamily: 'var(--font-mono)', fontSize: 10, color: '#555', letterSpacing: '0.08em', flexWrap: 'wrap' }}>
             <Link href="/" style={{ color: '#555', textDecoration: 'none' }}>PassGeni</Link>
             <span>→</span>
             <Link href="/blog" style={{ color: '#555', textDecoration: 'none' }}>Blog</Link>
@@ -403,7 +392,7 @@ export default function BlogPost({ post }) {
           </div>
         </nav>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 220px', gap: 60, alignItems: 'start' }}>
+        <div className="blog-post-layout">
 
           {/* ── MAIN CONTENT ── */}
           <article>
@@ -509,7 +498,7 @@ export default function BlogPost({ post }) {
           </article>
 
           {/* ── SIDEBAR ── */}
-          <aside style={{ paddingTop: 8 }}>
+          <aside className="blog-post-sidebar" style={{ paddingTop: 8 }}>
             <TableOfContents headings={headings} />
 
             {/* PassGeni CTA card */}

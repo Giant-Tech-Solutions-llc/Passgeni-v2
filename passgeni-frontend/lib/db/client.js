@@ -49,18 +49,18 @@ export function getDB() {
 // All throw on unexpected DB errors.
 
 /**
- * Find a customer by Lemon Squeezy customer ID.
- * @param {string} lsCustomerId
+ * Find a customer by Paddle customer ID.
+ * @param {string} paddleCustomerId
  * @returns {Promise<Object|null>}
  */
-export async function findCustomerByLSId(lsCustomerId) {
+export async function findCustomerByPaddleId(paddleCustomerId) {
   const db = getDB();
   const { data, error } = await db
     .from("customers")
     .select("*")
-    .eq("ls_customer_id", lsCustomerId)
+    .eq("paddle_customer_id", paddleCustomerId)
     .single();
-  if (error && error.code !== "PGRST116") throw error; // PGRST116 = not found
+  if (error && error.code !== "PGRST116") throw error;
   return data || null;
 }
 
@@ -81,18 +81,34 @@ export async function findCustomerByEmail(email) {
 }
 
 /**
- * Upsert a customer record.
- * Used by the Lemon Squeezy webhook when a subscription is created/updated.
+ * Upsert a customer by email (used when provisioning a new subscription).
+ * Creates a new customer or updates an existing one with the same email.
  */
-export async function upsertCustomer(fields) {
+export async function upsertCustomerByEmail(fields) {
   const db = getDB();
   const { data, error } = await db
     .from("customers")
-    .upsert(fields, { onConflict: "ls_customer_id" })
+    .upsert(fields, { onConflict: "email" })
     .select()
     .single();
   if (error) throw error;
   return data;
+}
+
+/**
+ * Update an existing customer record by Paddle customer ID.
+ * Used for subscription.updated / subscription.canceled / payment_failed.
+ */
+export async function updateCustomerByPaddleId(paddleCustomerId, fields) {
+  const db = getDB();
+  const { data, error } = await db
+    .from("customers")
+    .update(fields)
+    .eq("paddle_customer_id", paddleCustomerId)
+    .select()
+    .single();
+  if (error && error.code !== "PGRST116") throw error;
+  return data || null;
 }
 
 /**
@@ -229,13 +245,21 @@ export async function logApiCall({ keyId, customerId, params, responseMs, status
 export async function getUsageHistory(customerId, days = 7) {
   const db  = getDB();
   const ago = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().split("T")[0];
+
+  const { data: keyRows, error: keyErr } = await db
+    .from("api_keys")
+    .select("id")
+    .eq("customer_id", customerId);
+  if (keyErr) throw keyErr;
+
+  const keyIds = (keyRows || []).map((r) => r.id);
+  if (!keyIds.length) return [];
+
   const { data, error } = await db
     .from("usage_daily")
     .select("date, call_count, key_id, api_keys(key_prefix, label)")
     .gte("date", ago)
-    .in("key_id",
-      db.from("api_keys").select("id").eq("customer_id", customerId)
-    )
+    .in("key_id", keyIds)
     .order("date", { ascending: true });
   if (error) throw error;
   return data || [];
