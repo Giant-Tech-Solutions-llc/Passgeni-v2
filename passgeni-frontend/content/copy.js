@@ -389,6 +389,18 @@ export const FAQ = {
       question: "How does the Breach Checker work without storing my password?",
       answer:   "PassGeni uses k-anonymity via the HaveIBeenPwned API. Your password is hashed using SHA-1 client-side. Only the first 5 characters of that hash are sent to the API — never the full password. The API returns all hashes that match those 5 characters, and PassGeni checks locally if yours is among them. Your actual password never leaves your device.",
     },
+    {
+      question: "Can I use PassGeni on my phone?",
+      answer:   "Yes. PassGeni is fully responsive and works in any modern mobile browser. No app download required. Open passgeni.ai and start generating.",
+    },
+    {
+      question: "What happens if I forget my password?",
+      answer:   "PassGeni does not store your passwords — which means we cannot recover them. That is by design. We recommend storing the passwords PassGeni generates in a password manager like Bitwarden or 1Password.",
+    },
+    {
+      question: "Is PassGeni really free? What is the catch?",
+      answer:   "Genuinely free — 15 passwords per day, no account required, no ads, no tracking. We make money from Pro ($9/month) and Team ($29/month) plans for users who need higher limits, compliance presets, and API access. No catch.",
+    },
   ],
 };
 
