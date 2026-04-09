@@ -230,255 +230,392 @@ PADDLE_PRODUCT_TEAM_ANNUAL=
 
 ## PLANNED CHANGES FOR CLAUDE CODE
 
-> Implement these in order. One change per commit. Read the target file in full before touching it. Do not implement anything not on this list without explicit approval from the owner.
+> Implement in order. One change per commit. Read the target file in full before touching it. Do not implement anything not on this list without explicit owner approval.
 
 ---
 
-### PHASE 1 — BUG FIXES (do these first, nothing else)
-
-#### Fix 1.1 — Sections below the fold are rendering as a black void
-**What is broken:** Everything below the hero section on `passgeni.ai` is completely black — the generator, how it works, features, tools, testimonials, pricing, FAQ, waitlist sections are all invisible.
-**File to read first:** `components/sections/index.js`, `pages/index.js`, `styles/globals.css`
-**How to diagnose:** Open browser DevTools on passgeni.ai and look for JS errors in the console. Check if section elements exist in the DOM but have zero height, or if they are throwing a render error.
-**Fix:** Identify the root cause (likely a CSS variable not defined, a component import error, or a missing export) and fix it without changing any visual design.
-
-#### Fix 1.2 — `/pricing` page returns error
-**What is broken:** `passgeni.ai/pricing` shows "This page isn't working".
-**File to read first:** `pages/pricing.js` if it exists. If it does not exist, the fix is simply that the page is missing.
-**Fix:** Either create a minimal `pages/pricing.js` that renders the existing `<PricingSection />` component, or fix the existing file if it has a syntax/import error.
+### PHASE 1 — NEW FEATURES
 
 ---
 
-### PHASE 2 — UX FIXES (after Phase 1 is confirmed working)
+#### Feature 1.1 — Post-Quantum: 1 free use per day with upgrade popup
 
-#### Fix 2.1 — Hero: remove duplicate blinking dot
-**File:** `components/sections/Hero.js`
-**What is wrong:** There are two blinking dots in the hero — one in the badge pill at the top and one added below it. Only one is allowed.
-**Fix:** Keep the blinking dot in the badge pill ("FREE FOREVER · NO ACCOUNT · NO TRACKING"). Remove any other blinking dot added anywhere else in the hero. One dot total.
+**Files to read first:** `components/generator/GeneratorWidget.js`, `components/generator/ComplianceBar.js`
 
-#### Fix 2.2 — Hero: subheadline → 3 inline trust points
-**File:** `components/sections/Hero.js`
-**What is wrong:** The current subheadline is a paragraph of text displayed in 3 centred lines. This does not communicate value quickly enough.
-**Replace the paragraph with** 3 trust points displayed as a single horizontal row (not stacked vertically, not pill capsules — just inline with a separator):
-- 🔒 Built around your profession
-- ⚡ Never touches a server
-- 🆓 Free — no account needed
-Each emoji is `color: #C8FF00`. The text is `color: #888`. Separator between items is `·` in `color: #333`. All on one line. Wraps to multiple lines on mobile only.
-
-#### Fix 2.3 — Hero: remove "View pricing" secondary CTA
-**File:** `components/sections/Hero.js`
-**Fix:** Remove the "View pricing" ghost button. Keep only the primary "GENERATE MY PASSWORD ↓" button. Nothing else.
-
-#### Fix 2.4 — Generator: remove company logos strip
-**File:** `components/sections/GeneratorSection.js`
-**Fix:** Remove the `<LogosStrip />` import and usage. Do not replace it with anything.
-
-#### Fix 2.5 — Generator: remove stats bar
-**File:** `components/sections/GeneratorSection.js` or `pages/index.js`
-**Fix:** Remove any "X passwords generated this week" or similar stats counter. Do not replace it with anything.
-
-#### Fix 2.6 — Navigation: update links to match current pages
-**File:** `components/layout/Header.js` and `content/copy.js` (NAV export)
-**Current nav:** Features, Tools, Guides, Pricing, API, Blog
-**Required nav:** Generator, Tools, Guides, Pricing, Blog
-Remove "Features" (no dedicated features page) and "API" (not a primary nav item). "Generator" links to `/#generator`. Keep Sign In and TRY FREE buttons.
-
----
-
-### PHASE 3 — NEW FEATURES (after Phase 2 is confirmed working)
-
-#### Feature 3.1 — Post-Quantum: enforce 1 free use per day
-**Files:** `components/generator/GeneratorWidget.js`, `components/generator/ComplianceBar.js`
 **Behaviour:**
-- Free users get exactly 1 Post-Quantum generation per day
-- After the 1st use: the Post-Quantum toggle/button shows a lock icon 🔒 and is disabled
-- small popup message appears: "You've used your free Post-Quantum password today. Try aftr 24hrs, or upgarde to Pro (use Bold hyperlink and connect with pro package)"
-- Two "instant" unlock options shown as small text links:
-  - "Share on X for +15 passwords →" — opens `https://twitter.com/intent/tweet?text=...`
-  - "Share on LinkedIn for +15 passwords →" — opens LinkedIn share URL
-- Clicking either link: opens share URL in new tab AND unlocks +15 passwords stored in `localStorage` with a 24h timestamp
-- Limit resets at midnight — check `localStorage` timestamp on each render
-- Pro and Team users: no limit, no lock, no message
-- `localStorage` key: `pq_used_date` (store date as ISO string `YYYY-MM-DD`)
 
-#### Feature 3.2 — Testimonials: 3 featured static cards on homepage
-**File:** `components/sections/index.js` (TestimonialsSection) and `components/sections/Testimonials.js`
-**Replace** the current scrolling marquee on the homepage with 3 static featured cards in a 2-column layout: 2 cards on the first row, 1 card centred on the second row.
-**The 3 cards (exact text from copy.js TESTIMONIALS.items):**
-1. James K. — IT Security Manager — "ISO 27001 preset in PassGeni saved my team..."
-2. Pia R. — Dentist, private practice — "I generate all my practice management software..."
-3. Mei L. — Nurse practitioner — "Passgeni's HIPAA preset gave me exactly the right password..."
-Each card: dark background `#0a0a0c`, border `1px solid #1e1e1e`, rounded 12px, padding 24px. Stars in `#C8FF00`. Name bold white. Role muted grey. Quote in `#aaa`.
+Free users get exactly 1 Post-Quantum generation per day. After the 1st use, the Post-Quantum button shows a 🔒 lock icon, is disabled, and a small popup appears anchored below it.
 
-#### Feature 3.3 — FAQ: add 3 new questions
-**File:** `content/copy.js` (FAQ.items array)
-**Add** these 3 to the end of the existing 8 items. Do not remove any existing items:
-1. Q: "Can I use PassGeni on my phone?" A: "Yes. PassGeni is fully responsive and works in any mobile browser. No app download required."
-2. Q: "What happens if I forget my password?" A: "PassGeni does not store your passwords — which means we cannot recover them. Use a password manager like Bitwarden or 1Password to store the passwords PassGeni generates."
-3. Q: "Is PassGeni really free? What is the catch?" A: "The free tier is genuinely free — 15 passwords per day, no account required, no ads, no tracking. We make money from Pro ($9/month) and Team ($29/month) plans."
+**Popup design:**
 
-#### Feature 3.4 — Pricing: dedicated /pricing page
-**Create:** `pages/pricing.js`
-**Also edit:** `pages/index.js` — remove `<PricingSection />` import and usage, replace with a 2-line pricing teaser:
+Small card, `background: #0a0a0c`, `border: 1px solid #1e1e1e`, `border-radius: 10px`, `padding: 16px 18px`, `max-width: 280px`. Appears with a subtle fade-in.
+
+**Popup copy (do not change the tone or structure):**
+
 ```
-Simple, honest pricing. Free forever · Pro from $9/month · Team from $29/month
-[See full pricing →]  links to /pricing
+⚛️  That's your Post-Quantum password for today.
+
+Come back tomorrow, or unlock it right now.
+
+[Upgrade to Pro →]
+─────────────────────────────
+Or keep it free — share PassGeni:
+[𝕏 Share on X  +15 passwords]   [in Share on LinkedIn  +15 passwords]
 ```
-**The /pricing page must include:**
-- Monthly / Annual billing toggle (animated, pill style)
-- 4 plan cards: Free, Pro, Team (featured/highlighted), Enterprise
-- Full feature comparison table (rows = features, columns = Free / Pro / Team)
-- 8 pricing FAQ questions (can I cancel, is trial really free, what payment methods, etc.)
-- Bottom CTA: "Start free — no card needed" + "Start Team Trial"
-**Paddle price IDs** are already set as Vercel env vars — use them in checkout links:
+
+- "Upgrade to Pro →" — `font-weight: 700`, `color: #C8FF00`, links to `/pricing#pro`, no button styling — just a bold hyperlink
+- "Share on X" and "Share on LinkedIn" — small pill buttons, `background: rgba(200,255,0,0.06)`, `border: 1px solid rgba(200,255,0,0.15)`, `color: #C8FF00`, `font-size: 12px`, `border-radius: 100px`, `padding: 6px 14px`
+- The separator line and "Or keep it free" text — `color: #333`, `font-size: 11px`
+
+**Gemini-generated share copy (unique every click):**
+
+Before opening any share URL, call `POST /api/generate-share-copy` with `{ platform: "twitter" | "linkedin" }`. This API route calls Gemini and returns a unique post copy. Then open the share URL with that copy encoded.
+
+Create `pages/api/generate-share-copy.js`:
+- Calls `lib/gemini.js` with a prompt
+- Returns `{ copy: "..." }`
+
+**Gemini prompt for Twitter/X:**
+```
+Write a single casual Twitter/X post about using PassGeni (passgeni.ai) to generate a Post-Quantum password.
+Rules:
+- Sound like a real person, not a brand — conversational, genuine, slightly surprised or impressed
+- Mention @PassGeniAI naturally somewhere
+- Max 220 characters
+- Max 2 hashtags (only use #CyberSecurity or #PasswordSecurity if they fit naturally — do not force them)
+- Vary the angle every time: could be technical credibility, NIST mention, "didn't know this existed", daily use, compliance, etc.
+- Do not use exclamation marks more than once
+- Do not start with "Just"
+Output only the post text, nothing else.
+```
+
+**Gemini prompt for LinkedIn:**
+```
+Write a short LinkedIn post about using PassGeni (passgeni.ai) to generate a Post-Quantum password.
+Rules:
+- 3 short paragraphs max
+- First line must stop the scroll — a sharp observation or specific insight, not a generic hook
+- Professional but human — no corporate jargon, no "excited to share"
+- Mention one specific angle: compliance, DevOps, healthcare, finance, or general security
+- End with a genuine question or observation that invites a response
+- Include passgeni.ai as a plain URL in the last paragraph
+- Vary the profession angle and opening every time
+Output only the post text, nothing else.
+```
+
+Twitter share URL: `https://twitter.com/intent/tweet?text=ENCODED_COPY`
+LinkedIn share URL: `https://www.linkedin.com/sharing/share-offsite/?url=https%3A%2F%2Fpassgeni.ai`
+
+On click: open URL in new tab, then immediately unlock +15 passwords for 24h.
+
+**localStorage keys:**
+- `pq_used_date` — `YYYY-MM-DD` of the day the free use was consumed
+- `pq_unlocked_until` — UTC timestamp (ms) when the share-unlock expires
+
+**Reset logic:** On each render compare `pq_used_date` to today. If different day, clear both keys. Compare `Date.now()` to `pq_unlocked_until` — if expired, restore the lock.
+
+**Pro and Team users:** No limit, no lock, no popup.
+
+---
+
+#### Feature 1.2 — Pricing: dedicated `/pricing` page
+
+**File to create:** `pages/pricing.js`
+
+**Do NOT add any pricing section or pricing teaser anywhere on the homepage.**
+
+**The `/pricing` page must contain:**
+
+**1. Billing toggle** — pill switcher Monthly / Annual. Annual saves 17% on Pro, 28% on Team. State in `useState`. CSS transition on the active pill background.
+
+**2. 4 plan cards:**
+
+| Plan | Monthly | Annual | Trial |
+|---|---|---|---|
+| Free | $0 | $0 | None |
+| Pro | $9 | $89/yr | None |
+| Team ⭐ Most Popular | $29 | $249/yr | 14 days free — no card |
+| Enterprise | Custom | Custom | None |
+
+Free: 15 passwords/day, all profession seeds (5/day limit), passphrase mode, basic strength meter, DNA Score 1/day, Post-Quantum 1/day, zero data retention, Secure Password Sharing only.
+
+Pro adds: 150/day, all seeds + custom AI, unlimited DNA Score, password history (last 20), bulk 25, Breach Checker, Strength Checker, unlimited Secure Sharing.
+
+Team adds: unlimited generation, all 8 seeds + custom vocabulary, all compliance presets (HIPAA · PCI-DSS · SOC 2 · ISO 27001 · NIST · DoD · Post-Quantum), bulk 500, REST API 5,000/day, CSV export, 5 seats, all 6 tools, rotation reminders, priority support.
+
+Enterprise: everything in Team + unlimited API, unlimited seats, SSO/SAML, on-prem, dedicated Slack, custom SLA, Paddle invoice.
+
+**3. Paddle checkout links (env vars):**
 ```
 PADDLE_PRODUCT_PRO_MONTHLY   → pri_01kneap9by4pxq4s8x0hymq70g
 PADDLE_PRODUCT_PRO_ANNUAL    → pri_01kneb3qqefd5gxkbcsya31j6g
 PADDLE_PRODUCT_TEAM_MONTHLY  → pri_01kneb9db50m6aac1fnm2qz03r
 PADDLE_PRODUCT_TEAM_ANNUAL   → pri_01knebcwb2bpwp8aya2gbj8anm
 ```
+Link format: `/auth/signin?callbackUrl=/checkout?plan=pro&billing=monthly`
 
-#### Feature 3.5 — Waitlist: replace with CTA section
+**4. Full feature comparison table** — rows = features, columns = Free / Pro / Team. ✓ in `#C8FF00` for included, — for not included.
+
+**5. 8 FAQ accordion items:**
+- Can I cancel anytime?
+- Is the 14-day Team trial really free?
+- What payment methods do you accept?
+- Can I upgrade from Pro to Team later?
+- Is there an annual discount?
+- Do you store passwords on the server?
+- What compliance presets does Team include?
+- What is the Password DNA Score?
+
+**6. Bottom CTA** — "Generate Now — Free →" → `/#generator`. "Start Team Trial" → `/auth/signin?callbackUrl=/checkout?plan=team`.
+
+---
+
+#### Feature 1.3 — Homepage: replace Waitlist section with 2-card CTA section
+
 **File:** `components/sections/index.js` (WaitlistSection) and `pages/index.js`
-**Replace** the Waitlist section with a 2-card CTA section:
-- Card 1 — Weekly Security Digest: email input + "Subscribe →" button. On submit POST to `/api/waitlist` with `{ email, type: "digest" }`. Show success state.
-- Card 2 — Free Compliance Cheat Sheet PDF: button "Download free PDF →" that opens `/downloads/passgeni-hipaa-pcidss-cheatsheet.pdf` in a new tab. No email required.
-Below both cards: pricing teaser text + "See full pricing →" link to /pricing.
-**The PDF file** must be created at `public/downloads/passgeni-hipaa-pcidss-cheatsheet.pdf`. Content: one-page HIPAA + PCI-DSS password requirements reference card. PassGeni logo top-left. Brand colors. Two columns — HIPAA left, PCI-DSS right. Each column: a table of requirements with the PassGeni setting that satisfies them. Footer: passgeni.ai URL.
 
-#### Feature 3.6 — Navigation: mega menu for Tools and Guides
-**File:** `components/layout/Header.js`
-**Tools mega menu** (opens on hover, 4 columns):
-- Security: Breach Checker, Secure Password Sharing
-- Analysis: Password Strength Checker, Password Audit Tool (🏢 Team)
-- Business: Password Policy Generator (🏢 Team)
-- Utility: WiFi QR Generator (🏢 Team)
-**Guides mega menu** (3 columns):
-- Compliance: HIPAA, PCI-DSS v4.0, SOC 2, ISO 27001, NIST 800-63B, DoD
-- By Profession: Healthcare, Developers, Finance & Legal, Educators
-- Fundamentals: Password Entropy, Passphrase vs Password, Zero-Knowledge, Post-Quantum
-**Behaviour:** Opens on `mouseenter`, closes 200ms after `mouseleave` (so user can move cursor into the dropdown without it closing). Closes on `Escape` key. On mobile: mega menus become accordion items inside the hamburger drawer, not hover dropdowns.
+Replace the Waitlist section with two side-by-side cards. No pricing content in this section.
+
+**Card 1 — Weekly Security Digest**
+- Eyebrow label: `STAY SHARP` — `color: #C8FF00`, `font-size: 10px`, `letter-spacing: 0.14em`
+- Heading: "One security insight. Every week."
+- Body: "Breach alerts, compliance shifts, and one thing you can act on. That's it. No noise."
+- Email input + "Subscribe →" button
+- On submit: `POST /api/waitlist` with `{ email, type: "digest" }`
+- Success state: ✓ icon + "You're in. See you next week." in `#C8FF00`
+- Below form: "No spam. No selling your email. Unsubscribe in one click." — `color: #444`, `font-size: 11px`, PassGeni font stack
+
+**Card 2 — Free Compliance Cheat Sheet PDF**
+- Eyebrow label: `FREE DOWNLOAD` — same style as above
+- Heading: "HIPAA + PCI-DSS in two minutes."
+- Body: "The exact password requirements for both standards on one page. Used by compliance teams as a desk reference during audits."
+- Button: "Download free PDF →" — opens `/downloads/passgeni-hipaa-pcidss-cheatsheet.pdf` in new tab. No email, no signup.
+- Below button: "Instant download. No signup. No email." — same small style
+
+**PDF file** must be placed at `public/downloads/passgeni-hipaa-pcidss-cheatsheet.pdf`
+
+**PDF contents and design:**
+- Dark background `#060608`
+- PassGeni logo top-left in full colour
+- PassGeni wordmark watermark centred behind content at `opacity: 0.04` (low opacity, brand only)
+- Title: "HIPAA + PCI-DSS Password Requirements" — Outfit 800, white
+- Subtitle: "Quick reference for compliance teams · passgeni.ai" — `#888`
+- Two columns (HIPAA left, PCI-DSS right), separated by a `#1a1a1a` vertical rule
+- Each column: table with 3 cols — Requirement / Rule / PassGeni Setting
+- HIPAA rows: Min length (12 chars / Slider → 12+), Complexity (Upper+lower+num+symbol / All ON), History (Last 6 / History panel), Max age (90 days / Rotation reminder), No dictionary words (Enforced / AI seeding auto)
+- PCI-DSS v4.0 rows: Min length (12 chars / Slider → 12+), Complexity (Upper+lower+num+symbol / All ON), History (Last 4 / History panel), Max age (90 days / Rotation reminder), No dictionary words (Enforced / AI seeding auto)
+- Each column footer note: "PassGeni [HIPAA/PCI-DSS] preset auto-configures all of the above." in `#C8FF00`, 10px
+- Bottom strip: `background: #0a0a0c`, "Generated with passgeni.ai · Free compliance tools for security teams" — centred, `#555`, 10px
 
 ---
 
-### PHASE 4 — ANIMATIONS & PREMIUM FEEL
+#### Feature 1.4 — Navigation: mega menu for Tools and Guides
 
-> Install `framer-motion` before starting this phase: `npm install framer-motion`
-> Use `motion` components from framer-motion. Do not use CSS `animation` or `transition` for anything in this phase — use framer-motion only.
-> All animations must respect `prefers-reduced-motion`. Wrap all motion components with `AnimatePresence` where needed.
+**File:** `components/layout/Header.js`
 
-#### Animation 4.1 — Page load: staggered hero entrance
+Add hover mega menus to "Tools" and "Guides" nav items only.
+
+**Tools mega menu — 4 columns:**
+
+| Security | Analysis | Business | Utility |
+|---|---|---|---|
+| Breach Checker | Password Strength Checker | Password Policy Generator 🏢 | WiFi QR Generator 🏢 |
+| Secure Password Sharing | Password Audit Tool 🏢 | | |
+
+Each item: label white 13px bold, description `#555` 11px. Hover: `background: rgba(200,255,0,0.05)`, `border-radius: 8px`. 🏢 badge: `background: rgba(255,255,255,0.06)`, `color: #666`, `font-size: 9px`, `border-radius: 100px`, `padding: 2px 7px`.
+
+Footer: "New to PassGeni? Start with the generator →" → `/#generator`.
+
+**Guides mega menu — 3 columns:**
+
+| Compliance | By Profession | Fundamentals |
+|---|---|---|
+| HIPAA Password Requirements | Doctors & Healthcare | What is Password Entropy |
+| PCI-DSS v4.0 Guide | Developers & DevOps | Passphrase vs Password |
+| SOC 2 Requirements | Finance & Legal | Zero-Knowledge Security |
+| ISO 27001 Controls | Educators & HR | Post-Quantum Passwords |
+| NIST 800-63B Plain English | | |
+| DoD / Gov Requirements | | |
+
+Footer: "Browse all guides →" → `/guides`.
+
+**Dropdown style:** `background: rgba(8,8,10,0.98)`, `border: 1px solid rgba(200,255,0,0.1)`, `border-radius: 12px`, `backdrop-filter: blur(20px)`, `box-shadow: 0 24px 64px rgba(0,0,0,0.6)`.
+
+**Interaction:** Opens on `mouseenter`. Stays open when cursor moves into dropdown. Closes 200ms after `mouseleave` of entire dropdown area. Closes on `Escape`. Mobile (below 900px): accordion inside hamburger drawer, not hover.
+
+---
+
+#### Feature 1.5 — Navigation: remove "Try Free", add conditional "Dashboard" button
+
+**File:** `components/layout/Header.js`
+
+**Remove:** The "TRY FREE" button from the navbar entirely.
+
+**Replace with conditional rendering using `useSession()` from `next-auth/react`:**
+- **Logged out:** Show only "Sign In" link. No second button.
+- **Logged in:** Show "Dashboard →" button. Links to `/dashboard`. Same visual style as the removed "TRY FREE" button (`#C8FF00` background, black text, same padding).
+- **Loading:** Show nothing (no flash of wrong state).
+
+---
+
+#### Feature 1.6 — Testimonials: 3 featured static cards on homepage
+
+**File:** `components/sections/Testimonials.js` or `components/sections/index.js` (TestimonialsSection)
+
+Replace the scrolling marquee on the homepage with 3 static featured cards.
+
+**Layout:** 2 cards top row, 1 card centred bottom row. Max width 860px, centred.
+
+**The 3 cards — exact text from `content/copy.js` TESTIMONIALS.items:**
+1. James K. — Sys admin — "ISO 27001 preset in PassGeni saved my team..."
+2. Pia R. — Dentist, private practice — "I generate all my practice management software passwords with PassGeni on HIPAA mode..."
+3. Mei L. — Nurse practitioner — "HIPAA preset gave me exactly the right password policy without reading a 40-page document..."
+
+**Card style:** `background: #0a0a0c`, `border: 1px solid #1e1e1e`, `border-radius: 14px`, `padding: 28px`. Stars ★★★★★ in `#C8FF00` 13px. Name bold white 15px. Role `#555` 12px. Quote `#aaa` 14px italic, `line-height: 1.8`. Hover: border `rgba(200,255,0,0.18)`, `translateY(-3px)`, transition 0.2s.
+
+---
+
+#### Feature 1.7 — FAQ: add 3 new questions
+
+**File:** `content/copy.js` — FAQ.items array only. Append to end. Do not remove or edit existing items.
+
+```js
+{
+  question: "Can I use PassGeni on my phone?",
+  answer: "Yes. PassGeni is fully responsive and works in any modern mobile browser. No app download required. Open passgeni.ai and start generating."
+},
+{
+  question: "What happens if I forget my password?",
+  answer: "PassGeni does not store your passwords — which means we cannot recover them. That is by design. We recommend storing the passwords PassGeni generates in a password manager like Bitwarden or 1Password."
+},
+{
+  question: "Is PassGeni really free? What is the catch?",
+  answer: "Genuinely free — 15 passwords per day, no account required, no ads, no tracking. We make money from Pro ($9/month) and Team ($29/month) plans for users who need higher limits, compliance presets, and API access. No catch."
+}
+```
+
+---
+
+### PHASE 2 — ANIMATIONS & PREMIUM FEEL
+
+> Install framer-motion before starting: `npm install framer-motion`
+> Use `motion` components only — not CSS `animation` or `transition` for anything in this phase.
+> All animations must respect `prefers-reduced-motion`.
+> Do not animate anything not listed here.
+
+---
+
+#### Animation 2.1 — Hero: staggered entrance on page load
+
 **File:** `components/sections/Hero.js`
-**On page load**, the hero elements animate in with a staggered `fadeInUp` sequence:
-1. Badge pill: `opacity 0→1`, `y 20→0`, duration 0.5s, delay 0s
-2. H1 headline: `opacity 0→1`, `y 24→0`, duration 0.6s, delay 0.15s
-3. Password capsule: `opacity 0→1`, `y 20→0`, duration 0.5s, delay 0.3s
-4. Trust points row: `opacity 0→1`, `y 16→0`, duration 0.4s, delay 0.45s
-5. CTA button: `opacity 0→1`, `scale 0.95→1`, duration 0.4s, delay 0.55s
-6. Trust chips: `opacity 0→1`, duration 0.3s, delay 0.65s
-Easing: `easeOut` for all. Use `initial`, `animate`, `transition` props. Do not use `variants` unless it simplifies the code.
 
-#### Animation 4.2 — Scroll reveal for all sections
-**Files:** `components/sections/index.js`, `components/sections/HowItWorks.js`, `components/sections/Features.js`, `components/sections/ToolsPreview.js`
-**Every section** that is not in the viewport on load should animate in when scrolled into view:
-- Use `whileInView` with `viewport={{ once: true, margin: "-80px" }}`
-- Section headings: `opacity 0→1`, `y 30→0`, duration 0.6s, easing `easeOut`
-- Cards in a grid: staggered `opacity 0→1`, `y 20→0`, each card 0.1s after the previous
-- Do not animate the hero (already handled in 4.1) or the generator widget
+| Element | Delay | Animation |
+|---|---|---|
+| Badge pill | 0s | opacity 0→1, y 20→0 |
+| H1 headline | 0.15s | opacity 0→1, y 24→0 |
+| Password capsule | 0.3s | opacity 0→1, y 20→0 |
+| Trust points row | 0.45s | opacity 0→1, y 16→0 |
+| CTA button | 0.55s | opacity 0→1, scale 0.95→1 |
+| Trust chips row | 0.65s | opacity 0→1 |
 
-#### Animation 4.3 — Generator widget: password reveal animation
-**File:** `components/generator/PasswordDisplay.js`
-When a new password is generated:
-- The previous password fades out (`opacity 1→0`, duration 0.15s)
-- The new password fades in (`opacity 0→1`, `y -4→0`, duration 0.25s) after the fade-out completes
-- Use `AnimatePresence` with the password value as the `key` so framer-motion detects the change
-- The strength bar animates its width from 0 to the current value over 0.4s with `easeOut`
-- The entropy number counts up from 0 to its value over 0.5s (use framer-motion `useMotionValue` + `animate`)
-
-#### Animation 4.4 — CTA button: hover and press micro-interactions
-**File:** `styles/globals.css` and any component using `.cta-primary`
-Replace existing CSS hover states on the primary CTA button with framer-motion `whileHover` and `whileTap`:
-- `whileHover`: `scale: 1.03`, `boxShadow: "0 0 24px rgba(200,255,0,0.35)"`, transition duration 0.2s
-- `whileTap`: `scale: 0.97`, transition duration 0.1s
-Apply the same pattern to all `.btn-ghost` ghost buttons but with `scale: 1.02` on hover only.
-
-#### Animation 4.5 — Navigation: header scroll transition
-**File:** `components/layout/Header.js`
-When the user scrolls past 20px:
-- Header background animates from `transparent` to `rgba(6,6,8,0.92)` with `backdrop-filter: blur(20px)`
-- Header border-bottom animates from `transparent` to `rgba(200,255,0,0.08)`
-- Use framer-motion `useScroll` + `useTransform` to drive this smoothly (not a CSS class toggle)
-Add a thin scroll progress bar at the very top of the viewport:
-- Full-width `2px` bar, `position: fixed`, `top: 0`, `z-index: 9999`
-- Color: `#C8FF00` with a subtle glow `box-shadow: 0 0 6px rgba(200,255,0,0.5)`
-- Width driven by `useScroll` scroll progress (0% to 100%)
-
-#### Animation 4.6 — Testimonials: hover lift on cards
-**File:** `components/TestimonialsSection.js`
-Wrap each testimonial card in a `motion.div`:
-- `whileHover`: `y: -4`, `borderColor: "rgba(200,255,0,0.25)"`, transition duration 0.2s
-- Default border: `rgba(255,255,255,0.06)`
-The infinite marquee animation must remain CSS (not framer-motion) — only the card hover is framer-motion.
-
-#### Animation 4.7 — FAQ: accordion open/close animation
-**File:** `components/sections/index.js` or `components/sections/FAQ.js`
-Wrap the answer content in `AnimatePresence`:
-- On open: `height: 0→auto`, `opacity: 0→1`, duration 0.3s, easing `easeOut`
-- On close: `height: auto→0`, `opacity: 1→0`, duration 0.25s
-- The `+` icon rotates `0→45deg` on open, `45→0deg` on close, duration 0.2s
-Use framer-motion `motion.div` with `initial`, `animate`, `exit` — not CSS transitions.
-
-#### Animation 4.8 — Compliance preset buttons: selection animation
-**File:** `components/generator/ComplianceBar.js`
-When a compliance preset is selected:
-- The selected button: `scale 1→1.04` pulse on click (`whileTap`), then settles with a lime glow `box-shadow: 0 0 12px rgba(200,255,0,0.3)`
-- The previously selected button: glow fades out over 0.3s
-- Background of selected button animates from transparent to `rgba(200,255,0,0.1)`
-Use `AnimatePresence` on the selected indicator so it fades between selections.
-
-#### Animation 4.9 — Page transitions between routes
-**File:** `pages/_app.js`
-Wrap the page component with `AnimatePresence` and `motion.div`:
-- On route enter: `opacity 0→1`, `y 12→0`, duration 0.35s, easing `easeOut`
-- On route exit: `opacity 1→0`, `y 0→-8`, duration 0.2s
-Use `router.pathname` as the `key` for `AnimatePresence` so it detects route changes.
-This must not affect the initial page load (hero handles its own entrance in 4.1).
-
-#### Animation 4.10 — Mobile menu: slide-down drawer
-**File:** `components/layout/Header.js` or `components/Layout.js`
-Replace the existing CSS show/hide on the mobile nav drawer with framer-motion:
-- On open: drawer slides down from `y: -20`, `opacity: 0→1`, duration 0.3s, easing `easeOut`
-- On close: `y: 0→-10`, `opacity: 1→0`, duration 0.2s
-- Each nav link inside staggers in: delay 0.05s × index
-- Hamburger icon: the 3 bars animate into an X using `motion.line` or `motion.span` with `rotate` transforms
+All: `duration: 0.5`, `ease: "easeOut"`.
 
 ---
 
-## COMPLIANCE CHEAT SHEET PDF — CONTENTS
+#### Animation 2.2 — Scroll reveal for all sections
 
-The PDF at `public/downloads/passgeni-hipaa-pcidss-cheatsheet.pdf` must contain:
+**Files:** `components/sections/index.js` — HowItWorks, FeaturesSection, ToolsPreview, TestimonialsSection, FAQSection
 
-**Layout:** One page. Dark background (#060608). Two columns. PassGeni logo top-left. Title: "HIPAA + PCI-DSS Password Requirements" in white. Subtitle: "Quick reference for compliance teams" in #888.
+Section headings: `whileInView={{ opacity: 1, y: 0 }}`, `initial={{ opacity: 0, y: 30 }}`, `viewport={{ once: true, margin: "-80px" }}`, `transition={{ duration: 0.6, ease: "easeOut" }}`.
 
-**Left column — HIPAA:**
-| Requirement | Rule | PassGeni |
-| Min length | 8 chars (12 recommended) | Slider → 12+ |
-| Complexity | Upper + lower + number + symbol | All options ON |
-| History | Last 6 passwords | History panel |
-| Max age | 90 days | Rotation reminder |
-| No dictionary words | Enforced by AI seeding | Auto |
-PassGeni HIPAA preset auto-configures all of the above.
+Grid cards: each card `delay: index * 0.1`, `initial={{ opacity: 0, y: 20 }}`, `whileInView={{ opacity: 1, y: 0 }}`, `viewport={{ once: true }}`, `transition={{ duration: 0.4, ease: "easeOut" }}`.
 
-**Right column — PCI-DSS v4.0:**
-| Requirement | Rule | PassGeni |
-| Min length | 12 characters | Slider → 12+ |
-| Complexity | Upper + lower + number + symbol | All options ON |
-| History | Last 4 passwords | History panel |
-| Max age | 90 days | Rotation reminder |
-| No dictionary words | Enforced by AI seeding | Auto |
-PassGeni PCI-DSS preset auto-configures all of the above.
+Do not animate the hero or the generator widget.
 
-**Footer strip:** "Generated with passgeni.ai — Free compliance tools for security teams" + QR code linking to passgeni.ai
+---
+
+#### Animation 2.3 — Generator: password reveal on generation
+
+**File:** `components/generator/PasswordDisplay.js`
+
+`AnimatePresence` with password value as `key`:
+- Exit: `opacity: 1→0`, `y: 0→-4`, duration 0.15s
+- Enter: `opacity: 0→1`, `y: 4→0`, duration 0.25s
+
+Strength bar: animate width 0→current, duration 0.4s `easeOut`.
+Entropy number: count up 0→value using `useMotionValue` + framer-motion `animate()`, duration 0.5s.
+
+---
+
+#### Animation 2.4 — Buttons: hover and press micro-interactions
+
+Applies to all `.cta-primary` and ghost buttons sitewide. Use `motion.a` or `motion.button`:
+- Primary: `whileHover: { scale: 1.03, boxShadow: "0 0 24px rgba(200,255,0,0.35)" }`, `whileTap: { scale: 0.97 }`, `transition: { duration: 0.2 }`
+- Ghost: `whileHover: { scale: 1.02 }`, `whileTap: { scale: 0.98 }`, `transition: { duration: 0.2 }`
+
+---
+
+#### Animation 2.5 — Header: scroll-driven background + progress bar
+
+**File:** `components/layout/Header.js`
+
+Use `useScroll()` + `useTransform()`:
+- Header `backgroundColor`: `rgba(6,6,8,0)` → `rgba(6,6,8,0.95)` as `scrollY` 0→80
+- Header `backdropFilter`: `blur(0px)` → `blur(20px)` same range
+
+Scroll progress bar: `position: fixed`, `top: 0`, `left: 0`, `right: 0`, `height: 2px`, `zIndex: 9999`. `motion.div` with `scaleX: scrollYProgress`, `transformOrigin: "0%"`. Color `#C8FF00`, `boxShadow: 0 0 6px rgba(200,255,0,0.5)`.
+
+---
+
+#### Animation 2.6 — FAQ: animated accordion
+
+**File:** FAQ component
+
+Answer in `AnimatePresence`:
+- Enter: `initial={{ height: 0, opacity: 0 }}`, `animate={{ height: "auto", opacity: 1 }}`, `transition={{ duration: 0.3, ease: "easeOut" }}`
+- Exit: `exit={{ height: 0, opacity: 0 }}`, `transition={{ duration: 0.25 }}`
+
+`+` icon: `motion.span` with `animate={{ rotate: isOpen ? 45 : 0 }}`, `transition={{ duration: 0.2 }}`.
+
+---
+
+#### Animation 2.7 — Compliance preset: selection feedback
+
+**File:** `components/generator/ComplianceBar.js`
+
+Each button: `motion.button`, `whileTap={{ scale: 0.96 }}`. Active: `animate={{ boxShadow: "0 0 12px rgba(200,255,0,0.3)" }}`. Inactive: `animate={{ boxShadow: "0 0 0px rgba(200,255,0,0)" }}`. Duration 0.3s.
+
+---
+
+#### Animation 2.8 — Page transitions
+
+**File:** `pages/_app.js`
+
+`AnimatePresence mode="wait"` wrapping `<Component />`. `motion.div` with `router.pathname` as `key`:
+- Enter: `initial={{ opacity: 0, y: 12 }}`, `animate={{ opacity: 1, y: 0 }}`, `transition={{ duration: 0.35, ease: "easeOut" }}`
+- Exit: `exit={{ opacity: 0, y: -8 }}`, `transition={{ duration: 0.2 }}`
+
+---
+
+#### Animation 2.9 — Mobile menu: slide-down with staggered links
+
+**File:** `components/layout/Header.js`
+
+`AnimatePresence` on drawer:
+- Enter: `initial={{ opacity: 0, y: -16 }}`, `animate={{ opacity: 1, y: 0 }}`, `transition={{ duration: 0.3, ease: "easeOut" }}`
+- Exit: `exit={{ opacity: 0, y: -10 }}`, `transition={{ duration: 0.2 }}`
+
+Each link: `motion.a`, `initial={{ opacity: 0, x: -10 }}`, `animate={{ opacity: 1, x: 0 }}`, `transition={{ delay: index * 0.05 }}`.
+
+Hamburger bars: `motion.span` lines animate `rotate` + `y` to form an X when open.
+
+---
+
+#### Animation 2.10 — Testimonial cards: hover lift
+
+**File:** `components/TestimonialsSection.js`
+
+Each card: `motion.article`, `whileHover: { y: -4, borderColor: "rgba(200,255,0,0.25)" }`, `transition: { duration: 0.2 }`. Default border stays CSS. Marquee stays CSS.
 
 ---
 
@@ -488,9 +625,9 @@ PassGeni PCI-DSS preset auto-configures all of the above.
 2. **Do phases in order** — do not start Phase 2 until Phase 1 is verified working on passgeni.ai
 3. **One change per commit** — never bundle multiple changes into one commit
 4. **Text changes go in `content/copy.js` only** — never hardcode text in components
-5. **Style changes go in `styles/globals.css`** — for Phase 4 use framer-motion, not CSS
-6. **Never rewrite a working component** — make targeted edits only
-7. **Never change the logo or favicon** — brand assets, do not touch
-8. **Run `npm run build` locally before pushing** — catch errors before Vercel does
-9. **Check passgeni.ai after every commit** — confirm nothing broke
-10. **Brand color is `#C8FF00`** — use `var(--color-accent)` in components, not the hex directly
+5. **Never rewrite a working component** — make targeted edits only
+6. **Never change the logo or favicon** — brand assets, do not touch
+7. **Run `npm run build` locally before pushing** — catch errors before Vercel does
+8. **Check passgeni.ai after every commit** — confirm nothing broke
+9. **Brand color is `#C8FF00`** — use `var(--color-accent)` in components
+10. **One change per commit** — no bundling
