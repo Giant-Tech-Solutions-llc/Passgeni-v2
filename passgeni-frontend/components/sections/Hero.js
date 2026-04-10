@@ -1,10 +1,17 @@
 import{useState,useEffect}from"react";
+import{motion}from"framer-motion";
 import{HERO}from"../../content/copy.js";
 
 const CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
 const PASSWORDS=["nX9#kT2@mP5!qR8$","cortex-vault-442-helix","Bz7!deploy#K3@stack","helix-neon-881-pulse","pixel-stark-357-render","Kq#delta88!yield@Zn","doctor-ridge-991-seal","marble-flux-227-crest"];
 const PASSPHRASES=["correct-horse-battery-staple","neural-quantum-drift-pulse","cobalt-ridge-echo-seven","mirror-flare-north-dawn"];
 const ALL=[...PASSWORDS,...PASSPHRASES];
+
+const fadeUp=(delay=0)=>({
+  initial:{opacity:0,y:20},
+  animate:{opacity:1,y:0},
+  transition:{duration:0.5,ease:"easeOut",delay},
+});
 
 function TypeWriter(){
   const[idx,setIdx]=useState(0);
@@ -59,52 +66,61 @@ export default function HeroSection(){
       </div>
 
       <div style={{position:"relative",zIndex:10,textAlign:"center",width:"100%",maxWidth:920,margin:"0 auto"}}>
-        {/* Badge */}
-        <div className="fade-up" style={{display:"inline-flex",alignItems:"center",gap:10,background:"rgba(13,13,16,0.9)",border:"1px solid rgba(200,255,0,0.15)",borderRadius:100,padding:"8px clamp(16px,3vw,22px)",marginBottom:"clamp(28px,5vw,48px)"}}>
+        {/* Badge — delay 0s */}
+        <motion.div {...fadeUp(0)} style={{display:"inline-flex",alignItems:"center",gap:10,background:"rgba(13,13,16,0.9)",border:"1px solid rgba(200,255,0,0.15)",borderRadius:100,padding:"8px clamp(16px,3vw,22px)",marginBottom:"clamp(28px,5vw,48px)"}}>
           <div style={{width:7,height:7,borderRadius:"50%",background:"var(--accent)",boxShadow:"0 0 12px var(--accent)",animation:"blink 2s ease infinite",flexShrink:0}}/>
           <span style={{fontFamily:"var(--font-body)",fontSize:"clamp(9px,1.4vw,11px)",fontWeight:600,color:"rgba(200,255,0,.8)",letterSpacing:".14em",textTransform:"uppercase"}}>{HERO.badge}</span>
-        </div>
+        </motion.div>
 
-        {/* Headline */}
-        <h1 id="hero-headline" className="fade-up-2 hero-headline" style={{marginBottom:0,whiteSpace:"pre-line"}}>
+        {/* Headline — delay 0.15s */}
+        <motion.h1 id="hero-headline" className="hero-headline"
+          initial={{opacity:0,y:24}} animate={{opacity:1,y:0}} transition={{duration:0.5,ease:"easeOut",delay:0.15}}
+          style={{marginBottom:0,whiteSpace:"pre-line"}}
+        >
           {HERO.headline.split("\n")[0]}{"\n"}
           <span style={{color:"transparent",WebkitTextStroke:"1.5px rgba(200,255,0,0.4)",backgroundImage:"linear-gradient(90deg,rgba(200,255,0,.4),rgba(200,255,0,.9),rgba(200,255,0,.4))",backgroundSize:"200% auto",WebkitBackgroundClip:"text",animation:"gradientSweep 3s linear infinite"}}>
             {HERO.headline.split("\n")[1]}
           </span>{"\n"}
           <span style={{color:"var(--accent)"}}>{HERO.headline.split("\n")[2]}</span>
-        </h1>
+        </motion.h1>
 
-        {/* Gen capsule */}
-        <div className="fade-up-3" style={{display:"flex",justifyContent:"center",margin:"clamp(28px,5vw,52px) auto"}}>
+        {/* Gen capsule — delay 0.3s */}
+        <motion.div {...fadeUp(0.3)} style={{display:"flex",justifyContent:"center",margin:"clamp(28px,5vw,52px) auto"}}>
           <div className="gen-capsule">
             <span style={{fontFamily:"var(--font-body)",fontSize:"clamp(8px,1.2vw,9px)",fontWeight:700,color:"rgba(200,255,0,.5)",letterSpacing:".18em",textTransform:"uppercase",whiteSpace:"nowrap",flexShrink:0}}>GEN →</span>
             <TypeWriter/>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Sub */}
-        <p className="fade-up-3 hero-sub" style={{marginBottom:"clamp(28px,5vw,52px)"}}>
+        {/* Subheadline */}
+        <motion.p className="hero-sub"
+          initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} transition={{duration:0.5,ease:"easeOut",delay:0.3}}
+          style={{marginBottom:"clamp(28px,5vw,52px)"}}
+        >
           {HERO.subheadline}
-        </p>
+        </motion.p>
 
-        {/* CTAs */}
-        <div className="fade-up-4 hero-ctas" style={{marginBottom:"clamp(32px,5vw,56px)"}}>
+        {/* CTAs — delay 0.55s, scale */}
+        <motion.div className="hero-ctas"
+          initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{duration:0.5,ease:"easeOut",delay:0.55}}
+          style={{marginBottom:"clamp(32px,5vw,56px)"}}
+        >
           <a href={HERO.primaryHref} className="btn-primary"
             style={{fontSize:"clamp(12px,2vw,15px)",padding:"clamp(14px,2vw,17px) clamp(24px,4vw,40px)"}}
             onClick={e=>{e.currentTarget.classList.remove("btn-pulse");void e.currentTarget.offsetWidth;e.currentTarget.classList.add("btn-pulse");}}
           >{HERO.primaryCTA} ↓</a>
           <a href={HERO.secondaryHref} className="btn-ghost" style={{fontSize:"clamp(12px,2vw,15px)"}}>{HERO.secondaryCTA}</a>
-        </div>
+        </motion.div>
 
-        {/* Trust points */}
-        <div className="fade-up-4 hero-trust">
+        {/* Trust points — delay 0.45s */}
+        <motion.div className="hero-trust" {...fadeUp(0.45)}>
           {HERO.trustPoints.map(({icon,label})=>(
             <div key={label} style={{display:"flex",alignItems:"center",gap:7}}>
               <span aria-hidden style={{color:"rgba(200,255,0,.5)",fontSize:"clamp(10px,1.5vw,13px)"}}>{icon}</span>
               <span style={{fontFamily:"var(--font-body)",fontSize:"clamp(9px,1.2vw,11px)",fontWeight:600,color:"var(--muted)",letterSpacing:".08em",textTransform:"uppercase"}}>{label}</span>
             </div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );
