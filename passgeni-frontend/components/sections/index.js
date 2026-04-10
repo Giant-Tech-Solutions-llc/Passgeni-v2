@@ -181,12 +181,10 @@ export function TestimonialsSection(){
           {/* Top row — 2 cards */}
           <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:"clamp(12px,2vw,20px)",marginBottom:"clamp(12px,2vw,20px)"}}>
             {featured.slice(0,2).map((t,i)=>(
-              <article key={i} style={{
-                background:"#0a0a0c",border:"1px solid #1e1e1e",borderRadius:14,padding:28,
-                display:"flex",flexDirection:"column",transition:"border-color .2s,transform .2s",cursor:"default"
-              }}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(200,255,0,0.18)";e.currentTarget.style.transform="translateY(-3px)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="#1e1e1e";e.currentTarget.style.transform="translateY(0)";}}
+              <motion.article key={i}
+                whileHover={{y:-4,borderColor:"rgba(200,255,0,0.25)"}}
+                transition={{duration:0.2}}
+                style={{background:"#0a0a0c",border:"1px solid #1e1e1e",borderRadius:14,padding:28,display:"flex",flexDirection:"column",cursor:"default"}}
               >
                 <div style={{display:"flex",gap:2,marginBottom:12}}>
                   {Array(t.stars||5).fill("★").map((s,si)=><span key={si} style={{color:"#C8FF00",fontSize:13}}>{s}</span>)}
@@ -196,18 +194,16 @@ export function TestimonialsSection(){
                   <div style={{fontFamily:"var(--font-heading)",fontWeight:700,fontSize:15,color:"#fff"}}>{t.name}</div>
                   <div style={{fontFamily:"var(--font-body)",fontSize:12,color:"#555",marginTop:3}}>{t.role}</div>
                 </div>
-              </article>
+              </motion.article>
             ))}
           </div>
           {/* Bottom row — 1 card centred */}
           <div style={{display:"flex",justifyContent:"center"}}>
             {featured.slice(2,3).map((t,i)=>(
-              <article key={i} style={{
-                background:"#0a0a0c",border:"1px solid #1e1e1e",borderRadius:14,padding:28,
-                width:"calc(50% - 10px)",display:"flex",flexDirection:"column",transition:"border-color .2s,transform .2s",cursor:"default"
-              }}
-                onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(200,255,0,0.18)";e.currentTarget.style.transform="translateY(-3px)";}}
-                onMouseLeave={e=>{e.currentTarget.style.borderColor="#1e1e1e";e.currentTarget.style.transform="translateY(0)";}}
+              <motion.article key={i}
+                whileHover={{y:-4,borderColor:"rgba(200,255,0,0.25)"}}
+                transition={{duration:0.2}}
+                style={{background:"#0a0a0c",border:"1px solid #1e1e1e",borderRadius:14,padding:28,width:"calc(50% - 10px)",display:"flex",flexDirection:"column",cursor:"default"}}
               >
                 <div style={{display:"flex",gap:2,marginBottom:12}}>
                   {Array(t.stars||5).fill("★").map((s,si)=><span key={si} style={{color:"#C8FF00",fontSize:13}}>{s}</span>)}
@@ -217,7 +213,7 @@ export function TestimonialsSection(){
                   <div style={{fontFamily:"var(--font-heading)",fontWeight:700,fontSize:15,color:"#fff"}}>{t.name}</div>
                   <div style={{fontFamily:"var(--font-body)",fontSize:12,color:"#555",marginTop:3}}>{t.role}</div>
                 </div>
-              </article>
+              </motion.article>
             ))}
           </div>
         </div>
