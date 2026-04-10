@@ -250,16 +250,22 @@ export function ComplianceBar({ compliance, onSelect, activePreset }) {
         )}
       </div>
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {Object.entries(COMPLIANCE_PRESETS).map(([key, preset]) => (
-          <button
-            key={key}
-            onClick={() => onSelect(key)}
-            className={`compliance-pill ${compliance === key ? "active" : ""}`}
-            style={compliance === key ? { borderColor: preset.color, color: preset.color, background: `${preset.color}11` } : {}}
-          >
-            {preset.label}
-          </button>
-        ))}
+        {Object.entries(COMPLIANCE_PRESETS).map(([key, preset]) => {
+          const isActive = compliance === key;
+          return (
+            <motion.button
+              key={key}
+              onClick={() => onSelect(key)}
+              whileTap={{ scale: 0.96 }}
+              animate={{ boxShadow: isActive ? `0 0 12px ${preset.color}4d` : "0 0 0px rgba(200,255,0,0)" }}
+              transition={{ duration: 0.3 }}
+              className={`compliance-pill ${isActive ? "active" : ""}`}
+              style={isActive ? { borderColor: preset.color, color: preset.color, background: `${preset.color}11` } : {}}
+            >
+              {preset.label}
+            </motion.button>
+          );
+        })}
       </div>
     </div>
   );
