@@ -1,4 +1,5 @@
 import{useState}from"react";
+import{motion,AnimatePresence}from"framer-motion";
 import{HOW_IT_WORKS,FEATURES,TOOLS_PREVIEW,PRICING,TESTIMONIALS,FAQ,WAITLIST,BOTTOM_CTA}from"../../content/copy.js";
 import{Headline}from"../ui/index.js";
 
@@ -239,13 +240,28 @@ export function FAQSection(){
                 <span style={{fontFamily:"var(--font-body)",fontSize:11,fontWeight:700,color:"rgba(200,255,0,.45)",letterSpacing:".1em",flexShrink:0,minWidth:24}}>{String(i+1).padStart(2,"0")}</span>
                 <h3 style={{fontFamily:"var(--font-heading)",fontSize:"clamp(14px,2.5vw,17px)",fontWeight:700,color:open===i?"var(--accent)":"var(--text)",margin:0,lineHeight:1.4}}>{item.question}</h3>
               </div>
-              <span style={{color:"var(--accent)",fontSize:"clamp(18px,2.5vw,22px)",flexShrink:0,transition:"transform .2s",transform:open===i?"rotate(45deg)":"none",display:"block"}}>+</span>
+              <motion.span
+                animate={{rotate:open===i?45:0}}
+                transition={{duration:0.2}}
+                style={{color:"var(--accent)",fontSize:"clamp(18px,2.5vw,22px)",flexShrink:0,display:"block",originX:"50%",originY:"50%"}}
+              >+</motion.span>
             </div>
-            {open===i&&(
-              <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",lineHeight:1.85,marginTop:14,paddingLeft:"clamp(26px,4vw,42px)",animation:"fadeIn .25s ease"}}>
-                {item.answer}
-              </p>
-            )}
+            <AnimatePresence initial={false}>
+              {open===i&&(
+                <motion.div
+                  key="answer"
+                  initial={{height:0,opacity:0}}
+                  animate={{height:"auto",opacity:1}}
+                  exit={{height:0,opacity:0}}
+                  transition={{duration:0.3,ease:"easeOut"}}
+                  style={{overflow:"hidden"}}
+                >
+                  <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",lineHeight:1.85,marginTop:14,paddingLeft:"clamp(26px,4vw,42px)"}}>
+                    {item.answer}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ))}
       </div>
