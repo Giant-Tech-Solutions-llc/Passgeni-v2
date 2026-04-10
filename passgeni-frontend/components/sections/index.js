@@ -300,11 +300,14 @@ export function FeaturedBlogSection(){
         ))}
       </div>
       <div style={{textAlign:"center",marginTop:"clamp(24px,4vw,36px)"}}>
-        <a href="/blog"
+        <motion.a href="/blog"
+          whileHover={{scale:1.02}}
+          whileTap={{scale:0.98}}
+          transition={{duration:0.2}}
           style={{fontFamily:"var(--font-body)",fontSize:13,fontWeight:600,color:"var(--accent)",letterSpacing:".04em",display:"inline-flex",alignItems:"center",gap:8,padding:"clamp(10px,1.5vw,12px) clamp(20px,3vw,28px)",border:"1px solid rgba(200,255,0,.2)",borderRadius:8,transition:"border-color .2s,background .2s"}}
           onMouseEnter={e=>{e.currentTarget.style.borderColor="rgba(200,255,0,.4)";e.currentTarget.style.background="rgba(200,255,0,.04)";}}
           onMouseLeave={e=>{e.currentTarget.style.borderColor="rgba(200,255,0,.2)";e.currentTarget.style.background="transparent";}}
-        >View all posts →</a>
+        >View all posts →</motion.a>
       </div>
     </section>
   );
@@ -356,9 +359,14 @@ export function WaitlistSection(){
                 placeholder={BOTTOM_CTA.digest.inputPlaceholder}
                 style={{flex:1,minWidth:160,background:"rgba(255,255,255,0.04)",border:"1px solid #2a2a2a",borderRadius:8,padding:"10px 14px",fontFamily:"var(--font-body)",fontSize:14,color:"var(--text)",outline:"none"}}
               />
-              <button type="submit" disabled={loading} className="btn-primary" style={{whiteSpace:"nowrap",padding:"10px 18px",fontSize:13}}>
+              <motion.button type="submit" disabled={loading} className="btn-primary"
+                whileHover={{scale:1.03,boxShadow:"0 0 24px rgba(200,255,0,0.35)"}}
+                whileTap={{scale:0.97}}
+                transition={{duration:0.2}}
+                style={{whiteSpace:"nowrap",padding:"10px 18px",fontSize:13}}
+              >
                 {loading?"…":BOTTOM_CTA.digest.cta}
-              </button>
+              </motion.button>
             </form>
           )}
           <p style={disclaimerStyle}>{BOTTOM_CTA.digest.disclaimer}</p>
@@ -369,9 +377,14 @@ export function WaitlistSection(){
           <div style={eyebrowStyle}>{BOTTOM_CTA.pdf.eyebrow}</div>
           <h2 style={{fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(20px,3vw,28px)",color:"var(--text)",letterSpacing:"-.03em",marginBottom:12,lineHeight:1.15}}>{BOTTOM_CTA.pdf.headline}</h2>
           <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",lineHeight:1.75,marginBottom:24,flex:1}}>{BOTTOM_CTA.pdf.body}</p>
-          <a href={BOTTOM_CTA.pdf.href} target="_blank" rel="noopener noreferrer" className="btn-primary" style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 22px",fontSize:14,width:"fit-content"}}>
+          <motion.a href={BOTTOM_CTA.pdf.href} target="_blank" rel="noopener noreferrer" className="btn-primary"
+            whileHover={{scale:1.03,boxShadow:"0 0 24px rgba(200,255,0,0.35)"}}
+            whileTap={{scale:0.97}}
+            transition={{duration:0.2}}
+            style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 22px",fontSize:14,width:"fit-content"}}
+          >
             {BOTTOM_CTA.pdf.cta}
-          </a>
+          </motion.a>
           <p style={disclaimerStyle}>{BOTTOM_CTA.pdf.disclaimer}</p>
         </div>
       </div>

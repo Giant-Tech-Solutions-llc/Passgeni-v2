@@ -1,5 +1,6 @@
 import Head from "next/head";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import Header from "../components/layout/Header.js";
 import Footer from "../components/layout/Footer.js";
 
@@ -301,8 +302,18 @@ export default function PricingPage() {
                 Start generating now.<br /><span style={{ color: "var(--accent)" }}>No account needed.</span>
               </h2>
               <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
-                <a href="/#generator" className="btn-primary" style={{ fontSize: 15, padding: "14px 32px" }}>Generate Now — Free →</a>
-                <a href="/auth/signin?callbackUrl=/checkout?plan=team" className="btn-ghost" style={{ fontSize: 15, padding: "14px 32px" }}>Start Team Trial</a>
+                <motion.a href="/#generator" className="btn-primary"
+                  whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(200,255,0,0.35)" }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ fontSize: 15, padding: "14px 32px" }}
+                >Generate Now — Free →</motion.a>
+                <motion.a href="/auth/signin?callbackUrl=/checkout?plan=team" className="btn-ghost"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ fontSize: 15, padding: "14px 32px" }}
+                >Start Team Trial</motion.a>
               </div>
             </div>
           </section>
