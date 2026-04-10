@@ -1,5 +1,5 @@
 import{useState,useEffect,useRef}from"react";
-import{motion,useScroll,useTransform}from"framer-motion";
+import{motion,AnimatePresence,useScroll,useTransform}from"framer-motion";
 import{useSession}from"next-auth/react";
 import{NAV}from"../../content/copy.js";
 import PassGeniLogo from"./Logo.js";
@@ -234,60 +234,72 @@ export default function Header(){
         </div>
       </motion.header>
 
-      {/* Mobile drawer */}
-      <nav
-        className={`mobile-nav-drawer${open?" open":""}`}
-        aria-hidden={!open}
-        aria-label="Mobile navigation"
-      >
-        {NAV.links.map(l=>{
-          const isMega=l.label==="Tools"||l.label==="Guides";
-          const key=l.label.toLowerCase();
-          if(!isMega){
-            return(
-              <a key={l.label} href={l.href} className="mobile-nav-link"
-                onClick={()=>setOpen(false)}
-              >{l.label}</a>
-            );
-          }
-          return(
-            <div key={l.label}>
-              <button
-                className="mobile-nav-link"
-                style={{background:"none",border:"none",cursor:"pointer",width:"100%",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}
-                onClick={()=>setMobileExpanded(mobileExpanded===key?null:key)}
-              >
-                {l.label}
-                <span style={{fontSize:10,opacity:.5}}>{mobileExpanded===key?"▲":"▼"}</span>
-              </button>
-              {mobileExpanded===key&&(
-                <div style={{paddingLeft:16,marginBottom:8}}>
-                  {(key==="tools"?TOOLS_MENU.columns:GUIDES_MENU.columns).map(col=>
-                    col.items.map(item=>(
-                      <a key={item.label} href={item.href} className="mobile-nav-link"
-                        style={{fontSize:13,paddingTop:6,paddingBottom:6,opacity:.8}}
-                        onClick={()=>setOpen(false)}
-                      >{item.label}</a>
-                    ))
+      {/* Mobile drawer — animated */}
+      <AnimatePresence>
+        {open&&(
+          <motion.nav
+            key="mobile-drawer"
+            className="mobile-nav-drawer open"
+            aria-label="Mobile navigation"
+            initial={{opacity:0,y:-16}}
+            animate={{opacity:1,y:0}}
+            exit={{opacity:0,y:-10}}
+            transition={{duration:0.3,ease:"easeOut"}}
+          >
+            {NAV.links.map((l,li)=>{
+              const isMega=l.label==="Tools"||l.label==="Guides";
+              const key=l.label.toLowerCase();
+              if(!isMega){
+                return(
+                  <motion.a key={l.label} href={l.href} className="mobile-nav-link"
+                    initial={{opacity:0,x:-10}} animate={{opacity:1,x:0}}
+                    transition={{delay:li*0.05}}
+                    onClick={()=>setOpen(false)}
+                  >{l.label}</motion.a>
+                );
+              }
+              return(
+                <div key={l.label}>
+                  <motion.button
+                    className="mobile-nav-link"
+                    initial={{opacity:0,x:-10}} animate={{opacity:1,x:0}}
+                    transition={{delay:li*0.05}}
+                    style={{background:"none",border:"none",cursor:"pointer",width:"100%",textAlign:"left",display:"flex",justifyContent:"space-between",alignItems:"center"}}
+                    onClick={()=>setMobileExpanded(mobileExpanded===key?null:key)}
+                  >
+                    {l.label}
+                    <span style={{fontSize:10,opacity:.5}}>{mobileExpanded===key?"▲":"▼"}</span>
+                  </motion.button>
+                  {mobileExpanded===key&&(
+                    <div style={{paddingLeft:16,marginBottom:8}}>
+                      {(key==="tools"?TOOLS_MENU.columns:GUIDES_MENU.columns).map(col=>
+                        col.items.map(item=>(
+                          <a key={item.label} href={item.href} className="mobile-nav-link"
+                            style={{fontSize:13,paddingTop:6,paddingBottom:6,opacity:.8}}
+                            onClick={()=>setOpen(false)}
+                          >{item.label}</a>
+                        ))
+                      )}
+                    </div>
                   )}
                 </div>
+              );
+            })}
+            <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:12}}>
+              <a href="/auth/signin" className="btn-ghost"
+                style={{justifyContent:"center",fontSize:15,padding:"14px"}}
+                onClick={()=>setOpen(false)}
+              >Sign In</a>
+              {status!=="loading"&&session&&(
+                <a href="/dashboard" className="btn-primary"
+                  style={{justifyContent:"center",fontSize:15,padding:"14px"}}
+                  onClick={()=>setOpen(false)}
+                >Dashboard →</a>
               )}
             </div>
-          );
-        })}
-        <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:12}}>
-          <a href="/auth/signin" className="btn-ghost"
-            style={{justifyContent:"center",fontSize:15,padding:"14px"}}
-            onClick={()=>setOpen(false)}
-          >Sign In</a>
-          {status!=="loading"&&session&&(
-            <a href="/dashboard" className="btn-primary"
-              style={{justifyContent:"center",fontSize:15,padding:"14px"}}
-              onClick={()=>setOpen(false)}
-            >Dashboard →</a>
-          )}
-        </div>
-      </nav>
+          </motion.nav>
+        )}
+      </AnimatePresence>
     </>
   );
 }
