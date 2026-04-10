@@ -1,4 +1,5 @@
 import{useState,useEffect,useRef}from"react";
+import{motion,useScroll,useTransform}from"framer-motion";
 import{useSession}from"next-auth/react";
 import{NAV}from"../../content/copy.js";
 import PassGeniLogo from"./Logo.js";
@@ -116,6 +117,9 @@ function GuidesDropdown(){
 
 export default function Header(){
   const{data:session,status}=useSession();
+  const{scrollY,scrollYProgress}=useScroll();
+  const headerBg=useTransform(scrollY,[0,80],["rgba(6,6,8,0)","rgba(6,6,8,0.95)"]);
+  const headerBlur=useTransform(scrollY,[0,80],["blur(0px)","blur(20px)"]);
   const[scrolled,setScrolled]=useState(false);
   const[open,setOpen]=useState(false);
   const[active,setActive]=useState("");
@@ -158,7 +162,9 @@ export default function Header(){
 
   return(
     <>
-      <header>
+      {/* Scroll progress bar */}
+      <motion.div style={{scaleX:scrollYProgress,transformOrigin:"0%",position:"fixed",top:0,left:0,right:0,height:2,background:"#C8FF00",boxShadow:"0 0 6px rgba(200,255,0,0.5)",zIndex:9999}}/>
+      <motion.header style={{backgroundColor:headerBg,backdropFilter:headerBlur}}>
         {/* Main nav */}
         <nav className={`nav-root${scrolled?" scrolled":""}`} aria-label="Main navigation">
           <a href="/" className="nav-logo" aria-label="PassGeni home">
@@ -226,7 +232,7 @@ export default function Header(){
             ))}
           </div>
         </div>
-      </header>
+      </motion.header>
 
       {/* Mobile drawer */}
       <nav
