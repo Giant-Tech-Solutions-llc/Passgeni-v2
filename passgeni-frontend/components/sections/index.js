@@ -196,58 +196,68 @@ export function TestimonialsSection(){
 function TestimonialCard({t,delay=0}){
   return(
     <motion.article
-      initial={{opacity:0,y:16}}
+      initial={{opacity:0,y:24}}
       whileInView={{opacity:1,y:0}}
       viewport={{once:true,margin:"-40px"}}
-      transition={{duration:0.45,ease:"easeOut",delay}}
-      whileHover={{y:-4,borderColor:"rgba(200,255,0,0.2)"}}
+      transition={{duration:0.5,ease:"easeOut",delay}}
+      whileHover={{y:-6}}
+      className="bc bc-a"
       style={{
-        background:"#0a0a0c",
-        border:"1px solid #1a1a1e",
-        borderRadius:16,
-        padding:"clamp(20px,2.5vw,28px)",
         display:"flex",
         flexDirection:"column",
-        gap:16,
+        gap:0,
         cursor:"default",
-        transition:"border-color .2s",
+        position:"relative",
+        overflow:"hidden",
       }}
     >
-      {/* Stars */}
-      <div style={{display:"flex",gap:3}}>
-        {Array(t.stars||5).fill(0).map((_,si)=>(
-          <span key={si} style={{color:"#C8FF00",fontSize:12,lineHeight:1}}>★</span>
-        ))}
+      {/* top-edge lime shimmer (from .bc::before) already applied via className */}
+      {/* bottom-right radial glow (from .bc::after) already applied via className */}
+      <div className="bc-line"/>
+
+      {/* Stars + quote mark row */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}}>
+        <div style={{display:"flex",gap:3}}>
+          {Array(t.stars||5).fill(0).map((_,si)=>(
+            <span key={si} style={{color:"var(--accent)",fontSize:13,lineHeight:1}}>★</span>
+          ))}
+        </div>
+        <span style={{fontFamily:"var(--font-heading)",fontSize:48,lineHeight:1,color:"rgba(200,255,0,0.06)",fontWeight:800,userSelect:"none",marginTop:-8}}>&ldquo;</span>
       </div>
 
       {/* Quote */}
       <p style={{
         fontFamily:"var(--font-body)",
-        fontSize:"clamp(13px,1.4vw,15px)",
-        color:"#999",
-        lineHeight:1.75,
+        fontSize:"clamp(13px,1.4vw,14.5px)",
+        color:"var(--muted)",
+        lineHeight:1.8,
         flex:1,
-        margin:0,
+        margin:"0 0 20px",
       }}>
-        &ldquo;{t.text}&rdquo;
+        {t.text}
       </p>
 
-      {/* Author */}
-      <div style={{display:"flex",alignItems:"center",gap:12,paddingTop:4,borderTop:"1px solid rgba(255,255,255,.05)"}}>
+      {/* Divider */}
+      <div style={{height:1,background:"linear-gradient(90deg,rgba(200,255,0,0.12),transparent)",marginBottom:16}}/>
+
+      {/* Author row */}
+      <div style={{display:"flex",alignItems:"center",gap:12}}>
         <div style={{
-          width:36,height:36,borderRadius:"50%",
-          background:"linear-gradient(135deg,rgba(200,255,0,0.15),rgba(200,255,0,0.04))",
-          border:"1px solid rgba(200,255,0,0.12)",
+          width:40,height:40,borderRadius:"50%",flexShrink:0,
+          background:"linear-gradient(135deg,rgba(200,255,0,0.18) 0%,rgba(200,255,0,0.04) 100%)",
+          border:"1px solid rgba(200,255,0,0.18)",
+          boxShadow:"0 0 16px rgba(200,255,0,0.08)",
           display:"flex",alignItems:"center",justifyContent:"center",
-          fontFamily:"var(--font-body)",fontSize:11,fontWeight:700,
-          color:"rgba(200,255,0,0.7)",letterSpacing:".04em",flexShrink:0,
+          fontFamily:"var(--font-body)",fontSize:12,fontWeight:800,
+          color:"rgba(200,255,0,0.8)",letterSpacing:".04em",
         }}>
           {t.avatar||t.name.split(" ").map(w=>w[0]).join("").slice(0,2)}
         </div>
-        <div>
-          <div style={{fontFamily:"var(--font-body)",fontWeight:700,fontSize:14,color:"#e8e8e8",lineHeight:1.2}}>{t.name}</div>
-          <div style={{fontFamily:"var(--font-body)",fontSize:11,color:"#444",marginTop:3,lineHeight:1}}>{t.role}</div>
+        <div style={{flex:1,minWidth:0}}>
+          <div style={{fontFamily:"var(--font-body)",fontWeight:700,fontSize:14,color:"var(--text)",lineHeight:1.2,marginBottom:3}}>{t.name}</div>
+          <div style={{fontFamily:"var(--font-body)",fontSize:11,color:"var(--muted-2)",letterSpacing:".04em"}}>{t.role}</div>
         </div>
+        <div style={{width:7,height:7,borderRadius:"50%",background:"var(--accent)",boxShadow:"0 0 8px var(--accent)",flexShrink:0,opacity:.6}}/>
       </div>
     </motion.article>
   );

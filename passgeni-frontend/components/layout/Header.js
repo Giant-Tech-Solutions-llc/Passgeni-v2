@@ -9,20 +9,28 @@ import PassGeniLogo from"./Logo.js";
 const TOOLS_MENU={
   columns:[
     {label:"Security",items:[
-      {icon:"🔍",label:"Breach Checker",desc:"Check if your password appeared in a data breach",href:"/tools/breach-checker"},
-      {icon:"🔗",label:"Secure Password Sharing",desc:"Share credentials via encrypted one-time links",href:"/tools/secure-share"},
+      {icon:"🔍",label:"Breach Checker",desc:"See if your password appeared in any known data breach",href:"/tools/breach-checker"},
+      {icon:"🔗",label:"Secure Password Sharing",desc:"Send credentials via AES-256 encrypted one-time links",href:"/tools/secure-share"},
     ]},
     {label:"Analysis",items:[
-      {icon:"📊",label:"Password Strength Checker",desc:"Entropy score, crack time, DNA grade",href:"/tools/strength-checker"},
-      {icon:"🛡️",label:"Password Audit Tool",desc:"Audit multiple passwords at once",href:"/tools/audit",business:true},
+      {icon:"📊",label:"Password Strength Checker",desc:"Entropy bits, crack time estimate, DNA grade A–F",href:"/tools/strength-checker"},
+      {icon:"🛡️",label:"Password Audit Tool",desc:"Audit multiple passwords at once for your whole team",href:"/tools/audit",business:true},
     ]},
     {label:"Business",items:[
-      {icon:"📋",label:"Password Policy Generator",desc:"Generate a compliant written password policy",href:"/tools/policy-generator",business:true},
+      {icon:"📋",label:"Password Policy Generator",desc:"Generate a written, HIPAA/PCI/SOC2-aligned password policy",href:"/tools/policy-generator",business:true},
     ]},
     {label:"Utility",items:[
-      {icon:"📶",label:"WiFi QR Generator",desc:"Create a scannable QR code for your WiFi",href:"/tools/wifi-qr",business:true},
+      {icon:"📶",label:"WiFi QR Generator",desc:"One-click QR code for your network — guests scan, done",href:"/tools/wifi-qr",business:true},
     ]},
   ],
+  featured:{
+    label:"Try the Generator",
+    desc:"Profession-aware AI password generation. Zero data storage. No account needed.",
+    href:"/#generator",
+    stat1:{n:"256-bit",l:"Minimum entropy"},
+    stat2:{n:"0 bytes",l:"Data stored"},
+    stat3:{n:"FIPS 140-3",l:"Entropy source"},
+  },
   footer:{label:"New to PassGeni? Start with the generator →",href:"/#generator"},
 };
 
@@ -49,56 +57,57 @@ const GUIDES_MENU={
       {label:"Post-Quantum Passwords",href:"/guides/post-quantum-passwords"},
     ]},
   ],
+  featured:{
+    label:"Why PassGeni?",
+    desc:"Built after realising most generators produce strings nobody can actually remember — and that compliance teams had no reliable free tool.",
+    href:"/about",
+    links:[
+      {label:"Our Mission",href:"/about#mission"},
+      {label:"How it's different",href:"/about#difference"},
+      {label:"The team",href:"/about#team"},
+    ],
+  },
   footer:{label:"Browse all guides →",href:"/guides"},
 };
 
-// ─── Portal: positions dropdown via fixed layout, clamps to vw ─
+// ─── Portal ───────────────────────────────────────────────────
 function MegaMenuPortal({triggerRef,dropWidth,onMouseEnter,onMouseLeave,children}){
   const[mounted,setMounted]=useState(false);
   const[pos,setPos]=useState({top:0,left:0});
-  const EDGE_PAD=16;
-
-  useEffect(()=>{ setMounted(true); },[]);
-
+  const EDGE=16;
+  useEffect(()=>{setMounted(true);},[]);
   useEffect(()=>{
     if(!mounted||!triggerRef.current)return;
-    const rect=triggerRef.current.getBoundingClientRect();
+    const r=triggerRef.current.getBoundingClientRect();
     const vw=window.innerWidth;
-    const rawLeft=rect.left;
-    const clampedLeft=Math.min(rawLeft,vw-dropWidth-EDGE_PAD);
-    const safeLeft=Math.max(EDGE_PAD,clampedLeft);
-    setPos({top:rect.bottom+10,left:safeLeft});
+    const left=Math.max(EDGE,Math.min(r.left,vw-dropWidth-EDGE));
+    setPos({top:r.bottom+10,left});
   },[mounted,triggerRef,dropWidth]);
-
   if(!mounted)return null;
   return createPortal(
-    <div
-      style={{position:"fixed",top:pos.top,left:pos.left,zIndex:9000,width:dropWidth}}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
-    >
+    <div style={{position:"fixed",top:pos.top,left:pos.left,zIndex:9000,width:dropWidth,maxWidth:`calc(100vw - ${EDGE*2}px)`}}
+      onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
       {children}
     </div>,
     document.body
   );
 }
 
-// ─── Shared dropdown shell ─────────────────────────────────────
+// ─── Shared shell ─────────────────────────────────────────────
 const SHELL={
-  background:"rgba(7,7,9,0.98)",
-  border:"1px solid rgba(200,255,0,0.08)",
-  borderRadius:16,
-  backdropFilter:"blur(24px)",
-  WebkitBackdropFilter:"blur(24px)",
-  boxShadow:"0 32px 80px rgba(0,0,0,0.75), 0 0 0 1px rgba(200,255,0,0.04)",
-  padding:"28px 28px 20px",
-  maxWidth:"calc(100vw - 32px)",
+  background:"rgba(6,6,8,0.98)",
+  border:"1px solid rgba(200,255,0,0.09)",
+  borderRadius:18,
+  backdropFilter:"blur(28px)",
+  WebkitBackdropFilter:"blur(28px)",
+  boxShadow:"0 40px 96px rgba(0,0,0,0.8),0 0 0 1px rgba(200,255,0,0.04),inset 0 1px 0 rgba(200,255,0,0.05)",
+  overflow:"hidden",
   boxSizing:"border-box",
 };
 
 function ColLabel({children}){
   return(
-    <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"rgba(200,255,0,.5)",letterSpacing:".14em",textTransform:"uppercase",marginBottom:14,paddingBottom:10,borderBottom:"1px solid rgba(255,255,255,.05)"}}>
+    <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"rgba(200,255,0,.45)",letterSpacing:".15em",textTransform:"uppercase",marginBottom:12,paddingBottom:10,borderBottom:"1px solid rgba(255,255,255,.05)"}}>
       {children}
     </div>
   );
@@ -107,11 +116,11 @@ function ColLabel({children}){
 function MenuItem({href,icon,label,desc,badge}){
   return(
     <a href={href}
-      style={{display:"flex",alignItems:"flex-start",gap:14,padding:"10px 12px",borderRadius:10,textDecoration:"none",transition:"background .15s",marginBottom:2}}
+      style={{display:"flex",alignItems:"flex-start",gap:13,padding:"11px 12px",borderRadius:10,textDecoration:"none",transition:"background .15s",marginBottom:2}}
       onMouseEnter={e=>e.currentTarget.style.background="rgba(200,255,0,0.05)"}
       onMouseLeave={e=>e.currentTarget.style.background="transparent"}
     >
-      <div style={{width:36,height:36,borderRadius:8,background:"rgba(200,255,0,0.06)",border:"1px solid rgba(200,255,0,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,flexShrink:0,marginTop:1}}>
+      <div style={{width:38,height:38,borderRadius:9,background:"rgba(200,255,0,0.06)",border:"1px solid rgba(200,255,0,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0,marginTop:1}}>
         {icon||"⚙️"}
       </div>
       <div style={{flex:1,minWidth:0}}>
@@ -119,7 +128,7 @@ function MenuItem({href,icon,label,desc,badge}){
           <span style={{fontFamily:"var(--font-body)",fontSize:14,fontWeight:600,color:"#f0f0f0",lineHeight:1.2}}>{label}</span>
           {badge&&<span style={{background:"rgba(200,255,0,0.08)",color:"rgba(200,255,0,0.5)",fontSize:9,borderRadius:100,padding:"2px 8px",fontFamily:"var(--font-body)",fontWeight:700,letterSpacing:".08em",textTransform:"uppercase",flexShrink:0}}>Team</span>}
         </div>
-        {desc&&<div style={{fontFamily:"var(--font-body)",fontSize:12,color:"#666",lineHeight:1.5}}>{desc}</div>}
+        {desc&&<div style={{fontFamily:"var(--font-body)",fontSize:12,color:"#5a5a6a",lineHeight:1.5}}>{desc}</div>}
       </div>
     </a>
   );
@@ -129,9 +138,9 @@ function GuideLink({href,label}){
   const arrowRef=useRef(null);
   return(
     <a href={href}
-      style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"9px 12px",borderRadius:8,textDecoration:"none",transition:"background .15s,color .15s",fontFamily:"var(--font-body)",fontSize:13,fontWeight:500,color:"#aaa",lineHeight:1.4,marginBottom:2}}
+      style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8,padding:"9px 12px",borderRadius:8,textDecoration:"none",transition:"background .15s,color .15s",fontFamily:"var(--font-body)",fontSize:13,fontWeight:500,color:"#9090a8",lineHeight:1.4,marginBottom:2}}
       onMouseEnter={e=>{e.currentTarget.style.background="rgba(200,255,0,0.05)";e.currentTarget.style.color="#fff";if(arrowRef.current)arrowRef.current.style.opacity="1";}}
-      onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="#aaa";if(arrowRef.current)arrowRef.current.style.opacity="0";}}
+      onMouseLeave={e=>{e.currentTarget.style.background="transparent";e.currentTarget.style.color="#9090a8";if(arrowRef.current)arrowRef.current.style.opacity="0";}}
     >
       {label}
       <span ref={arrowRef} style={{color:"rgba(200,255,0,.6)",fontSize:12,opacity:0,transition:"opacity .15s",flexShrink:0}}>→</span>
@@ -139,51 +148,118 @@ function GuideLink({href,label}){
   );
 }
 
-function DropdownFooter({tagline,href,label}){
+function ToolsFeaturedPanel({f}){
   return(
-    <div style={{borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:16,marginTop:4,display:"flex",alignItems:"center",justifyContent:"space-between",gap:16,flexWrap:"wrap"}}>
-      <span style={{fontFamily:"var(--font-body)",fontSize:12,color:"#3a3a3a"}}>{tagline}</span>
-      <a href={href}
-        style={{fontFamily:"var(--font-body)",fontSize:13,fontWeight:600,color:"rgba(200,255,0,.7)",textDecoration:"none",transition:"color .15s",whiteSpace:"nowrap"}}
+    <div style={{background:"rgba(200,255,0,0.03)",borderLeft:"1px solid rgba(200,255,0,0.07)",padding:"28px 24px",display:"flex",flexDirection:"column",justifyContent:"space-between",minHeight:"100%"}}>
+      <div>
+        <div style={{width:44,height:44,borderRadius:10,background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:16}}>⚡</div>
+        <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"rgba(200,255,0,.5)",letterSpacing:".14em",textTransform:"uppercase",marginBottom:10}}>{f.label}</div>
+        <p style={{fontFamily:"var(--font-body)",fontSize:13,color:"#666",lineHeight:1.7,marginBottom:20}}>{f.desc}</p>
+        <a href={f.href}
+          style={{display:"inline-flex",alignItems:"center",gap:8,background:"var(--accent)",color:"#000",fontFamily:"var(--font-body)",fontSize:12,fontWeight:700,letterSpacing:".06em",textTransform:"uppercase",padding:"10px 20px",borderRadius:8,textDecoration:"none",transition:"opacity .15s"}}
+          onMouseEnter={e=>e.currentTarget.style.opacity=".88"}
+          onMouseLeave={e=>e.currentTarget.style.opacity="1"}
+        >Try it free →</a>
+      </div>
+      <div style={{marginTop:24,display:"flex",flexDirection:"column",gap:10}}>
+        {[f.stat1,f.stat2,f.stat3].map((s,i)=>(
+          <div key={i} style={{display:"flex",alignItems:"center",gap:12}}>
+            <div style={{width:6,height:6,borderRadius:"50%",background:"rgba(200,255,0,.4)",flexShrink:0}}/>
+            <span style={{fontFamily:"var(--font-body)",fontSize:12,fontWeight:700,color:"rgba(200,255,0,.8)"}}>{s.n}</span>
+            <span style={{fontFamily:"var(--font-body)",fontSize:11,color:"#444"}}>{s.l}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function GuidesFeaturedPanel({f}){
+  return(
+    <div style={{background:"rgba(200,255,0,0.03)",borderLeft:"1px solid rgba(200,255,0,0.07)",padding:"28px 24px",display:"flex",flexDirection:"column",gap:20}}>
+      <div>
+        <div style={{width:44,height:44,borderRadius:10,background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:16}}>🧭</div>
+        <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"rgba(200,255,0,.5)",letterSpacing:".14em",textTransform:"uppercase",marginBottom:10}}>{f.label}</div>
+        <p style={{fontFamily:"var(--font-body)",fontSize:13,color:"#666",lineHeight:1.7,marginBottom:20}}>{f.desc}</p>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {f.links.map(l=>(
+            <a key={l.label} href={l.href}
+              style={{display:"flex",alignItems:"center",gap:10,padding:"9px 12px",borderRadius:8,textDecoration:"none",background:"rgba(255,255,255,.02)",border:"1px solid rgba(255,255,255,.04)",fontFamily:"var(--font-body)",fontSize:13,fontWeight:500,color:"#aaa",transition:"all .15s"}}
+              onMouseEnter={e=>{e.currentTarget.style.background="rgba(200,255,0,.05)";e.currentTarget.style.color="#fff";e.currentTarget.style.borderColor="rgba(200,255,0,.1)";}}
+              onMouseLeave={e=>{e.currentTarget.style.background="rgba(255,255,255,.02)";e.currentTarget.style.color="#aaa";e.currentTarget.style.borderColor="rgba(255,255,255,.04)";}}
+            >
+              <span style={{color:"rgba(200,255,0,.4)",fontSize:12}}>◈</span>{l.label}
+            </a>
+          ))}
+        </div>
+      </div>
+      <a href={f.href}
+        style={{marginTop:"auto",display:"inline-flex",alignItems:"center",gap:6,fontFamily:"var(--font-body)",fontSize:13,fontWeight:600,color:"rgba(200,255,0,.7)",textDecoration:"none",transition:"color .15s"}}
         onMouseEnter={e=>e.currentTarget.style.color="#C8FF00"}
         onMouseLeave={e=>e.currentTarget.style.color="rgba(200,255,0,.7)"}
-      >{label}</a>
+      >About PassGeni →</a>
     </div>
   );
 }
 
 function ToolsDropdown(){
+  const f=TOOLS_MENU.featured;
   return(
-    <div style={SHELL}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:24,rowGap:8}}>
-        {TOOLS_MENU.columns.map(col=>(
-          <div key={col.label} style={{marginBottom:8}}>
-            <ColLabel>{col.label}</ColLabel>
-            {col.items.map(item=>(
-              <MenuItem key={item.label} href={item.href} icon={item.icon} label={item.label} desc={item.desc} badge={item.business}/>
-            ))}
-          </div>
-        ))}
+    <div style={{...SHELL,display:"grid",gridTemplateColumns:"1fr 220px"}}>
+      {/* Left: columns */}
+      <div style={{padding:"28px 24px 20px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",columnGap:16,rowGap:4,marginBottom:20}}>
+          {TOOLS_MENU.columns.map(col=>(
+            <div key={col.label} style={{marginBottom:8}}>
+              <ColLabel>{col.label}</ColLabel>
+              {col.items.map(item=>(
+                <MenuItem key={item.label} href={item.href} icon={item.icon} label={item.label} desc={item.desc} badge={item.business}/>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:14,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <span style={{fontFamily:"var(--font-body)",fontSize:11,color:"#333"}}>All tools free · No account needed</span>
+          <a href={TOOLS_MENU.footer.href}
+            style={{fontFamily:"var(--font-body)",fontSize:12,fontWeight:600,color:"rgba(200,255,0,.7)",textDecoration:"none",transition:"color .15s"}}
+            onMouseEnter={e=>e.currentTarget.style.color="#C8FF00"}
+            onMouseLeave={e=>e.currentTarget.style.color="rgba(200,255,0,.7)"}
+          >{TOOLS_MENU.footer.label}</a>
+        </div>
       </div>
-      <DropdownFooter tagline="All tools are free · No account needed" href={TOOLS_MENU.footer.href} label={TOOLS_MENU.footer.label}/>
+      {/* Right: featured */}
+      <ToolsFeaturedPanel f={f}/>
     </div>
   );
 }
 
 function GuidesDropdown(){
+  const f=GUIDES_MENU.featured;
   return(
-    <div style={SHELL}>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",columnGap:20,rowGap:8}}>
-        {GUIDES_MENU.columns.map(col=>(
-          <div key={col.label} style={{marginBottom:8}}>
-            <ColLabel>{col.label}</ColLabel>
-            {col.items.map(item=>(
-              <GuideLink key={item.label} href={item.href} label={item.label}/>
-            ))}
-          </div>
-        ))}
+    <div style={{...SHELL,display:"grid",gridTemplateColumns:"1fr 220px"}}>
+      {/* Left: columns */}
+      <div style={{padding:"28px 24px 20px"}}>
+        <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",columnGap:12,rowGap:4,marginBottom:20}}>
+          {GUIDES_MENU.columns.map(col=>(
+            <div key={col.label} style={{marginBottom:8}}>
+              <ColLabel>{col.label}</ColLabel>
+              {col.items.map(item=>(
+                <GuideLink key={item.label} href={item.href} label={item.label}/>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div style={{borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:14,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
+          <span style={{fontFamily:"var(--font-body)",fontSize:11,color:"#333"}}>Free compliance guides · Updated 2024</span>
+          <a href={GUIDES_MENU.footer.href}
+            style={{fontFamily:"var(--font-body)",fontSize:12,fontWeight:600,color:"rgba(200,255,0,.7)",textDecoration:"none",transition:"color .15s"}}
+            onMouseEnter={e=>e.currentTarget.style.color="#C8FF00"}
+            onMouseLeave={e=>e.currentTarget.style.color="rgba(200,255,0,.7)"}
+          >{GUIDES_MENU.footer.label}</a>
+        </div>
       </div>
-      <DropdownFooter tagline="Free compliance guides · Updated 2024" href={GUIDES_MENU.footer.href} label={GUIDES_MENU.footer.label}/>
+      {/* Right: featured */}
+      <GuidesFeaturedPanel f={f}/>
     </div>
   );
 }
@@ -234,12 +310,18 @@ export default function Header(){
     closeTimer.current=setTimeout(()=>setMegaOpen(null),200);
   },[]);
 
-  const triggerRef=(key)=>key==="tools"?toolsRef:guidesRef;
-  const dropWidth=(key)=>key==="tools"?640:700;
+  const MEGA_KEYS=["tools","guides"];
+  const triggerRefs={tools:toolsRef,guides:guidesRef};
+  const dropWidths={tools:780,guides:820};
+
+  // All nav links including About
+  const allLinks=[
+    ...NAV.links,
+    {label:"About",href:"/about"},
+  ];
 
   return(
     <>
-      {/* Scroll progress bar */}
       <motion.div style={{scaleX:scrollYProgress,transformOrigin:"0%",position:"fixed",top:0,left:0,right:0,height:2,background:"#C8FF00",boxShadow:"0 0 6px rgba(200,255,0,0.5)",zIndex:9999}}/>
 
       <motion.header style={{backgroundColor:headerBg,backdropFilter:headerBlur,position:"fixed",top:0,left:0,right:0,zIndex:1000}}>
@@ -250,9 +332,9 @@ export default function Header(){
           </a>
 
           <div className="nav-links-row" role="list">
-            {NAV.links.map(l=>{
-              const isMega=l.label==="Tools"||l.label==="Guides";
+            {allLinks.map(l=>{
               const key=l.label.toLowerCase();
+              const isMega=MEGA_KEYS.includes(key);
               if(!isMega){
                 return(
                   <a key={l.label} href={l.href}
@@ -262,7 +344,7 @@ export default function Header(){
                   >{l.label}</a>
                 );
               }
-              const tRef=triggerRef(key);
+              const tRef=triggerRefs[key];
               const isOpen=megaOpen===key;
               return(
                 <div key={l.label} ref={tRef} style={{position:"relative"}} role="listitem"
@@ -285,15 +367,15 @@ export default function Header(){
                     {isOpen&&(
                       <MegaMenuPortal
                         triggerRef={tRef}
-                        dropWidth={dropWidth(key)}
+                        dropWidth={dropWidths[key]}
                         onMouseEnter={()=>openMega(key)}
                         onMouseLeave={scheduleMegaClose}
                       >
                         <motion.div
-                          initial={{opacity:0,y:8,scale:0.98}}
+                          initial={{opacity:0,y:10,scale:0.97}}
                           animate={{opacity:1,y:0,scale:1}}
-                          exit={{opacity:0,y:4,scale:0.98}}
-                          transition={{duration:0.18,ease:"easeOut"}}
+                          exit={{opacity:0,y:4,scale:0.97}}
+                          transition={{duration:0.2,ease:[0.22,1,0.36,1]}}
                         >
                           {key==="tools"?<ToolsDropdown/>:<GuidesDropdown/>}
                         </motion.div>
@@ -334,10 +416,9 @@ export default function Header(){
             exit={{opacity:0,y:-10}}
             transition={{duration:0.3,ease:"easeOut"}}
           >
-            {NAV.links.map((l,li)=>{
-              const isMega=l.label==="Tools"||l.label==="Guides";
+            {allLinks.map((l,li)=>{
               const key=l.label.toLowerCase();
-
+              const isMega=MEGA_KEYS.includes(key);
               if(!isMega){
                 return(
                   <motion.a key={l.label} href={l.href} className="mobile-nav-link"
@@ -347,10 +428,8 @@ export default function Header(){
                   >{l.label}</motion.a>
                 );
               }
-
               const menuData=key==="tools"?TOOLS_MENU:GUIDES_MENU;
               const isExpanded=mobileExpanded===key;
-
               return(
                 <div key={l.label} style={{borderBottom:"1px solid rgba(255,255,255,.06)"}}>
                   <motion.button
@@ -366,7 +445,6 @@ export default function Header(){
                       style={{fontSize:20,lineHeight:1,color:"rgba(200,255,0,.5)",display:"inline-block"}}
                     >+</motion.span>
                   </motion.button>
-
                   <AnimatePresence>
                     {isExpanded&&(
                       <motion.div
@@ -413,7 +491,6 @@ export default function Header(){
                 </div>
               );
             })}
-
             <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:12}}>
               <a href="/auth/signin" className="btn-ghost"
                 style={{justifyContent:"center",fontSize:15,padding:"14px"}}
