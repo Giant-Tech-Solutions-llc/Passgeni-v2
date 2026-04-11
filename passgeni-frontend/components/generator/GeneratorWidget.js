@@ -338,39 +338,113 @@ export default function GeneratorWidget() {
                   />
                   {showPqPopup && (
                     <div ref={pqPopupRef} style={{
-                      position:"absolute",top:"calc(100% + 8px)",left:0,zIndex:300,
-                      background:"#0a0a0c",border:"1px solid #1e1e1e",borderRadius:10,
-                      padding:"16px 18px",maxWidth:280,width:"max-content",
-                      animation:"fadeIn .2s ease",
-                      boxShadow:"0 16px 48px rgba(0,0,0,0.7)",
+                      position:"absolute",top:"calc(100% + 10px)",left:0,zIndex:300,
+                      background:"rgba(8,8,11,0.97)",
+                      border:"1px solid rgba(200,255,0,0.14)",
+                      borderRadius:14,
+                      padding:"20px 20px 16px",
+                      width:300,
+                      animation:"fadeIn .18s ease",
+                      boxShadow:"0 24px 56px rgba(0,0,0,0.8),0 0 0 1px rgba(200,255,0,0.04),inset 0 1px 0 rgba(200,255,0,0.06)",
+                      backdropFilter:"blur(16px)",
                     }}>
-                      <div style={{ fontFamily:"var(--font-body)",fontSize:14,fontWeight:600,color:"#fff",marginBottom:8,lineHeight:1.5 }}>
-                        ⚛️  That&apos;s your Post-Quantum password for today.
+                      {/* Header row */}
+                      <div style={{ display:"flex",alignItems:"flex-start",justifyContent:"space-between",marginBottom:10 }}>
+                        <div style={{
+                          width:32,height:32,borderRadius:8,flexShrink:0,
+                          background:"linear-gradient(135deg,rgba(200,255,0,0.18),rgba(200,255,0,0.04))",
+                          border:"1px solid rgba(200,255,0,0.2)",
+                          display:"flex",alignItems:"center",justifyContent:"center",
+                          fontSize:15,
+                        }}>⚛️</div>
+                        <button
+                          onClick={()=>setShowPqPopup(false)}
+                          style={{ background:"none",border:"none",color:"#555",fontSize:18,cursor:"pointer",lineHeight:1,padding:"2px 4px",transition:"color .15s" }}
+                          onMouseEnter={e=>e.currentTarget.style.color="#aaa"}
+                          onMouseLeave={e=>e.currentTarget.style.color="#555"}
+                          aria-label="Dismiss"
+                        >×</button>
                       </div>
-                      <div style={{ fontFamily:"var(--font-body)",fontSize:13,color:"#aaa",marginBottom:14,lineHeight:1.6 }}>
-                        Come back tomorrow, or unlock it right now.
+
+                      {/* Title + body */}
+                      <div style={{ fontFamily:"var(--font-body)",fontSize:14,fontWeight:700,color:"#fff",marginBottom:6,lineHeight:1.4,letterSpacing:"-.01em" }}>
+                        Daily limit reached.
                       </div>
-                      <a href="/pricing#pro" style={{ fontFamily:"var(--font-body)",fontSize:14,fontWeight:700,color:"#C8FF00",textDecoration:"none",display:"block",marginBottom:12 }}>
-                        Upgrade to Pro →
+                      <div style={{ fontFamily:"var(--font-body)",fontSize:12.5,color:"#666",marginBottom:16,lineHeight:1.65 }}>
+                        Free tier includes 1 Post-Quantum password per day — yours is protected. Resets at midnight, or unlock unlimited right now.
+                      </div>
+
+                      {/* Primary CTA */}
+                      <a href="/pricing" style={{
+                        display:"flex",alignItems:"center",justifyContent:"space-between",
+                        background:"var(--accent)",color:"#000",
+                        fontFamily:"var(--font-body)",fontSize:12,fontWeight:800,
+                        letterSpacing:".04em",textTransform:"uppercase",
+                        borderRadius:8,padding:"10px 14px",
+                        textDecoration:"none",marginBottom:12,
+                        transition:"opacity .15s",
+                      }}
+                      onMouseEnter={e=>e.currentTarget.style.opacity=".88"}
+                      onMouseLeave={e=>e.currentTarget.style.opacity="1"}
+                      >
+                        <span>Upgrade to Pro</span>
+                        <span style={{ fontFamily:"var(--font-mono)",fontSize:10, fontWeight:400,opacity:.7 }}>$9 / mo · 150/day</span>
                       </a>
-                      <div style={{ borderTop:"1px solid #222",paddingTop:12,marginBottom:10 }}>
-                        <div style={{ fontFamily:"var(--font-body)",fontSize:11,color:"#333",marginBottom:10,textTransform:"uppercase",letterSpacing:".08em" }}>Or keep it free — share PassGeni:</div>
-                        <div style={{ display:"flex",gap:8,flexWrap:"wrap" }}>
-                          <button
-                            onClick={()=>handlePqShare("twitter")}
-                            disabled={!!pqShareLoading}
-                            style={{ background:"rgba(200,255,0,0.06)",border:"1px solid rgba(200,255,0,0.15)",color:"#C8FF00",fontSize:12,borderRadius:100,padding:"6px 14px",fontFamily:"var(--font-body)",fontWeight:600,cursor:"pointer",opacity:pqShareLoading==="twitter"?0.5:1 }}
-                          >
-                            {pqShareLoading==="twitter"?"…":"𝕏 Share on X  +15 passwords"}
-                          </button>
-                          <button
-                            onClick={()=>handlePqShare("linkedin")}
-                            disabled={!!pqShareLoading}
-                            style={{ background:"rgba(200,255,0,0.06)",border:"1px solid rgba(200,255,0,0.15)",color:"#C8FF00",fontSize:12,borderRadius:100,padding:"6px 14px",fontFamily:"var(--font-body)",fontWeight:600,cursor:"pointer",opacity:pqShareLoading==="linkedin"?.5:1 }}
-                          >
-                            {pqShareLoading==="linkedin"?"…":"in Share on LinkedIn  +15 passwords"}
-                          </button>
-                        </div>
+
+                      {/* Divider */}
+                      <div style={{ display:"flex",alignItems:"center",gap:10,marginBottom:12 }}>
+                        <div style={{ flex:1,height:1,background:"linear-gradient(90deg,transparent,#1e1e1e)" }} />
+                        <span style={{ fontFamily:"var(--font-body)",fontSize:10,color:"#444",letterSpacing:".08em",textTransform:"uppercase",flexShrink:0 }}>or stay free</span>
+                        <div style={{ flex:1,height:1,background:"linear-gradient(90deg,#1e1e1e,transparent)" }} />
+                      </div>
+
+                      {/* Share label */}
+                      <div style={{ fontFamily:"var(--font-body)",fontSize:11,color:"#555",marginBottom:8,lineHeight:1.5 }}>
+                        Share PassGeni and unlock <span style={{ color:"var(--accent)",fontWeight:700 }}>+15 passwords</span> for 24 hours:
+                      </div>
+
+                      {/* Share buttons */}
+                      <div style={{ display:"flex",flexDirection:"column",gap:6 }}>
+                        <button
+                          onClick={()=>handlePqShare("twitter")}
+                          disabled={!!pqShareLoading}
+                          style={{
+                            display:"flex",alignItems:"center",justifyContent:"space-between",
+                            background:"rgba(200,255,0,0.05)",
+                            border:"1px solid rgba(200,255,0,0.12)",
+                            color:"#C8FF00",fontSize:12,borderRadius:8,
+                            padding:"9px 12px",
+                            fontFamily:"var(--font-body)",fontWeight:600,
+                            cursor:pqShareLoading?"not-allowed":"pointer",
+                            opacity:pqShareLoading==="twitter"?0.5:1,
+                            transition:"background .15s,border-color .15s",
+                          }}
+                          onMouseEnter={e=>{ if(!pqShareLoading){ e.currentTarget.style.background="rgba(200,255,0,0.1)"; e.currentTarget.style.borderColor="rgba(200,255,0,0.25)"; }}}
+                          onMouseLeave={e=>{ e.currentTarget.style.background="rgba(200,255,0,0.05)"; e.currentTarget.style.borderColor="rgba(200,255,0,0.12)"; }}
+                        >
+                          <span>{pqShareLoading==="twitter" ? "Opening…" : "𝕏  Share on X"}</span>
+                          <span style={{ fontFamily:"var(--font-mono)",fontSize:10,opacity:.6,fontWeight:400 }}>+15 passwords</span>
+                        </button>
+                        <button
+                          onClick={()=>handlePqShare("linkedin")}
+                          disabled={!!pqShareLoading}
+                          style={{
+                            display:"flex",alignItems:"center",justifyContent:"space-between",
+                            background:"rgba(200,255,0,0.05)",
+                            border:"1px solid rgba(200,255,0,0.12)",
+                            color:"#C8FF00",fontSize:12,borderRadius:8,
+                            padding:"9px 12px",
+                            fontFamily:"var(--font-body)",fontWeight:600,
+                            cursor:pqShareLoading?"not-allowed":"pointer",
+                            opacity:pqShareLoading==="linkedin"?.5:1,
+                            transition:"background .15s,border-color .15s",
+                          }}
+                          onMouseEnter={e=>{ if(!pqShareLoading){ e.currentTarget.style.background="rgba(200,255,0,0.1)"; e.currentTarget.style.borderColor="rgba(200,255,0,0.25)"; }}}
+                          onMouseLeave={e=>{ e.currentTarget.style.background="rgba(200,255,0,0.05)"; e.currentTarget.style.borderColor="rgba(200,255,0,0.12)"; }}
+                        >
+                          <span>{pqShareLoading==="linkedin" ? "Opening…" : "in  Share on LinkedIn"}</span>
+                          <span style={{ fontFamily:"var(--font-mono)",fontSize:10,opacity:.6,fontWeight:400 }}>+15 passwords</span>
+                        </button>
                       </div>
                     </div>
                   )}
