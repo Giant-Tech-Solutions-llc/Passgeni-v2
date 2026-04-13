@@ -8,6 +8,8 @@
 // =============================================================
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 
 const FRAMEWORKS = [
@@ -297,9 +299,9 @@ export default function PolicyGeneratorPage() {
           />
         </div>
 
-        <button onClick={generate} className="btn-primary" style={{ width: "100%", justifyContent: "center", fontSize: 15 }}>
+        <motion.button onClick={generate} className="btn-primary" {...btnPrimary} style={{ width: "100%", justifyContent: "center", fontSize: 15 }}>
           Generate policy document →
-        </button>
+        </motion.button>
       </div>
 
       {/* ── Policy output ── */}
@@ -310,12 +312,12 @@ export default function PolicyGeneratorPage() {
               Your password policy
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={copy}     className="btn-ghost" style={{ fontSize: 13, padding: "10px 18px" }}>
+              <motion.button onClick={copy}     className="btn-ghost" {...btnGhost} style={{ fontSize: 13, padding: "10px 18px" }}>
                 {copied ? "✓ Copied" : "Copy text"}
-              </button>
-              <button onClick={download} className="btn-primary" style={{ fontSize: 13, padding: "10px 18px", animation: "none" }}>
+              </motion.button>
+              <motion.button onClick={download} className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "10px 18px", animation: "none" }}>
                 ↓ Download .txt
-              </button>
+              </motion.button>
             </div>
           </div>
           <div style={{ background: "#08080a", border: "1px solid #141416", borderRadius: 12, padding: "28px", fontFamily: "var(--font-mono)", fontSize: 12, color: "#aaa", lineHeight: 1.9, whiteSpace: "pre-wrap", maxHeight: 600, overflowY: "auto" }}>

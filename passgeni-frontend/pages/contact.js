@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
+import { btnPrimary } from "../lib/motion.js";
 import PageLayout from "../components/layout/PageLayout.js";
 
 const LINK = { color: "#C8FF00", textDecoration: "none" };
@@ -98,9 +99,9 @@ export default function ContactPage() {
               <input type="text" placeholder="Subject" value={form.subject} onChange={update("subject")} style={INPUT} />
               <textarea placeholder="Your message…" value={form.message} onChange={update("message")} required rows={6}
                 style={{ ...INPUT, resize: "vertical", lineHeight: 1.7 }} />
-              <button type="submit" className="btn-primary" disabled={loading} style={{ fontSize: 15, padding: "14px 32px" }}>
+              <motion.button type="submit" className="btn-primary" {...btnPrimary} disabled={loading} style={{ fontSize: 15, padding: "14px 32px" }}>
                 {loading ? "Opening mail client…" : "Send message →"}
-              </button>
+              </motion.button>
             </form>
           )}
         </motion.div>

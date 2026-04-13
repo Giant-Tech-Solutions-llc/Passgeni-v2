@@ -8,6 +8,8 @@
 // =============================================================
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 
 // ─── CRYPTO HELPERS ───────────────────────────────────────────
@@ -129,9 +131,9 @@ function ShareForm() {
           style={{ width: "100%", background: "#060608", border: "1px solid #1a1a1a", borderRadius: 8, padding: "12px 16px", fontFamily: "var(--font-body)", fontSize: 13, color: "#fff", outline: "none", marginBottom: 20, boxSizing: "border-box" }}
         />
 
-        <button onClick={createLink} disabled={loading || !password.trim()} className="btn-primary" style={{ width: "100%", justifyContent: "center", fontSize: 14, animation: "none", opacity: !password.trim() ? 0.5 : 1 }}>
+        <motion.button onClick={createLink} disabled={loading || !password.trim()} className="btn-primary" {...btnPrimary} style={{ width: "100%", justifyContent: "center", fontSize: 14, animation: "none", opacity: !password.trim() ? 0.5 : 1 }}>
           {loading ? "Encrypting…" : "Create secure link →"}
-        </button>
+        </motion.button>
       </div>
 
       {shareUrl && (
@@ -143,9 +145,9 @@ function ShareForm() {
             {shareUrl}
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={copy} className="btn-primary" style={{ fontSize: 13, padding: "10px 20px", animation: "none" }}>
+            <motion.button onClick={copy} className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "10px 20px", animation: "none" }}>
               {copied ? "✓ Copied!" : "Copy link"}
-            </button>
+            </motion.button>
           </div>
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 6 }}>
             {[
@@ -216,9 +218,9 @@ function DecryptView({ fragData }) {
           For security, secrets can only be viewed once. This link was already opened and the secret has been cleared from memory.
           Ask the sender to create a new secure link.
         </p>
-        <a href="/tools/secure-share" className="btn-ghost" style={{ display: "inline-flex", fontSize: 13, padding: "10px 24px" }}>
+        <motion.a href="/tools/secure-share" className="btn-ghost" {...btnGhost} style={{ display: "inline-flex", fontSize: 13, padding: "10px 24px" }}>
           Create a new secure link →
-        </a>
+        </motion.a>
       </div>
     );
   }
@@ -234,9 +236,9 @@ function DecryptView({ fragData }) {
         <strong style={{ color: "#ff8888" }}>This secret can only be viewed once — save it immediately after revealing.</strong>
       </p>
       {!revealed ? (
-        <button onClick={reveal} disabled={loading} className="btn-primary" style={{ fontSize: 15, padding: "14px 32px" }}>
+        <motion.button onClick={reveal} disabled={loading} className="btn-primary" {...btnPrimary} style={{ fontSize: 15, padding: "14px 32px" }}>
           {loading ? "Decrypting…" : "Reveal secret →"}
-        </button>
+        </motion.button>
       ) : secret ? (
         <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
           {secret.note && (

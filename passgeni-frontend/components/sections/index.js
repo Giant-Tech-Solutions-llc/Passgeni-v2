@@ -1,6 +1,7 @@
 import{useState}from"react";
 import{motion,AnimatePresence}from"framer-motion";
 import{HOW_IT_WORKS,FEATURES,TOOLS_PREVIEW,PRICING,TESTIMONIALS,FAQ,WAITLIST,BOTTOM_CTA}from"../../content/copy.js";
+import{btnPrimary,btnGhost,sectionHeadReveal,bcCard}from"../../lib/motion.js";
 import{Headline}from"../ui/index.js";
 
 const LOGOS=["Microsoft","Google","Amazon","Stripe","Shopify","Cloudflare","GitHub","Atlassian","Twilio","Okta","Datadog","HashiCorp","Vercel","MongoDB","Elastic"];
@@ -31,9 +32,6 @@ export function LogosStrip(){
   );
 }
 
-const sectionHeadReveal={initial:{opacity:0,y:30},whileInView:{opacity:1,y:0},viewport:{once:true,margin:"-80px"},transition:{duration:0.6,ease:"easeOut"}};
-const cardReveal=(i)=>({initial:{opacity:0,y:20},whileInView:{opacity:1,y:0},viewport:{once:true},transition:{duration:0.4,ease:"easeOut",delay:i*0.1}});
-
 /* ── HOW IT WORKS ── */
 export function HowItWorks(){
   return(
@@ -44,7 +42,7 @@ export function HowItWorks(){
       </div>
       <div className="grid-cards">
         {HOW_IT_WORKS.steps.map((step,i)=>(
-          <motion.article key={step.step} {...cardReveal(i)} className="bc bc-a">
+          <motion.article key={step.step} {...bcCard(i)} className="bc bc-a">
             <div className="bc-line"/>
             <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"var(--accent)",letterSpacing:".14em",marginBottom:16,textTransform:"uppercase"}}>{step.step}</div>
             <h3 style={{fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(16px,2.5vw,20px)",color:"var(--text)",marginBottom:12,letterSpacing:"-.02em"}}>{step.title}</h3>
@@ -69,7 +67,7 @@ export function FeaturesSection(){
       </div>
       <div className="grid-cards">
         {FEATURES.items.slice(0,6).map((item,i)=>(
-          <motion.article key={item.title} {...cardReveal(i)} className="bc bc-a">
+          <motion.article key={item.title} {...bcCard(i)} className="bc bc-a">
             <div className="bc-line"/>
             <div style={{fontSize:"clamp(22px,3.5vw,28px)",marginBottom:16,color:"var(--accent)",lineHeight:1}}>{item.icon}</div>
             <h3 style={{fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(15px,2vw,17px)",color:"var(--text)",marginBottom:10,letterSpacing:"-.02em",lineHeight:1.3}}>{item.title}</h3>
@@ -93,7 +91,7 @@ export function ToolsPreview(){
       </div>
       <div className="grid-cards">
         {TOOLS_PREVIEW.items.slice(0,6).map((item,i)=>(
-          <motion.a key={item.title} {...cardReveal(i)} href={item.href} className="bc bc-a" style={{textDecoration:"none"}}>
+          <motion.a key={item.title} {...bcCard(i)} href={item.href} className="bc bc-a" style={{textDecoration:"none"}}>
             <div className="bc-line"/>
             <div style={{fontSize:"clamp(22px,3.5vw,28px)",marginBottom:14,lineHeight:1}}>{item.icon}</div>
             <h3 style={{fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(15px,2vw,17px)",color:"var(--text)",marginBottom:8,flex:1}}>{item.title}</h3>
@@ -117,15 +115,19 @@ export function PricingSection(){
       </div>
       <div className="pricing-grid">
         {PRICING.plans.map((plan,i)=>(
-          <div key={plan.name} style={{
-            background:i===1?"linear-gradient(135deg,rgba(13,13,16,.9) 0%,rgba(200,255,0,.05) 100%)":"rgba(13,13,16,.75)",
-            border:i===1?"1px solid rgba(200,255,0,.28)":"1px solid rgba(200,255,0,.08)",
-            borderRadius:"var(--radius-l)",padding:"clamp(24px,3vw,36px)",
-            display:"flex",flexDirection:"column",position:"relative",
-            backdropFilter:"blur(12px)",transition:"border-color .3s,transform .3s",
-          }}
-            onMouseEnter={e=>{if(i!==1)e.currentTarget.style.borderColor="rgba(200,255,0,.2)";e.currentTarget.style.transform="translateY(-2px)";}}
-            onMouseLeave={e=>{e.currentTarget.style.borderColor=i===1?"rgba(200,255,0,.28)":"rgba(200,255,0,.08)";e.currentTarget.style.transform="translateY(0)";}}
+          <motion.div key={plan.name}
+            initial={{opacity:0,y:24}} whileInView={{opacity:1,y:0}}
+            viewport={{once:true,amount:0.15}}
+            transition={{duration:0.5,delay:i*0.08,ease:[0.16,1,0.3,1]}}
+            style={{
+              background:i===1?"linear-gradient(135deg,rgba(13,13,16,.9) 0%,rgba(200,255,0,.05) 100%)":"rgba(13,13,16,.75)",
+              border:i===1?"1px solid rgba(200,255,0,.28)":"1px solid rgba(200,255,0,.08)",
+              borderRadius:"var(--radius-l)",padding:"clamp(24px,3vw,36px)",
+              display:"flex",flexDirection:"column",position:"relative",
+              backdropFilter:"blur(12px)",transition:"border-color .3s",
+            }}
+            onMouseEnter={e=>{if(i!==1)e.currentTarget.style.borderColor="rgba(200,255,0,.2)";}}
+            onMouseLeave={e=>{e.currentTarget.style.borderColor=i===1?"rgba(200,255,0,.28)":"rgba(200,255,0,.08)";}}
           >
             {i===1&&<div style={{position:"absolute",top:0,left:0,right:0,height:1,background:"linear-gradient(90deg,transparent,rgba(200,255,0,.6),transparent)"}}/>}
             {plan.badge&&(
@@ -141,9 +143,10 @@ export function PricingSection(){
               </div>
               <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",lineHeight:1.6}}>{plan.tagline}</p>
             </div>
-            <a href={plan.ctaHref} className={plan.featured?"btn-primary":"btn-ghost"}
+            <motion.a href={plan.ctaHref} className={plan.featured?"btn-primary":"btn-ghost"}
+              {...(plan.featured?btnPrimary:btnGhost)}
               style={{width:"100%",justifyContent:"center",marginBottom:24,display:"flex",boxSizing:"border-box"}}
-            >{plan.cta}</a>
+            >{plan.cta}</motion.a>
             <div style={{borderTop:"1px solid rgba(200,255,0,0.08)",paddingTop:16,flex:1}}>
               {plan.features.map((f,fi)=>(
                 <div key={fi} style={{display:"flex",gap:10,alignItems:"flex-start",marginBottom:9}}>
@@ -158,7 +161,7 @@ export function PricingSection(){
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
       <p style={{textAlign:"center",fontFamily:"var(--font-body)",fontSize:11,color:"var(--muted-2)",marginTop:24,letterSpacing:".08em"}}>{PRICING.footer}</p>
@@ -397,9 +400,7 @@ export function WaitlistSection(){
                 style={{flex:1,minWidth:160,background:"rgba(255,255,255,0.04)",border:"1px solid #2a2a2a",borderRadius:8,padding:"10px 14px",fontFamily:"var(--font-body)",fontSize:14,color:"var(--text)",outline:"none"}}
               />
               <motion.button type="submit" disabled={loading} className="btn-primary"
-                whileHover={{scale:1.03,boxShadow:"0 0 24px rgba(200,255,0,0.35)"}}
-                whileTap={{scale:0.97}}
-                transition={{duration:0.2}}
+                {...btnPrimary}
                 style={{whiteSpace:"nowrap",padding:"10px 18px",fontSize:13}}
               >
                 {loading?"…":BOTTOM_CTA.digest.cta}
@@ -415,9 +416,7 @@ export function WaitlistSection(){
           <h2 style={{fontFamily:"var(--font-heading)",fontWeight:800,fontSize:"clamp(20px,3vw,28px)",color:"var(--text)",letterSpacing:"-.03em",marginBottom:12,lineHeight:1.15}}>{BOTTOM_CTA.pdf.headline}</h2>
           <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",lineHeight:1.75,marginBottom:24,flex:1}}>{BOTTOM_CTA.pdf.body}</p>
           <motion.a href={BOTTOM_CTA.pdf.href} target="_blank" rel="noopener noreferrer" className="btn-primary"
-            whileHover={{scale:1.03,boxShadow:"0 0 24px rgba(200,255,0,0.35)"}}
-            whileTap={{scale:0.97}}
-            transition={{duration:0.2}}
+            {...btnPrimary}
             style={{display:"inline-flex",alignItems:"center",justifyContent:"center",padding:"12px 22px",fontSize:14,width:"fit-content"}}
           >
             {BOTTOM_CTA.pdf.cta}

@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter }           from "next/router";
 import PageLayout              from "../../components/layout/PageLayout.js";
@@ -305,10 +306,11 @@ function TeamManager({ members, onUpdate }) {
               style={{ ...INPUT, flex: 1, minWidth: 160 }}
               onFocus={e => (e.currentTarget.style.borderColor = "rgba(200,255,0,.3)")}
               onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,.07)")} />
-            <button onClick={invite} disabled={loading || !email.trim()} className="btn-primary"
+            <motion.button onClick={invite} disabled={loading || !email.trim()} className="btn-primary"
+              {...btnPrimary}
               style={{ fontSize: 12, padding: "10px 18px", flexShrink: 0, opacity: !email.trim() ? 0.45 : 1 }}>
               {loading ? "Sending…" : "Invite →"}
-            </button>
+            </motion.button>
           </div>
           {error   && <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#ff6644", margin: 0 }}>{error}</p>}
           {success && <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#C8FF00", margin: 0 }}>✓ {success}</p>}
@@ -369,9 +371,9 @@ function UpgradeBanner() {
           Upgrade to Team for 5,000 calls/day, 5 seats, compliance exports, and full API access.
         </div>
       </div>
-      <a href="/pricing" className="btn-primary" style={{ whiteSpace: "nowrap", flexShrink: 0, fontSize: 12 }}>
+      <motion.a href="/pricing" className="btn-primary" {...btnPrimary} style={{ whiteSpace: "nowrap", flexShrink: 0, fontSize: 12 }}>
         Upgrade to Team →
-      </a>
+      </motion.a>
     </motion.div>
   );
 }
@@ -463,7 +465,7 @@ export default function DashboardPage() {
         <main style={{ maxWidth: 480, margin: "0 auto", padding: "120px var(--page-pad)", textAlign: "center" }}>
           <div style={{ fontSize: 36, marginBottom: 16 }}>⚠️</div>
           <div style={{ fontFamily: "var(--font-body)", fontSize: 15, color: "#ff6644", marginBottom: 20 }}>{loadError}</div>
-          <button onClick={fetchData} className="btn-ghost" style={{ fontSize: 13 }}>Try again →</button>
+          <motion.button onClick={fetchData} className="btn-ghost" {...btnGhost} style={{ fontSize: 13 }}>Try again →</motion.button>
         </main>
       </PageLayout>
     );
@@ -528,12 +530,13 @@ export default function DashboardPage() {
 
           {/* Actions */}
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <a href="/api-docs" className="btn-ghost" style={{ fontSize: 12, padding: "9px 16px" }}>API Docs</a>
+            <motion.a href="/api-docs" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>API Docs</motion.a>
             {data.paddleCustomerId && (
-              <button onClick={openBillingPortal} disabled={billingLoading} className="btn-ghost"
+              <motion.button onClick={openBillingPortal} disabled={billingLoading} className="btn-ghost"
+                {...btnGhost}
                 style={{ fontSize: 12, padding: "9px 16px", cursor: "pointer" }}>
                 {billingLoading ? "Loading…" : "Billing →"}
-              </button>
+              </motion.button>
             )}
             <button onClick={() => signOut({ callbackUrl: "/" })}
               style={{ background: "none", border: "1px solid rgba(255,255,255,.07)", borderRadius: 8, padding: "9px 16px", fontFamily: "var(--font-body)", fontSize: 12, color: "#555", cursor: "pointer", transition: "all .15s" }}

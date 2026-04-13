@@ -3,6 +3,8 @@
 // passgeni.ai/tools
 // =============================================================
 
+import { motion } from "framer-motion";
+import { fadeUp, heroEntrance, bcCard, fadeIn } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
 
 const TOOLS = [
@@ -80,7 +82,7 @@ export default function ToolsIndexPage() {
       <main style={{ maxWidth: 1200, margin: "0 auto", padding: "80px var(--page-pad) 120px" }}>
 
         {/* Header */}
-        <div style={{ marginBottom: 64 }}>
+        <motion.div style={{ marginBottom: 64 }} {...heroEntrance(0)}>
           <nav aria-label="Breadcrumb" style={{ marginBottom: 24 }}>
             <a href="/" style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#888", textDecoration: "none" }}>PassGeni</a>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#444", margin: "0 8px" }}>→</span>
@@ -95,22 +97,21 @@ export default function ToolsIndexPage() {
           <p style={{ fontFamily: "var(--font-body)", fontSize: 16, color: "#888", maxWidth: 520, lineHeight: 1.8 }}>
             Every tool runs entirely in your browser. Nothing is stored. Nothing is transmitted. Free, forever.
           </p>
-        </div>
+        </motion.div>
 
         {/* Tools grid */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
-          {TOOLS.map((tool) => (
-            <a
+          {TOOLS.map((tool, i) => (
+            <motion.a
               key={tool.href}
               href={tool.href}
-              style={{ textDecoration: "none", display: "flex", flexDirection: "column", background: "#0a0a0c", border: "1px solid #141416", borderRadius: 16, padding: "28px 32px", transition: "all 0.3s cubic-bezier(.16,1,.3,1)", position: "relative", overflow: "hidden" }}
+              {...bcCard(i)}
+              style={{ textDecoration: "none", display: "flex", flexDirection: "column", background: "#0a0a0c", border: "1px solid #141416", borderRadius: 16, padding: "28px 32px", position: "relative", overflow: "hidden" }}
               onMouseEnter={(e) => {
-                e.currentTarget.style.transform    = "translateY(-4px)";
                 e.currentTarget.style.borderColor  = `${tool.color}44`;
                 e.currentTarget.style.boxShadow    = `0 20px 60px ${tool.color}11`;
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.transform    = "none";
                 e.currentTarget.style.borderColor  = "#141416";
                 e.currentTarget.style.boxShadow    = "none";
               }}
@@ -132,12 +133,12 @@ export default function ToolsIndexPage() {
                 <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: tool.color, letterSpacing: "0.08em" }}>Use tool</span>
                 <span style={{ color: tool.color, fontSize: 14 }}>→</span>
               </div>
-            </a>
+            </motion.a>
           ))}
         </div>
 
         {/* Bottom trust row */}
-        <div style={{ marginTop: 64, padding: "32px", background: "#0a0a0c", border: "1px solid #141416", borderRadius: 12, textAlign: "center" }}>
+        <motion.div {...fadeUp(0.1)} style={{ marginTop: 64, padding: "32px", background: "#0a0a0c", border: "1px solid #141416", borderRadius: 12, textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>
             Zero retention by design
           </div>
@@ -145,7 +146,7 @@ export default function ToolsIndexPage() {
             Every tool on this page runs entirely client-side using your browser's native cryptographic APIs.
             No account, no tracking, no servers involved in processing your passwords.
           </p>
-        </div>
+        </motion.div>
 
         {/* Testimonials */}
         <div style={{ marginTop: 80 }}>
@@ -160,15 +161,15 @@ export default function ToolsIndexPage() {
               { name: "Nina P.",  role: "UX researcher",          text: "Strength Checker gave me actual data — entropy in bits, crack time, improvements to make. Not just a vague red/green bar. Actual useful feedback." },
               { name: "Elena V.", role: "HR director",            text: "Generated a complete HIPAA-aligned password policy PDF in two minutes using the Policy Generator. IT stopped arguing with us instantly." },
               { name: "Hana J.", role: "Data analyst",            text: "Breach checker k-anonymity is real. Only 5 chars of my SHA-1 hash go to HIBP. I checked the network tab. My password never left the browser." },
-            ].map((t) => (
-              <div key={t.name} style={{ background: "#0c0c0e", border: "1px solid #141416", borderRadius: 12, padding: "22px 24px" }}>
+            ].map((t, i) => (
+              <motion.div key={t.name} {...bcCard(i)} style={{ background: "#0c0c0e", border: "1px solid #141416", borderRadius: 12, padding: "22px 24px" }}>
                 <div style={{ display: "flex", gap: 2, marginBottom: 10 }}>
                   {[1,2,3,4,5].map(i => <span key={i} style={{ color: "#C8FF00", fontSize: 11 }}>★</span>)}
                 </div>
                 <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#999", lineHeight: 1.75, marginBottom: 14 }}>"{t.text}"</p>
                 <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 12, color: "#fff" }}>{t.name}</div>
                 <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", marginTop: 3 }}>{t.role}</div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>

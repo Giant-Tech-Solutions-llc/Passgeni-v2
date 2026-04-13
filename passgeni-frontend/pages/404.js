@@ -2,6 +2,8 @@
 // PASSGENI — 404 NOT FOUND PAGE
 // =============================================================
 
+import { motion } from "framer-motion";
+import { btnPrimary, btnGhost } from "../lib/motion.js";
 import PageLayout from "../components/layout/PageLayout.js";
 
 export default function NotFoundPage() {
@@ -20,9 +22,9 @@ export default function NotFoundPage() {
           This page doesn't exist or was moved.
         </p>
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href="/"        className="btn-primary" style={{ animation: "none" }}>← Back to home</a>
-          <a href="/guides"  className="btn-ghost">Browse guides</a>
-          <a href="/tools"   className="btn-ghost">View tools</a>
+          <motion.a href="/"       className="btn-primary" {...btnPrimary} style={{ animation: "none" }}>← Back to home</motion.a>
+          <motion.a href="/guides" className="btn-ghost"   {...btnGhost}>Browse guides</motion.a>
+          <motion.a href="/tools"  className="btn-ghost"   {...btnGhost}>View tools</motion.a>
         </div>
       </main>
     </PageLayout>

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import Header from "../components/layout/Header.js";
 import Footer from "../components/layout/Footer.js";
+import { btnPrimary, btnGhost, heroEntrance, sectionHeadReveal, bcCard } from "../lib/motion.js";
 
 const PLANS = [
   {
@@ -230,9 +231,10 @@ export default function PricingPage() {
                       )}
                       <p style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-base)", color: "var(--muted)", lineHeight: 1.6 }}>{plan.tagline}</p>
                     </div>
-                    <a href={ctaHref} className={plan.featured ? "btn-primary" : "btn-ghost"}
+                    <motion.a href={ctaHref} className={plan.featured ? "btn-primary" : "btn-ghost"}
+                      {...(plan.featured ? btnPrimary : btnGhost)}
                       style={{ width: "100%", justifyContent: "center", marginBottom: plan.trialNote ? 8 : 24, display: "flex", boxSizing: "border-box" }}
-                    >{plan.cta}</a>
+                    >{plan.cta}</motion.a>
                     {plan.trialNote && (
                       <div style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "var(--muted-2)", textAlign: "center", marginBottom: 16 }}>{plan.trialNote}</div>
                     )}
@@ -327,15 +329,11 @@ export default function PricingPage() {
               </h2>
               <div style={{ display: "flex", gap: 16, justifyContent: "center", flexWrap: "wrap" }}>
                 <motion.a href="/#generator" className="btn-primary"
-                  whileHover={{ scale: 1.03, boxShadow: "0 0 24px rgba(200,255,0,0.35)" }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ duration: 0.2 }}
+                  {...btnPrimary}
                   style={{ fontSize: 15, padding: "14px 32px" }}
                 >Generate Now — Free →</motion.a>
                 <motion.a href="/auth/signin?callbackUrl=/checkout?plan=team" className="btn-ghost"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ duration: 0.2 }}
+                  {...btnGhost}
                   style={{ fontSize: 15, padding: "14px 32px" }}
                 >Start Team Trial</motion.a>
               </div>

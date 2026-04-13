@@ -7,26 +7,7 @@ import Head from "next/head";
 import { motion } from "framer-motion";
 import Header from "../components/layout/Header.js";
 import Footer from "../components/layout/Footer.js";
-
-const sectionHeadReveal = {
-  initial: { opacity: 0, y: 30 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.6, ease: "easeOut" },
-};
-
-const cardReveal = (i) => ({
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true },
-  transition: { duration: 0.4, ease: "easeOut", delay: i * 0.1 },
-});
-
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 20 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.5, ease: "easeOut", delay },
-});
+import { sectionHeadReveal, bcCard, heroEntrance, btnPrimary, btnGhost } from "../lib/motion.js";
 
 // ── CHARS for background streams ──────────────────────────────
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
@@ -178,7 +159,7 @@ export default function AboutPage() {
 
           <div style={{ position: "relative", zIndex: 10, textAlign: "center", width: "100%", maxWidth: 920, margin: "0 auto" }}>
             {/* Badge */}
-            <motion.div {...fadeUp(0)} style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(13,13,16,0.9)", border: "1px solid rgba(200,255,0,0.15)", borderRadius: 100, padding: "8px clamp(16px,3vw,22px)", marginBottom: "clamp(28px,5vw,48px)" }}>
+            <motion.div {...heroEntrance(0)} style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(13,13,16,0.9)", border: "1px solid rgba(200,255,0,0.15)", borderRadius: 100, padding: "8px clamp(16px,3vw,22px)", marginBottom: "clamp(28px,5vw,48px)" }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--accent)", boxShadow: "0 0 12px var(--accent)", animation: "blink 2s ease infinite", flexShrink: 0 }} />
               <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(9px,1.4vw,11px)", fontWeight: 600, color: "rgba(200,255,0,.8)", letterSpacing: ".14em", textTransform: "uppercase" }}>Our Story</span>
             </motion.div>
@@ -208,23 +189,8 @@ export default function AboutPage() {
               So we built something different.
             </motion.p>
 
-            {/* CTA */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, ease: "easeOut", delay: 0.45 }}
-              style={{ marginBottom: "clamp(32px,5vw,56px)" }}
-            >
-              <a
-                href="/#generator"
-                className="btn-primary"
-                style={{ fontSize: "clamp(13px,2vw,16px)", padding: "clamp(16px,2vw,20px) clamp(40px,6vw,72px)", letterSpacing: ".06em" }}
-              >
-                Generate a password ↓
-              </a>
-            </motion.div>
-
             {/* Trust chips */}
-            <motion.div className="hero-trust" {...fadeUp(0.55)}>
+            <motion.div className="hero-trust" {...heroEntrance(0.55)}>
               {TRUST_POINTS.map(({ icon, label }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
                   <span aria-hidden style={{ color: "rgba(200,255,0,.5)", fontSize: "clamp(10px,1.5vw,13px)" }}>{icon}</span>
@@ -304,7 +270,7 @@ export default function AboutPage() {
           </div>
           <div className="grid-cards">
             {HOW_STEPS.map((step, i) => (
-              <motion.article key={step.step} {...cardReveal(i)} className="bc bc-a">
+              <motion.article key={step.step} {...bcCard(i)} className="bc bc-a">
                 <div className="bc-line" />
                 <div style={{ fontFamily: "var(--font-body)", fontSize: 10, fontWeight: 700, color: "var(--accent)", letterSpacing: ".14em", marginBottom: 16, textTransform: "uppercase" }}>{step.step}</div>
                 <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(16px,2.5vw,20px)", color: "var(--text)", marginBottom: 12, letterSpacing: "-.02em" }}>{step.title}</h3>
@@ -325,7 +291,7 @@ export default function AboutPage() {
           </div>
           <div className="grid-cards">
             {VALUES.map((card, i) => (
-              <motion.article key={card.title} {...cardReveal(i)} className="bc bc-a">
+              <motion.article key={card.title} {...bcCard(i)} className="bc bc-a">
                 <div className="bc-line" />
                 <div style={{ fontSize: "clamp(22px,3.5vw,28px)", marginBottom: 16, color: "var(--accent)", lineHeight: 1 }}>{card.icon}</div>
                 <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(15px,2vw,17px)", color: "var(--text)", marginBottom: 10, letterSpacing: "-.02em", lineHeight: 1.3 }}>{card.title}</h3>
@@ -426,7 +392,7 @@ export default function AboutPage() {
             {PLEDGES.map((pledge, i) => (
               <motion.div
                 key={pledge.title}
-                {...cardReveal(i)}
+                {...bcCard(i)}
                 style={{
                   textAlign: "center",
                   marginBottom: i < PLEDGES.length - 1 ? 36 : 0,
@@ -460,12 +426,9 @@ export default function AboutPage() {
             style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "clamp(24px,4vw,36px)" }}
           >
             <div style={{ display: "flex", gap: "clamp(10px,1.5vw,14px)", justifyContent: "center", flexWrap: "wrap" }}>
-              <a href="/#generator" className="btn-primary" style={{ fontSize: "clamp(13px,1.6vw,15px)", padding: "clamp(14px,1.8vw,16px) clamp(32px,4vw,52px)" }}>
-                Generate a password ↓
-              </a>
-              <a href="/pricing" className="btn-ghost" style={{ fontSize: "clamp(13px,1.6vw,15px)", padding: "clamp(14px,1.8vw,16px) clamp(24px,3vw,36px)" }}>
+              <motion.a href="/pricing" className="btn-ghost" {...btnGhost} style={{ fontSize: "clamp(13px,1.6vw,15px)", padding: "clamp(14px,1.8vw,16px) clamp(24px,3vw,36px)" }}>
                 See Team pricing
-              </a>
+              </motion.a>
             </div>
 
             <div className="hero-trust">

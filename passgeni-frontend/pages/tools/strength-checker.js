@@ -4,6 +4,8 @@
 // =============================================================
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 import { getStrength, getEntropy, getCrackTime, getDNAScore } from "../../lib/strength.js";
 
@@ -114,9 +116,9 @@ function StrengthMeter({ password }) {
             })}
           </div>
           <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid #111" }}>
-            <a href="/#generator" className="btn-primary" style={{ fontSize: 13, padding: "12px 24px", animation: "none" }}>
+            <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "12px 24px", animation: "none" }}>
               Generate a stronger password →
-            </a>
+            </motion.a>
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import{useState,useEffect}from"react";
 import{motion}from"framer-motion";
 import{HERO}from"../../content/copy.js";
+import{btnPrimary}from"../../lib/motion.js";
 
 const CHARS="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
 const PASSWORDS=["nX9#kT2@mP5!qR8$","cortex-vault-442-helix","Bz7!deploy#K3@stack","helix-neon-881-pulse","pixel-stark-357-render","Kq#delta88!yield@Zn","doctor-ridge-991-seal","marble-flux-227-crest"];
@@ -105,10 +106,11 @@ export default function HeroSection(){
           initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} transition={{duration:0.5,ease:"easeOut",delay:0.55}}
           style={{marginBottom:"clamp(32px,5vw,56px)",display:"flex",justifyContent:"center"}}
         >
-          <a href={HERO.primaryHref} className="btn-primary"
+          <motion.a href={HERO.primaryHref} className="btn-primary"
+            {...btnPrimary}
             style={{fontSize:"clamp(13px,2vw,16px)",padding:"clamp(16px,2vw,20px) clamp(40px,6vw,72px)",letterSpacing:".06em"}}
             onClick={e=>{e.currentTarget.classList.remove("btn-pulse");void e.currentTarget.offsetWidth;e.currentTarget.classList.add("btn-pulse");}}
-          >{HERO.primaryCTA} ↓</a>
+          >{HERO.primaryCTA} ↓</motion.a>
         </motion.div>
 
         {/* Trust points — delay 0.45s */}

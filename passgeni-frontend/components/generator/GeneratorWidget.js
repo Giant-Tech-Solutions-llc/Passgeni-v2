@@ -2,6 +2,8 @@
 // PASSGENI — GENERATOR WIDGET
 // =============================================================
 import { useState, useRef, useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import { COMPLIANCE_PRESETS } from "../../data/compliance.js";
 import { PROFESSIONS } from "../../content/professions.js";
 import { buildPassword, buildPassphrase, deriveSeeds, generateAuditRecord } from "../../lib/generator.js";
@@ -488,9 +490,9 @@ export default function GeneratorWidget() {
                   <option value="korean">🇰🇷 Korean</option>
                 </select>
               </div>
-              <button className="btn-primary" style={{ width:"100%", justifyContent:"center" }} onClick={()=>generate()}>
+              <motion.button className="btn-primary" {...btnPrimary} style={{ width:"100%", justifyContent:"center" }} onClick={()=>generate()}>
                 {generating ? "Generating…" : "Generate Secure Password →"}
-              </button>
+              </motion.button>
               {pwLimitHit && (
                 <div style={{ marginTop:12, background:"#0a0a0c", border:"1px solid #1e1e1e", borderRadius:10, padding:"14px 18px", animation:"fadeIn .2s ease" }}>
                   <div style={{ fontFamily:"var(--font-body)", fontSize:13, fontWeight:600, color:"#fff", marginBottom:6 }}>

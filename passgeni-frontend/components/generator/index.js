@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence, useMotionValue, animate } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import { COMPLIANCE_PRESETS }  from "../../data/compliance.js";
 import { PROFESSIONS }         from "../../content/professions.js";
 import { buildPassword, buildPassphrase } from "../../lib/generator.js";
@@ -228,9 +229,9 @@ export function BulkGenerator({ profession, opts, length, customSeeds, quantumMo
 
       {/* Body */}
       <div style={{ padding: "20px 24px" }}>
-        <button className="btn-primary" style={{ width: "100%", justifyContent: "center", marginBottom: blocked ? 0 : 16 }} onClick={generate}>
+        <motion.button className="btn-primary" {...btnPrimary} style={{ width: "100%", justifyContent: "center", marginBottom: blocked ? 0 : 16 }} onClick={generate}>
           {generating ? `Generating ${count} passwords…` : <>Generate {count} passwords <span style={{ fontSize: 16 }}>⚡</span></>}
-        </button>
+        </motion.button>
         {blocked && (
           <div style={{ marginTop: 12, marginBottom: 16, background: "#0a0a0c", border: "1px solid #1e1e1e", borderRadius: 10, padding: "14px 18px", animation: "fadeIn .2s ease" }}>
             <div style={{ fontFamily: "var(--font-body)", fontSize: 13, fontWeight: 600, color: "#fff", marginBottom: 6 }}>
@@ -244,8 +245,8 @@ export function BulkGenerator({ profession, opts, length, customSeeds, quantumMo
         {bulk.length > 0 && (
           <>
             <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
-              <button onClick={copyAll}  className="btn-ghost" style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "10px 16px" }}>Copy all</button>
-              <button onClick={download} className="btn-ghost" style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "10px 16px" }}>↓ Download .txt</button>
+              <motion.button onClick={copyAll}  className="btn-ghost" {...btnGhost} style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "10px 16px" }}>Copy all</motion.button>
+              <motion.button onClick={download} className="btn-ghost" {...btnGhost} style={{ flex: 1, justifyContent: "center", fontSize: 12, padding: "10px 16px" }}>↓ Download .txt</motion.button>
             </div>
             <div style={{ background: "#08080a", border: "1px solid #141416", borderRadius: 10, overflow: "hidden", maxHeight: 320, overflowY: "auto" }}>
               {bulk.map((pw, i) => (
@@ -448,9 +449,9 @@ export function PassphraseTab({ profession, customSeeds, customLabel, showOtherI
       />
 
       {/* Generate button */}
-      <button className="btn-primary" style={{ width: "100%", justifyContent: "center" }} onClick={() => generate()}>
+      <motion.button className="btn-primary" {...btnPrimary} style={{ width: "100%", justifyContent: "center" }} onClick={() => generate()}>
         {generating ? "Generating…" : <>Generate passphrase <span style={{ fontSize: 18 }}>→</span></>}
-      </button>
+      </motion.button>
 
       <p style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "#aaa", textAlign: "center", marginTop: 14, letterSpacing: "0.04em" }}>
         Recommended by <strong style={{ color: "#bbb" }}>NIST SP 800-63B</strong> · Easier to remember · Just as strong

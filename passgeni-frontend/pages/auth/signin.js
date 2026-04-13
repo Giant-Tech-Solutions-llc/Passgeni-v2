@@ -5,10 +5,11 @@
 // Magic-link email auth. No password. Just email → link → in.
 // =============================================================
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
 
 export default function SignInPage() {
@@ -103,14 +104,15 @@ export default function SignInPage() {
               </p>
             )}
 
-            <button
+            <motion.button
               onClick={handleSubmit}
               disabled={loading}
               className="btn-primary"
+              {...btnPrimary}
               style={{ width: "100%", justifyContent: "center", fontSize: 15, animation: "none", opacity: loading ? 0.7 : 1 }}
             >
               {loading ? "Sending link…" : "Send magic link →"}
-            </button>
+            </motion.button>
 
             <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#555", marginTop: 20, textAlign: "center", lineHeight: 1.7 }}>
               Only Team subscribers can access the dashboard.{" "}

@@ -4,6 +4,8 @@
 // =============================================================
 
 import { useRouter } from "next/router";
+import { motion } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
 
 const ERROR_MESSAGES = {
@@ -29,12 +31,12 @@ export default function AuthErrorPage() {
           {msg}
         </p>
         <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-          <a href="/auth/signin" className="btn-primary" style={{ animation: "none" }}>
+          <motion.a href="/auth/signin" className="btn-primary" {...btnPrimary} style={{ animation: "none" }}>
             Try again →
-          </a>
-          <a href="mailto:hello@passgeni.ai" className="btn-ghost">
+          </motion.a>
+          <motion.a href="mailto:hello@passgeni.ai" className="btn-ghost" {...btnGhost}>
             Contact support
-          </a>
+          </motion.a>
         </div>
         {code !== "Default" && (
           <p style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#333", marginTop: 24, letterSpacing: "0.1em" }}>

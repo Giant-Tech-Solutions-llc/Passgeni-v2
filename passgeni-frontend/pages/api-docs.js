@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { btnPrimary, btnGhost } from "../lib/motion.js";
 import PageLayout from "../components/layout/PageLayout.js";
 
 const BASE = "https://passgeni.ai/api/v1";
@@ -401,9 +402,9 @@ function LiveTester() {
           </div>
         </div>
 
-        <button onClick={run} disabled={loading} className="btn-primary" style={{ width: "100%", justifyContent: "center", fontSize: 13 }}>
+        <motion.button onClick={run} disabled={loading} className="btn-primary" {...btnPrimary} style={{ width: "100%", justifyContent: "center", fontSize: 13 }}>
           {loading ? "Running…" : "Run request →"}
-        </button>
+        </motion.button>
       </div>
 
       {/* Response */}
@@ -542,8 +543,8 @@ export default function APIDocsPage() {
             </p>
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <a href="#quickstart" className="btn-primary">Start in 30 seconds →</a>
-              <a href="#tester" className="btn-ghost">Try live tester</a>
+              <motion.a href="#quickstart" className="btn-primary" {...btnPrimary}>Start in 30 seconds →</motion.a>
+              <motion.a href="#tester" className="btn-ghost" {...btnGhost}>Try live tester</motion.a>
             </div>
           </motion.div>
 
@@ -939,9 +940,9 @@ X-RateLimit-Reset:     1735689600000  // Unix ms — midnight UTC`} label="Rate 
                       ))}
                     </div>
                     {plan.featured && (
-                      <a href="/pricing" className="btn-primary" style={{ display: "flex", justifyContent: "center", fontSize: 13 }}>
+                      <motion.a href="/pricing" className="btn-primary" {...btnPrimary} style={{ display: "flex", justifyContent: "center", fontSize: 13 }}>
                         Start free trial →
-                      </a>
+                      </motion.a>
                     )}
                   </div>
                 </div>

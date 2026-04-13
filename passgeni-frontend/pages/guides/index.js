@@ -4,6 +4,7 @@
 // =============================================================
 
 import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
 import { COMPLIANCE_GUIDES, PROFESSION_GUIDES, CONCEPT_GUIDES, COMPARISON_GUIDES } from "../../content/guides.js";
 
@@ -147,9 +148,9 @@ export default function GuidesIndexPage() {
           <p style={{ fontFamily: "var(--font-body)", fontSize: "clamp(14px,1.5vw,16px)", color: "var(--muted)", marginBottom: 28, maxWidth: 440, margin: "0 auto 28px", lineHeight: 1.8 }}>
             We publish new guides weekly. Join the list and we'll email you when guides relevant to your industry go live.
           </p>
-          <a href="/#waitlist" className="btn-primary" style={{ fontSize: 14, padding: "13px 28px" }}>
+          <motion.a href="/#waitlist" className="btn-primary" {...btnPrimary} style={{ fontSize: 14, padding: "13px 28px" }}>
             Get notified →
-          </a>
+          </motion.a>
         </motion.div>
 
       </main>

@@ -4,6 +4,7 @@ import{motion,AnimatePresence,useScroll,useTransform}from"framer-motion";
 import{useSession}from"next-auth/react";
 import{NAV}from"../../content/copy.js";
 import PassGeniLogo from"./Logo.js";
+import{btnPrimary,btnGhost}from"../../lib/motion.js";
 
 // ─── Menu Data ────────────────────────────────────────────────
 const TOOLS_MENU={
@@ -390,7 +391,7 @@ export default function Header(){
           <div className="nav-right">
             <a href="/auth/signin" className="nav-signin">Sign In</a>
             {status!=="loading"&&session&&(
-              <a href="/dashboard" className="btn-primary" style={{padding:"9px 18px",fontSize:12}}>Dashboard →</a>
+              <motion.a href="/dashboard" className="btn-primary" {...btnPrimary} style={{padding:"9px 18px",fontSize:12}}>Dashboard →</motion.a>
             )}
             <button
               className={`nav-hamburger${open?" open":""}`}
@@ -492,15 +493,17 @@ export default function Header(){
               );
             })}
             <div style={{marginTop:28,display:"flex",flexDirection:"column",gap:12}}>
-              <a href="/auth/signin" className="btn-ghost"
+              <motion.a href="/auth/signin" className="btn-ghost"
+                {...btnGhost}
                 style={{justifyContent:"center",fontSize:15,padding:"14px"}}
                 onClick={()=>setOpen(false)}
-              >Sign In</a>
+              >Sign In</motion.a>
               {status!=="loading"&&session&&(
-                <a href="/dashboard" className="btn-primary"
+                <motion.a href="/dashboard" className="btn-primary"
+                  {...btnPrimary}
                   style={{justifyContent:"center",fontSize:15,padding:"14px"}}
                   onClick={()=>setOpen(false)}
-                >Dashboard →</a>
+                >Dashboard →</motion.a>
               )}
             </div>
           </motion.nav>

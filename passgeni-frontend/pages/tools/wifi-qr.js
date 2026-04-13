@@ -8,6 +8,8 @@
 // =============================================================
 
 import { useState, useEffect, useRef } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 
 // ─── QR CODE LIBRARY LOADER ───────────────────────────────────
@@ -93,9 +95,9 @@ function QRDisplay({ wifiString, label }) {
 
       {/* Actions */}
       <div style={{ display: "flex", gap: 10 }}>
-        <button onClick={download} className="btn-primary" style={{ fontSize: 13, padding: "12px 24px", animation: "none" }}>
+        <motion.button onClick={download} className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "12px 24px", animation: "none" }}>
           ↓ Download PNG
-        </button>
+        </motion.button>
       </div>
 
       {/* Privacy note */}
@@ -206,14 +208,15 @@ export default function WifiQRPage() {
             <span style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#aaa" }}>Hidden network (not broadcast)</span>
           </label>
 
-          <button
+          <motion.button
             onClick={generate}
             disabled={!ssid.trim() || (security !== "nopass" && !password.trim())}
             className="btn-primary"
+            {...btnPrimary}
             style={{ width: "100%", justifyContent: "center", fontSize: 14, animation: "none", opacity: (!ssid.trim() || (security !== "nopass" && !password.trim())) ? 0.5 : 1 }}
           >
             Generate QR code →
-          </button>
+          </motion.button>
 
           {/* Tips */}
           <div style={{ marginTop: 20 }}>

@@ -7,6 +7,8 @@
 // =============================================================
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 import { getStrength, getEntropy, getCrackTime, getDNAScore } from "../../lib/strength.js";
 
@@ -248,18 +250,19 @@ export default function AuditToolPage() {
         </div>
         <div style={{ display: "flex", gap: 10, marginTop: 16, flexWrap: "wrap" }}>
           {count < MAX_PASSWORDS && (
-            <button onClick={addRow} className="btn-ghost" style={{ fontSize: 13, padding: "10px 20px" }}>
+            <motion.button onClick={addRow} className="btn-ghost" {...btnGhost} style={{ fontSize: 13, padding: "10px 20px" }}>
               + Add row
-            </button>
+            </motion.button>
           )}
-          <button
+          <motion.button
             onClick={runAudit}
             disabled={loading || !inputs.slice(0, count).some((p) => p.trim())}
             className="btn-primary"
+            {...btnPrimary}
             style={{ fontSize: 14, padding: "12px 28px", animation: "none" }}
           >
             {loading ? "Auditing…" : `Run audit →`}
-          </button>
+          </motion.button>
         </div>
         <p style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", marginTop: 12, letterSpacing: "0.08em" }}>
           All analysis is client-side · Breach check uses k-anonymity · Nothing is stored or transmitted
@@ -274,9 +277,9 @@ export default function AuditToolPage() {
             <AuditRow key={i} entry={entry} index={i} />
           ))}
           <div style={{ marginTop: 20, textAlign: "center" }}>
-            <a href="/#generator" className="btn-primary" style={{ fontSize: 14, padding: "14px 32px" }}>
+            <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ fontSize: 14, padding: "14px 32px" }}>
               Replace weak passwords →
-            </a>
+            </motion.a>
           </div>
         </>
       )}

@@ -7,6 +7,7 @@
 // =============================================================
 
 import { motion } from "framer-motion";
+import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
 import { ALL_GUIDES, getGuideBySlug, getRelatedGuides } from "../../content/guides.js";
 import { getGuideSchema, getFAQSchema } from "../../seo/schema.js";
@@ -135,9 +136,9 @@ export function GeneratorCTA({ compliance }) {
       <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#888", marginBottom: 20, lineHeight: 1.7 }}>
         Free. Client-side. Zero storage. {compliance && `${compliance.toUpperCase()} preset included.`}
       </p>
-      <a href={href} className="btn-primary" style={{ fontSize: 14, padding: "13px 28px", animation: "none" }}>
+      <motion.a href={href} className="btn-primary" {...btnPrimary} style={{ fontSize: 14, padding: "13px 28px", animation: "none" }}>
         Generate password →
-      </a>
+      </motion.a>
     </div>
   );
 }
@@ -228,7 +229,7 @@ export default function GuidePage({ guide, related, contentHtml, toc }) {
         <div style={{ maxWidth: 760, margin: "120px auto", padding: "0 var(--page-pad)", textAlign: "center" }}>
           <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 40, color: "#fff", marginBottom: 16 }}>404</div>
           <p style={{ fontFamily: "var(--font-body)", fontSize: 16, color: "#888" }}>This guide doesn't exist.</p>
-          <a href="/guides" className="btn-primary" style={{ marginTop: 24, display: "inline-flex" }}>← All guides</a>
+          <motion.a href="/guides" className="btn-primary" {...btnPrimary} style={{ marginTop: 24, display: "inline-flex" }}>← All guides</motion.a>
         </div>
       </PageLayout>
     );
@@ -316,8 +317,8 @@ export default function GuidePage({ guide, related, contentHtml, toc }) {
         </nav>
 
         <div style={{ marginTop: 40, textAlign: "center" }}>
-          <a href="/guides" className="btn-ghost" style={{ marginRight: 12 }}>← All guides</a>
-          <a href="/#generator" className="btn-primary" style={{ animation: "none" }}>Generate password →</a>
+          <motion.a href="/guides" className="btn-ghost" {...btnGhost} style={{ marginRight: 12 }}>← All guides</motion.a>
+          <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ animation: "none" }}>Generate password →</motion.a>
         </div>
 
       </main>

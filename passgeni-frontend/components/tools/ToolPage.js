@@ -5,6 +5,8 @@
 // breadcrumbs, and the "try the generator" CTA at the bottom.
 // =============================================================
 
+import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import PageLayout from "../layout/PageLayout.js";
 
 // ─── BREADCRUMB ───────────────────────────────────────────────
@@ -46,9 +48,9 @@ function GeneratorCTA() {
         <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#888", marginBottom: 28, maxWidth: 400, margin: "0 auto 28px" }}>
           Free, client-side, zero storage. Uses your profession to make it memorable.
         </p>
-        <a href="/#generator" className="btn-primary" style={{ fontSize: 15, padding: "16px 32px" }}>
+        <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ fontSize: 15, padding: "16px 32px" }}>
           Generate my password →
-        </a>
+        </motion.a>
       </div>
     </section>
   );

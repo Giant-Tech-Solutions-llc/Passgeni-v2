@@ -8,6 +8,8 @@
 // =============================================================
 
 import { useState } from "react";
+import { motion } from "framer-motion";
+import { btnPrimary } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 
 // ─── SHA-1 HASH (client-side) ────────────────────────────────
@@ -66,9 +68,9 @@ function BreachResult({ result, password }) {
               This password appears in known data breach databases. Any account using it is at serious risk. Change it immediately on every site where you use it.
             </p>
             <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-              <a href="/#generator" className="btn-primary" style={{ fontSize: 13, padding: "10px 20px" }}>
+              <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "10px 20px" }}>
                 Generate a safe replacement →
-              </a>
+              </motion.a>
             </div>
           </div>
         </div>
@@ -187,14 +189,15 @@ export default function BreachCheckerPage() {
               {showPw ? "🙈" : "👁"}
             </button>
           </div>
-          <button
+          <motion.button
             className="btn-primary"
+            {...btnPrimary}
             onClick={handleCheck}
             disabled={loading || !password.trim()}
             style={{ padding: "14px 28px", fontSize: 14, animation: "none", opacity: !password.trim() ? 0.5 : 1 }}
           >
             {loading ? "Checking…" : "Check →"}
-          </button>
+          </motion.button>
         </div>
 
         {/* Zero knowledge notice */}
