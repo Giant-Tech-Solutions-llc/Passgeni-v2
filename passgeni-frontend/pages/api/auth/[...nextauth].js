@@ -63,14 +63,9 @@ async function sendVerificationRequest({ identifier: email, url }) {
 
 // ─── AUTH OPTIONS ────────────────────────────────────────────
 export const authOptions = {
+  url: process.env.NEXTAUTH_URL,  // ← ADD THIS LINE
   adapter: SupabaseAdapter(),
-
-  providers: [
-    EmailProvider({
-      // We use a custom sendVerificationRequest instead of SMTP
-      from:                      "hello@passgeni.ai",
-      sendVerificationRequest,
-      maxAge:                    10 * 60, // 10 minutes
+  // ... rest unchanged                   10 * 60, // 10 minutes
     }),
   ],
 
