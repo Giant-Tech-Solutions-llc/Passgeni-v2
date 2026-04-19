@@ -17,7 +17,7 @@
 import NextAuth from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { Resend } from "resend";
-import { findCustomerByEmail } from "../../../lib/db/client.js";
+import { findCustomerByEmail, upsertCustomerByEmail } from "../../../lib/db/client.js";
 import { SupabaseAdapter } from "../../../lib/auth/adapter.js";
 
 // ─── RESEND EMAIL SENDER ─────────────────────────────────────
@@ -82,21 +82,28 @@ export const authOptions = {
       // On sign-in or explicit refresh, fetch customer from DB
       if (trigger === "signIn" || trigger === "update" || !token.customerId) {
         try {
-          const customer = await findCustomerByEmail(token.email);
-          if (customer) {
-            token.customerId    = customer.id;
-            token.plan          = customer.plan;
-            token.planStatus    = customer.plan_status;
-            token.trialEnd      = customer.trial_end;
-            token.paddleCustomerId = customer.paddle_customer_id;
-          } else {
-            // Email doesn't have a customer record — free/unsubscribed
-            token.customerId  = null;
-            token.plan        = "free";
-            token.planStatus  = "none";
+          let customer = await findCustomerByEmail(token.email);
+          if (!customer) {
+            // First sign-in — auto-provision 14-day Assurance trial (no card required)
+            const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+            customer = await upsertCustomerByEmail({
+              email:       token.email.toLowerCase(),
+              plan:        "assurance",
+              plan_status: "trialing",
+              trial_end:   trialEnd,
+            });
+            console.log("[auth] Provisioned 14-day Assurance trial for", token.email);
           }
+          token.customerId       = customer.id;
+          token.plan             = customer.plan;
+          token.planStatus       = customer.plan_status;
+          token.trialEnd         = customer.trial_end;
+          token.paddleCustomerId = customer.paddle_customer_id;
         } catch (e) {
           console.error("JWT callback DB error:", e);
+          // Fallback: don't block sign-in if DB is unavailable
+          token.plan       = "free";
+          token.planStatus = "none";
         }
       }
       return token;

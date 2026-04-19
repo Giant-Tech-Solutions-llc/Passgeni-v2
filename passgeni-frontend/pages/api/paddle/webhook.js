@@ -14,7 +14,7 @@
 
 import crypto            from "crypto";
 import { generateApiKey } from "../../../lib/apiKeys.js";
-import { mapPaddleStatus, isActiveSubscription, PADDLE_API } from "../../../lib/paddle.js";
+import { mapPaddleStatus, isActiveSubscription, planFromPriceId, PADDLE_API } from "../../../lib/paddle.js";
 import {
   upsertCustomerByEmail,
   updateCustomerByPaddleId,
@@ -67,7 +67,7 @@ async function fetchPaddleCustomerEmail(paddleCustomerId) {
 }
 
 // ─── PROVISION ────────────────────────────────────────────────
-async function provisionTeamAccess({ paddleCustomerId, paddleSubscriptionId, customerEmail, trialEndsAt, nextBilledAt }) {
+async function provisionAccess({ paddleCustomerId, paddleSubscriptionId, customerEmail, priceId, trialEndsAt, nextBilledAt }) {
   if (!customerEmail) {
     customerEmail = await fetchPaddleCustomerEmail(paddleCustomerId);
   }
@@ -76,13 +76,14 @@ async function provisionTeamAccess({ paddleCustomerId, paddleSubscriptionId, cus
     return;
   }
 
+  const plan       = planFromPriceId(priceId);
   const planStatus = trialEndsAt && new Date(trialEndsAt) > new Date() ? "trialing" : "active";
 
   const customer = await upsertCustomerByEmail({
     paddle_customer_id:     String(paddleCustomerId),
     paddle_subscription_id: String(paddleSubscriptionId),
     email:                  customerEmail.toLowerCase(),
-    plan:                   "team",
+    plan,
     plan_status:            planStatus,
     trial_end:              trialEndsAt || null,
     current_period_end:     nextBilledAt || null,
@@ -92,11 +93,11 @@ async function provisionTeamAccess({ paddleCustomerId, paddleSubscriptionId, cus
   await createApiKey({ customerId: customer.id, keyHash: hash, keyPrefix: prefix, label: "Default" });
 
   await sendEmail({ to: customerEmail, ...teamWelcome(customerEmail, raw) });
-  console.log(`✓ Provisioned Team for ${customerEmail}, key: ${prefix}`);
+  console.log(`✓ Provisioned ${plan} for ${customerEmail}, key: ${prefix}`);
 }
 
 // ─── DEPROVISION ──────────────────────────────────────────────
-async function deprovisionTeamAccess(paddleCustomerId) {
+async function deprovisionAccess(paddleCustomerId) {
   const customer = await findCustomerByPaddleId(String(paddleCustomerId));
   if (!customer) return;
 
@@ -104,7 +105,7 @@ async function deprovisionTeamAccess(paddleCustomerId) {
   await updateCustomerByPaddleId(String(paddleCustomerId), { plan: "free", plan_status: "canceled" });
 
   await sendEmail({ to: customer.email, ...teamCancellation(customer.email) });
-  console.log(`✓ Deprovisioned Team for ${customer.email}`);
+  console.log(`✓ Deprovisioned ${customer.plan} for ${customer.email}`);
 }
 
 // ─── MAIN HANDLER ─────────────────────────────────────────────
@@ -137,10 +138,12 @@ export default async function handler(req, res) {
 
       case "subscription.created": {
         if (!data) break;
-        await provisionTeamAccess({
+        const createdPriceId = data.items?.[0]?.price?.id || null;
+        await provisionAccess({
           paddleCustomerId:     data.customer_id,
           paddleSubscriptionId: data.id,
           customerEmail:        data.customer?.email || null,
+          priceId:              createdPriceId,
           trialEndsAt:          data.trial_dates?.ends_at || null,
           nextBilledAt:         data.next_billed_at || null,
         });
@@ -149,9 +152,11 @@ export default async function handler(req, res) {
 
       case "subscription.updated": {
         if (!data) break;
+        const updatedPriceId = data.items?.[0]?.price?.id || null;
+        const updatedPlan    = isActiveSubscription(data.status) ? planFromPriceId(updatedPriceId) : "free";
         await updateCustomerByPaddleId(String(data.customer_id), {
           paddle_subscription_id: String(data.id),
-          plan:                   isActiveSubscription(data.status) ? "team" : "free",
+          plan:                   updatedPlan,
           plan_status:            mapPaddleStatus(data.status),
           trial_end:              data.trial_dates?.ends_at || null,
           current_period_end:     data.next_billed_at || null,
@@ -161,7 +166,7 @@ export default async function handler(req, res) {
 
       case "subscription.canceled": {
         if (!data) break;
-        await deprovisionTeamAccess(data.customer_id);
+        await deprovisionAccess(data.customer_id);
         break;
       }
 

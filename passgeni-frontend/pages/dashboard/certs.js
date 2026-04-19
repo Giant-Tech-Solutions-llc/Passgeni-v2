@@ -3,11 +3,12 @@
  * Lists all certificates, stats, and quick certify CTA.
  */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession, signIn } from "next-auth/react";
 import Head from "next/head";
 import Header from "../../components/layout/Header.js";
 import Footer from "../../components/layout/Footer.js";
+import UpgradeModal from "../../components/ui/UpgradeModal.js";
 
 const STANDARD_LABELS = {
   nist:  "NIST SP 800-63B",
@@ -35,7 +36,7 @@ function fmtDate(iso) {
 }
 
 /* ─── Certify flow ───────────────────────────────────────────────────────── */
-function CertifyPanel({ onCertified }) {
+function CertifyPanel({ onCertified, onPaywallHit }) {
   const [compliance, setCompliance] = useState("nist");
   const [length, setLength] = useState(16);
   const [opts, setOpts] = useState({ upper: true, lower: true, numbers: true, special: true });
@@ -87,8 +88,8 @@ function CertifyPanel({ onCertified }) {
     });
     const data = await r.json();
     if (r.status === 402) {
-      setError(data.error);
       setStatus("idle");
+      onPaywallHit?.({ reason: data.code, used: data.used, limit: data.limit });
       return;
     }
     if (!r.ok) { setError(data.error ?? "Certificate generation failed"); setStatus("idle"); return; }
@@ -223,8 +224,9 @@ export default function CertsDashboard() {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(null);
+  const [upgradeModal, setUpgradeModal] = useState(null); // null | { reason, used, limit }
 
-  const fetchCerts = async () => {
+  const fetchCerts = useCallback(async () => {
     setLoading(true);
     const r = await fetch("/api/dashboard/certs");
     if (r.ok) {
@@ -233,7 +235,7 @@ export default function CertsDashboard() {
       setTotal(d.total ?? 0);
     }
     setLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     if (authStatus === "unauthenticated") {
@@ -259,14 +261,75 @@ export default function CertsDashboard() {
   const validCount = certs.filter((c) => certStatus(c) === "valid").length;
   const expiredCount = certs.filter((c) => certStatus(c) === "expired").length;
 
+  const isTrialing = session?.user?.planStatus === "trialing";
+  const trialDaysLeft = isTrialing && session.user.trialEnd
+    ? Math.max(0, Math.ceil((new Date(session.user.trialEnd) - new Date()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
   return (
     <>
       <Head>
         <title>Certificates — PassGeni</title>
       </Head>
+
+      <UpgradeModal
+        open={!!upgradeModal}
+        onClose={() => setUpgradeModal(null)}
+        reason={upgradeModal?.reason}
+        used={upgradeModal?.used}
+        limit={upgradeModal?.limit}
+      />
+
       <div style={{ background: "var(--bg)", color: "var(--text)", minHeight: "100vh" }}>
         <Header />
         <main style={{ maxWidth: 840, margin: "0 auto", padding: "48px 24px 80px" }}>
+
+          {/* Trial banner */}
+          {isTrialing && trialDaysLeft > 0 && (
+            <div style={{
+              marginBottom: 28,
+              padding: "14px 20px",
+              borderRadius: 10,
+              background: "rgba(200,255,0,0.05)",
+              border: "1px solid rgba(200,255,0,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+            }}>
+              <div style={{ fontSize: 13, color: "#ccc" }}>
+                <span style={{ color: "#c8ff00", fontWeight: 700 }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? "s" : ""} left</span> on your free Assurance trial.
+                Unlimited certs + all standards while active.
+              </div>
+              <a href="/pricing" style={{ fontSize: 12, fontWeight: 700, color: "#c8ff00", textDecoration: "none", border: "1px solid rgba(200,255,0,0.3)", padding: "6px 14px", borderRadius: 6, whiteSpace: "nowrap" }}>
+                Upgrade to keep access →
+              </a>
+            </div>
+          )}
+
+          {/* Trial expired notice */}
+          {isTrialing && trialDaysLeft === 0 && (
+            <div style={{
+              marginBottom: 28,
+              padding: "14px 20px",
+              borderRadius: 10,
+              background: "rgba(255,68,68,0.07)",
+              border: "1px solid rgba(255,68,68,0.2)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+            }}>
+              <div style={{ fontSize: 13, color: "#ff9999" }}>
+                Your Assurance trial has ended. You are now on the Free plan — 3 NIST certificates per month.
+              </div>
+              <a href="/pricing" style={{ fontSize: 12, fontWeight: 700, color: "#c8ff00", textDecoration: "none", border: "1px solid rgba(200,255,0,0.3)", padding: "6px 14px", borderRadius: 6, whiteSpace: "nowrap" }}>
+                Upgrade →
+              </a>
+            </div>
+          )}
 
           {/* top bar */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 16, marginBottom: 40 }}>
@@ -302,7 +365,10 @@ export default function CertsDashboard() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, marginBottom: 36, alignItems: "start" }}>
             {/* Issue panel */}
             <div style={{ gridColumn: "span 1" }}>
-              <CertifyPanel onCertified={() => { fetchCerts(); }} />
+              <CertifyPanel
+                onCertified={() => { fetchCerts(); }}
+                onPaywallHit={(info) => setUpgradeModal(info)}
+              />
             </div>
 
             {/* Quick guide */}
