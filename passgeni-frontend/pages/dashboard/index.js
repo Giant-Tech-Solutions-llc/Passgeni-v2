@@ -634,6 +634,11 @@ export default function ComplianceDashboard() {
                 Upgrade
               </motion.a>
             )}
+            {data.plan === "authority" && (
+              <motion.a href="/dashboard/team" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+                Team →
+              </motion.a>
+            )}
             <motion.a href="/api-docs" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
               API Docs
             </motion.a>

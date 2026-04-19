@@ -17,7 +17,7 @@
 import NextAuth from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { Resend } from "resend";
-import { findCustomerByEmail, upsertCustomerByEmail } from "../../../lib/db/client.js";
+import { findCustomerByEmail, upsertCustomerByEmail, getDB } from "../../../lib/db/client.js";
 import { SupabaseAdapter } from "../../../lib/auth/adapter.js";
 
 // ─── RESEND EMAIL SENDER ─────────────────────────────────────
@@ -99,6 +99,23 @@ export const authOptions = {
           token.planStatus       = customer.plan_status;
           token.trialEnd         = customer.trial_end;
           token.paddleCustomerId = customer.paddle_customer_id;
+          token.teamPolicyStandard = customer.team_policy_standard ?? null;
+
+          // Check if this user is an active member of another team
+          try {
+            const db = getDB();
+            const { data: membership } = await db
+              .from("team_members")
+              .select("customer_id")
+              .eq("email", token.email.toLowerCase())
+              .eq("status", "active")
+              .limit(1)
+              .maybeSingle();
+            token.teamCustomerId = membership?.customer_id ?? null;
+          } catch (e) {
+            console.warn("[auth] team membership lookup failed (non-fatal):", e?.message);
+            token.teamCustomerId = null;
+          }
         } catch (e) {
           console.error("JWT callback DB error:", e);
           // Fallback: don't block sign-in if DB is unavailable
@@ -111,11 +128,13 @@ export const authOptions = {
 
     // Expose token fields to useSession() in the browser
     async session({ session, token }) {
-      session.user.customerId     = token.customerId;
-      session.user.plan           = token.plan;
-      session.user.planStatus     = token.planStatus;
-      session.user.trialEnd       = token.trialEnd;
-      session.user.paddleCustomerId = token.paddleCustomerId;
+      session.user.customerId        = token.customerId;
+      session.user.plan              = token.plan;
+      session.user.planStatus        = token.planStatus;
+      session.user.trialEnd          = token.trialEnd;
+      session.user.paddleCustomerId  = token.paddleCustomerId;
+      session.user.teamCustomerId    = token.teamCustomerId ?? null;
+      session.user.teamPolicyStandard = token.teamPolicyStandard ?? null;
       return session;
     },
   },

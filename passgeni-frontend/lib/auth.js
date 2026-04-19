@@ -49,3 +49,21 @@ export async function requireTeam(req, res) {
 
   return { session, customerId: session.user.customerId };
 }
+
+export async function requireAuthority(req, res) {
+  const session = await requireAuth(req, res);
+  if (!session) return null;
+
+  if (session.user.plan !== "authority") {
+    res.status(403).json({ error: "Authority plan required", upgrade: "https://passgeni.ai/pricing" });
+    return null;
+  }
+
+  const validStatuses = ["active", "trialing"];
+  if (!validStatuses.includes(session.user.planStatus)) {
+    res.status(403).json({ error: "Subscription inactive", status: session.user.planStatus });
+    return null;
+  }
+
+  return { session, customerId: session.user.customerId };
+}

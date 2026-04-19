@@ -293,3 +293,104 @@ export async function getTeamMembers(customerId) {
   if (error) throw error;
   return data || [];
 }
+
+/**
+ * Add (or re-invite) a team member. Upserts on (customer_id, email).
+ */
+export async function addTeamMember(customerId, email, name) {
+  const db = getDB();
+  const { data, error } = await db
+    .from("team_members")
+    .upsert(
+      { customer_id: customerId, email: email.toLowerCase(), name: name || null, status: "pending", role: "member", invited_at: new Date().toISOString() },
+      { onConflict: "customer_id,email" }
+    )
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Mark a team member as active (accepted their invite).
+ */
+export async function activateTeamMember(customerId, email) {
+  const db = getDB();
+  const { data, error } = await db
+    .from("team_members")
+    .update({ status: "active", accepted_at: new Date().toISOString() })
+    .eq("customer_id", customerId)
+    .eq("email", email.toLowerCase())
+    .select()
+    .single();
+  if (error && error.code !== "PGRST116") throw error;
+  return data || null;
+}
+
+/**
+ * Remove a team member (soft-delete: status = removed).
+ */
+export async function removeTeamMember(memberId, customerId) {
+  const db = getDB();
+  const { error } = await db
+    .from("team_members")
+    .update({ status: "removed" })
+    .eq("id", memberId)
+    .eq("customer_id", customerId);
+  if (error) throw error;
+}
+
+/**
+ * Update a team member's role.
+ */
+export async function updateTeamMemberRole(memberId, customerId, role) {
+  const db = getDB();
+  const { data, error } = await db
+    .from("team_members")
+    .update({ role })
+    .eq("id", memberId)
+    .eq("customer_id", customerId)
+    .select()
+    .single();
+  if (error && error.code !== "PGRST116") throw error;
+  return data || null;
+}
+
+/**
+ * Set (or clear) the org compliance policy for a customer.
+ * Pass null to clear.
+ */
+export async function setTeamPolicy(customerId, standard) {
+  const db = getDB();
+  const { data, error } = await db
+    .from("customers")
+    .update({ team_policy_standard: standard || null })
+    .eq("id", customerId)
+    .select("team_policy_standard")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+/**
+ * Get all nextauth_users.id values for active team members of a customer.
+ * Used to query certificates across a whole team.
+ */
+export async function getTeamUserIds(customerId) {
+  const db = getDB();
+  const { data: members, error: mErr } = await db
+    .from("team_members")
+    .select("email")
+    .eq("customer_id", customerId)
+    .eq("status", "active");
+  if (mErr) throw mErr;
+  if (!members || members.length === 0) return [];
+
+  const emails = members.map((m) => m.email.toLowerCase());
+  const { data: users, error: uErr } = await db
+    .from("nextauth_users")
+    .select("id")
+    .in("email", emails);
+  if (uErr) throw uErr;
+  return (users || []).map((u) => u.id);
+}
