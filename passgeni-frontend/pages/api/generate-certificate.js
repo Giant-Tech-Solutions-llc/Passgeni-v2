@@ -11,6 +11,7 @@
 import crypto from "crypto";
 import { jwtVerify } from "jose";
 import { verifySessionToken, signCertJWT } from "../../lib/certs.js";
+import { logEvent, checkAnomalyThreshold, EVENT_TYPES } from "../../lib/usageEvents.js";
 import {
   STANDARDS,
   normalizeStandardId,
@@ -208,6 +209,13 @@ export default async function handler(req, res) {
 
   const baseUrl = process.env.NEXTAUTH_URL ?? "https://passgeni.ai";
   const cert_url = `${baseUrl}/cert/${certId}`;
+
+  // Fire-and-forget: log event + anomaly check (no latency impact)
+  const rawIp = (req.headers["x-forwarded-for"] ?? req.socket?.remoteAddress ?? "").split(",")[0].trim();
+  logEvent(userId, EVENT_TYPES.CERT_GENERATED, { cert_id: certId, compliance_standard: canonicalId, entropy_bits: jwtPayload.entropy_bits }, rawIp);
+  checkAnomalyThreshold(userId, 50).then(({ anomaly, count }) => {
+    if (anomaly) console.warn(`[anomaly] User ${userId} generated ${count} certs in 24h`);
+  });
 
   return res.status(201).json({
     cert_id: certId,
