@@ -12,6 +12,10 @@ import crypto from "crypto";
 import { verifySessionToken, signCertJWT, buildCertPayload, validateCompliance, STANDARDS } from "../../lib/certs.js";
 import { createCertificate, getMonthlyCount } from "../../lib/db/certs.js";
 import { resolveApiCaller } from "../../lib/apiAuth.js";
+import { createRateLimiter } from "../../lib/rateLimit.js";
+
+// 30 cert generations per minute per user/key
+const checkRateLimit = createRateLimiter({ limit: 30, windowMs: 60_000 });
 
 // Free tier: 3 certs/month, NIST only
 const FREE_MONTHLY_LIMIT = 3;
@@ -23,6 +27,8 @@ export default async function handler(req, res) {
   // ── Auth (session cookie or Bearer API key) ───────────────────────────────
   const caller = await resolveApiCaller(req, res);
   if (!caller) return; // resolveApiCaller already sent the error response
+
+  if (!checkRateLimit(req, res, caller)) return;
 
   const { userId, email, plan }  = caller;
 
