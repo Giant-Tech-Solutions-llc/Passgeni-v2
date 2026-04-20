@@ -26,6 +26,14 @@ const nextConfig = {
       },
     ];
   },
+  async rewrites() {
+    return [
+      {
+        source: "/.well-known/jwks.json",
+        destination: "/api/.well-known/jwks.json",
+      },
+    ];
+  },
   async redirects() {
     return [
       { source: "/docs", destination: "/api", permanent: true },
