@@ -8,11 +8,10 @@
  * Returns: { cert_id, cert_url, standards_met, compliance_standard, entropy_bits, expires_at }
  */
 
-import { getToken } from "next-auth/jwt";
 import crypto from "crypto";
 import { verifySessionToken, signCertJWT, buildCertPayload, validateCompliance, STANDARDS } from "../../lib/certs.js";
 import { createCertificate, getMonthlyCount } from "../../lib/db/certs.js";
-import { findCustomerByEmail } from "../../lib/db/client.js";
+import { resolveApiCaller } from "../../lib/apiAuth.js";
 
 // Free tier: 3 certs/month, NIST only
 const FREE_MONTHLY_LIMIT = 3;
@@ -21,21 +20,11 @@ const FREE_STANDARDS = ["nist"];
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  if (!token) {
-    return res.status(401).json({
-      error: "Sign in to generate your certificate. It takes 30 seconds — no password needed.",
-      code: "AUTH_REQUIRED",
-    });
-  }
+  // ── Auth (session cookie or Bearer API key) ───────────────────────────────
+  const caller = await resolveApiCaller(req, res);
+  if (!caller) return; // resolveApiCaller already sent the error response
 
-  const userId = token.sub;
-  const email = token.email;
-
-  // ── Plan lookup ───────────────────────────────────────────────────────────
-  const customer = await findCustomerByEmail(email).catch(() => null);
-  const plan = customer?.plan ?? "free";
+  const { userId, email, plan }  = caller;
 
   // ── Session token validation ──────────────────────────────────────────────
   const { session_token } = req.body ?? {};
