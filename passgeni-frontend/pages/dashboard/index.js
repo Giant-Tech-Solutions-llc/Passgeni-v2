@@ -639,6 +639,9 @@ export default function ComplianceDashboard() {
                 Team →
               </motion.a>
             )}
+            <motion.a href="/dashboard/api-keys" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+              API Keys
+            </motion.a>
             <motion.a href="/api-docs" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
               API Docs
             </motion.a>
