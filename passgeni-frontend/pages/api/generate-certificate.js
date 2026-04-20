@@ -2,13 +2,14 @@
  * POST /api/generate-certificate
  *
  * Issues an ES256-signed compliance certificate.
- * Requires: auth session + valid generation session_token from /api/issue-session.
+ * Requires: auth session + valid generation_session_id from /api/generate.
  *
- * Body: { session_token }
+ * Body: { generation_session_id }
  * Returns: { cert_id, cert_url, standards_met, compliance_standard, entropy_bits, expires_at }
  */
 
 import crypto from "crypto";
+import { jwtVerify } from "jose";
 import { verifySessionToken, signCertJWT } from "../../lib/certs.js";
 import {
   STANDARDS,
@@ -39,21 +40,54 @@ export default async function handler(req, res) {
 
   const { userId, email, plan }  = caller;
 
-  // ── Session token validation ──────────────────────────────────────────────
-  const { session_token } = req.body ?? {};
-  if (!session_token) {
-    return res.status(400).json({ error: "session_token is required" });
+  // ── Session token validation (generation_session_id primary, session_token legacy) ─
+  const { generation_session_id, session_token } = req.body ?? {};
+  const token = generation_session_id ?? session_token;
+
+  if (!token) {
+    return res.status(400).json({
+      error: "generation_session_id is required.",
+      fix: "Call POST /api/generate first to get a session token, then certify using that token.",
+    });
   }
 
   let sessionParams;
-  try {
-    sessionParams = verifySessionToken(session_token);
-  } catch (err) {
-    return res.status(400).json({
-      error: err.message.includes("expired")
-        ? "Your generation session expired. Go back and generate a new password to certify."
-        : "Invalid session token.",
-    });
+  if (generation_session_id) {
+    // New jose-signed token from /api/generate
+    try {
+      const secret = new TextEncoder().encode(process.env.NEXTAUTH_SECRET);
+      const { payload } = await jwtVerify(generation_session_id, secret);
+      if (payload.type !== "generation_session") throw new Error("Invalid token type");
+      // Params are server-verified — client cannot tamper with them
+      const p = payload.params;
+      sessionParams = {
+        compliance_standard: p.compliance_standard,
+        length:      p.length,
+        has_upper:   p.has_upper,
+        has_lower:   p.has_lower,
+        has_numbers: p.has_numbers,
+        has_special: p.has_special,
+        entropy_bits:  p.entropy_bits,
+        char_pool_size: p.char_pool_size,
+      };
+    } catch {
+      return res.status(401).json({
+        error: "Invalid or expired generation session. Sessions expire after 60 seconds.",
+        fix: "Generate a new password and certify within 60 seconds.",
+      });
+    }
+  } else {
+    // Legacy HMAC token from /api/issue-session
+    try {
+      sessionParams = verifySessionToken(session_token);
+    } catch (err) {
+      return res.status(400).json({
+        error: err.message.includes("expired")
+          ? "Your generation session expired. Go back and generate a new password to certify."
+          : "Invalid session token.",
+        fix: "Call POST /api/generate to get a fresh session token.",
+      });
+    }
   }
 
   const {
