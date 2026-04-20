@@ -58,7 +58,7 @@ async function sendVerificationRequest({ identifier: email, url }) {
     throw new Error(error.message || "Failed to send sign-in email");
   }
 
-  console.log("[auth] Magic link sent to", email, "id:", data?.id);
+  console.info("[auth] Magic link sent id:", data?.id);
 }
 
 // ─── AUTH OPTIONS ────────────────────────────────────────────
@@ -92,7 +92,7 @@ export const authOptions = {
               plan_status: "trialing",
               trial_end:   trialEnd,
             });
-            console.log("[auth] Provisioned 14-day Assurance trial for", token.email);
+            console.info("[auth] Provisioned trial");
           }
           token.customerId       = customer.id;
           token.plan             = customer.plan;

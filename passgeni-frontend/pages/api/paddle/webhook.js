@@ -93,7 +93,7 @@ async function provisionAccess({ paddleCustomerId, paddleSubscriptionId, custome
   await createApiKey({ customerId: customer.id, keyHash: hash, keyPrefix: prefix, label: "Default" });
 
   await sendEmail({ to: customerEmail, ...teamWelcome(customerEmail, raw) });
-  console.log(`✓ Provisioned ${plan} for ${customerEmail}, key: ${prefix}`);
+  console.info(`✓ Provisioned ${plan} key: ${prefix}`);
 }
 
 // ─── DEPROVISION ──────────────────────────────────────────────
@@ -105,7 +105,7 @@ async function deprovisionAccess(paddleCustomerId) {
   await updateCustomerByPaddleId(String(paddleCustomerId), { plan: "free", plan_status: "canceled" });
 
   await sendEmail({ to: customer.email, ...teamCancellation(customer.email) });
-  console.log(`✓ Deprovisioned ${customer.plan} for ${customer.email}`);
+  console.info(`✓ Deprovisioned ${customer.plan}`);
 }
 
 // ─── MAIN HANDLER ─────────────────────────────────────────────
