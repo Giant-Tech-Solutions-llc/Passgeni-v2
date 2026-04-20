@@ -14,47 +14,6 @@ import crypto from "crypto";
 const b64u = (buf) => Buffer.from(buf).toString("base64url");
 const fromb64u = (str) => Buffer.from(str, "base64url");
 
-/* ─── Compliance rules ────────────────────────────────────────────────────── */
-export const STANDARDS = {
-  nist:  { label: "NIST SP 800-63B",  minLength: 8,  minEntropy: 0,  requireUpper: false, requireLower: false, requireNumbers: false, requireSpecial: false },
-  hipaa: { label: "HIPAA §164.312",   minLength: 12, minEntropy: 0,  requireUpper: true,  requireLower: true,  requireNumbers: true,  requireSpecial: true  },
-  pci:   { label: "PCI-DSS v4.0 R8",  minLength: 12, minEntropy: 40, requireUpper: true,  requireLower: true,  requireNumbers: true,  requireSpecial: true  },
-  soc2:  { label: "SOC 2 CC6.1",      minLength: 16, minEntropy: 0,  requireUpper: true,  requireLower: true,  requireNumbers: true,  requireSpecial: true  },
-  iso:   { label: "ISO 27001:2022 A9", minLength: 14, minEntropy: 0,  requireUpper: true,  requireLower: true,  requireNumbers: true,  requireSpecial: true  },
-  fips:  { label: "FIPS 140-3",        minLength: 20, minEntropy: 64, requireUpper: true,  requireLower: true,  requireNumbers: true,  requireSpecial: true  },
-};
-
-/** Returns { valid: bool, gaps: string[] } */
-export function validateCompliance(params, standard) {
-  const rules = STANDARDS[standard];
-  if (!rules) return { valid: false, gaps: [`Unknown standard: ${standard}`] };
-
-  const { length, has_upper, has_lower, has_numbers, has_special, entropy_bits } = params;
-  const gaps = [];
-
-  if (length < rules.minLength)
-    gaps.push(`Minimum length for ${rules.label} is ${rules.minLength} (got ${length})`);
-  if (rules.requireUpper && !has_upper)
-    gaps.push(`${rules.label} requires uppercase letters`);
-  if (rules.requireLower && !has_lower)
-    gaps.push(`${rules.label} requires lowercase letters`);
-  if (rules.requireNumbers && !has_numbers)
-    gaps.push(`${rules.label} requires numbers`);
-  if (rules.requireSpecial && !has_special)
-    gaps.push(`${rules.label} requires special characters`);
-  if (rules.minEntropy > 0 && entropy_bits < rules.minEntropy)
-    gaps.push(`${rules.label} requires ≥${rules.minEntropy} bits of entropy (got ${entropy_bits})`);
-
-  return { valid: gaps.length === 0, gaps };
-}
-
-/** Returns all standards satisfied by the given params */
-export function getStandardsMet(params) {
-  return Object.keys(STANDARDS).filter(
-    (s) => validateCompliance(params, s).valid
-  );
-}
-
 /* ─── Session tokens (HMAC-HS256) ────────────────────────────────────────── */
 const SESSION_TTL = 10 * 60; // 10 minutes
 
@@ -165,25 +124,3 @@ export function getJWKS() {
   };
 }
 
-/* ─── Cert payload builder ───────────────────────────────────────────────── */
-export function buildCertPayload({ certId, userId, email, sessionParams }) {
-  const { compliance_standard, length, has_upper, has_lower, has_numbers, has_special, entropy_bits, char_pool_size } = sessionParams;
-  const standards_met = getStandardsMet(sessionParams);
-  const now = Math.floor(Date.now() / 1000);
-
-  return {
-    jti: certId,
-    iss: "passgeni.ai",
-    sub: userId,
-    email,
-    cert_version: "2.0",
-    compliance_standard,
-    entropy_bits,
-    char_pool_size,
-    generation_params: { length, has_upper, has_lower, has_numbers, has_special },
-    entropy_source: "crypto.getRandomValues (FIPS 140-3 aligned)",
-    standards_met,
-    iat: now,
-    exp: now + 365 * 24 * 60 * 60, // 1 year
-  };
-}
