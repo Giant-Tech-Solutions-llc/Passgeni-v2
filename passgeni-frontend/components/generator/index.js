@@ -28,7 +28,7 @@ export function PasswordDisplay({ password, generating, strength, entropy, crack
   return (
     <div style={{ background: "#08080a", border: "1px solid #141416", borderRadius: 10, padding: "20px 24px", position: "relative", overflow: "hidden" }} aria-live="polite">
       {/* Scan line animation */}
-      <div style={{ position: "absolute", left: 0, right: 0, height: "1px", background: "linear-gradient(90deg,transparent,#C8FF0022,transparent)", animation: "scanline 3s linear infinite", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", left: 0, right: 0, height: "1px", background: "linear-gradient(90deg,transparent,#C8FF0022,transparent)", pointerEvents: "none" }} />
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16 }}>
         {/* Password with AnimatePresence key-swap */}
@@ -62,9 +62,11 @@ export function PasswordDisplay({ password, generating, strength, entropy, crack
         <div style={{ marginTop: 14 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
             <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: strength.color, letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }}>{strength.label}</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555" }}>
-              <AnimatedEntropy value={entropy || 0} /> bits
-            </span>
+            {(entropy || 0) > 0 && (
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555" }}>
+                <AnimatedEntropy value={entropy} /> bits
+              </span>
+            )}
           </div>
           <div style={{ height: 3, background: "#141416", borderRadius: 100, overflow: "hidden" }}>
             <motion.div
