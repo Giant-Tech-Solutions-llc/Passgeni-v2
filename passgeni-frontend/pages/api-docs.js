@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { btnPrimary, btnGhost } from "../lib/motion.js";
 import PageLayout from "../components/layout/PageLayout.js";
 
-const BASE = "https://passgeni.ai/api/v1";
+const BASE = "https://passgeni.ai/api";
 
 // ─── Syntax-highlight a JSON string ──────────────────────────
 function JsonHL({ code }) {
@@ -298,7 +298,7 @@ const PARAMS = [
   { name: "profession", type: "string",  req: false, def: '"developer"', color: "#a5d6a7", note: "Seeds the generator: developer · doctor · finance · designer · legal · educator" },
   { name: "length",     type: "number",  req: false, def: "18",          color: "#ffa657", note: "Password length. Range 8–32. Compliance presets enforce a higher minimum." },
   { name: "count",      type: "number",  req: false, def: "1",           color: "#ffa657", note: "How many passwords to return. Free: max 10. Team: max 500 per request." },
-  { name: "compliance", type: "string",  req: false, def: "null",        color: "#ffb74d", note: "hipaa · pci · soc2 · iso · nist · dod — Team plan only. Enforces the exact standard." },
+  { name: "compliance", type: "string",  req: false, def: "null",        color: "#ffb74d", note: "hipaa · pci · soc2 · iso · nist · dod — Assurance or Authority plan only. Enforces the exact standard." },
   { name: "mode",       type: "string",  req: false, def: '"password"',  color: "#ce93d8", note: '"password" for standard, "passphrase" for memorable word-based credentials.' },
   { name: "quantum",    type: "boolean", req: false, def: "false",       color: "#ef9a9a", note: "Post-quantum mode: 512-bit entropy, expanded symbol set, 20-char minimum." },
 ];
@@ -335,7 +335,7 @@ function LiveTester() {
       const body = { profession, length, count };
       if (apiKey.trim()) body.apiKey    = apiKey.trim();
       if (compliance)    body.compliance = compliance;
-      const res  = await fetch("/api/v1/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
+      const res  = await fetch("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
       const data = await res.json();
       setResponse({ status: res.status, body: data });
     } catch { setError("Request failed — check your connection."); }
@@ -377,7 +377,7 @@ function LiveTester() {
           {/* Compliance */}
           <div>
             <label style={{ display: "block", fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>
-              compliance <span style={{ color: "#333" }}>team only</span>
+              compliance <span style={{ color: "#333" }}>paid plans only</span>
             </label>
             <select value={compliance} onChange={e => setCompliance(e.target.value)} style={SELECT}>
               <option value="">none</option>
@@ -588,9 +588,9 @@ export default function APIDocsPage() {
 
             {/* Team CTA */}
             <div style={{ marginTop: 28, background: "linear-gradient(135deg,rgba(200,255,0,.07),rgba(10,10,13,.9))", border: "1px solid rgba(200,255,0,.15)", borderRadius: 12, padding: "16px" }}>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "rgba(200,255,0,.6)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Team plan</div>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#777", lineHeight: 1.65, marginBottom: 12 }}>5,000 calls/day · All compliance presets · 500 per request</p>
-              <a href="/pricing" style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF00", textDecoration: "none", letterSpacing: ".06em" }}>$29/month →</a>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "rgba(200,255,0,.6)", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>Assurance / Authority</div>
+              <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#777", lineHeight: 1.65, marginBottom: 12 }}>1,000–5,000 calls/day · All compliance presets · 500 per request</p>
+              <a href="/pricing" style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF00", textDecoration: "none", letterSpacing: ".06em" }}>from $19/month →</a>
             </div>
           </nav>
 
@@ -727,7 +727,7 @@ export default function APIDocsPage() {
               Pass your API key as <code style={{ background: "rgba(200,255,0,.08)", color: "#C8FF00", padding: "2px 6px", borderRadius: 4, fontSize: 13 }}>apiKey</code> in the request body.
               Free tier requests need no key at all.
             </p>
-            <CodeBlock code={`// Authenticated (Team plan)
+            <CodeBlock code={`// Authenticated (Assurance or Authority plan)
 { "apiKey": "pg_live_abc123...", "count": 10 }
 
 // Anonymous (free tier — no key needed, 50 calls/day)
@@ -760,14 +760,23 @@ export default function APIDocsPage() {
                     <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#555" }}>—</span></td>
                     <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#aaa" }}>$0</span></td>
                   </tr>
+                  <tr style={{ borderBottom: "1px solid rgba(255,255,255,.03)" }}>
+                    <td style={{ padding: "14px 16px" }}>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#C8FF00", fontWeight: 700 }}>Assurance</span>
+                    </td>
+                    <td style={{ padding: "14px 16px" }}><code style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C8FF00" }}>1,000/day</code></td>
+                    <td style={{ padding: "14px 16px" }}><code style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C8FF00" }}>500</code></td>
+                    <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C8FF00" }}>All 6</span></td>
+                    <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#aaa" }}>$19/mo</span></td>
+                  </tr>
                   <tr>
                     <td style={{ padding: "14px 16px" }}>
-                      <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#C8FF00", fontWeight: 700 }}>Team</span>
+                      <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#C8FF00", fontWeight: 700 }}>Authority</span>
                     </td>
                     <td style={{ padding: "14px 16px" }}><code style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C8FF00" }}>5,000/day</code></td>
                     <td style={{ padding: "14px 16px" }}><code style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C8FF00" }}>500</code></td>
                     <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#C8FF00" }}>All 6</span></td>
-                    <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#aaa" }}>$29/mo</span></td>
+                    <td style={{ padding: "14px 16px" }}><span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#aaa" }}>$59/mo</span></td>
                   </tr>
                 </tbody>
               </table>
@@ -915,8 +924,12 @@ X-RateLimit-Reset:     1735689600000  // Unix ms — midnight UTC`} label="Rate 
                   items: ["50 API calls / day", "Max 10 per request", "No API key needed", "Password mode only", "All 6 profession seeds", "No compliance presets"],
                 },
                 {
-                  name: "Team", price: "$29", period: "/month", color: "#C8FF00", featured: true, badge: "14-day free trial",
-                  items: ["5,000 API calls / day", "Max 500 per request", "All 6 compliance presets", "Passphrase mode", "Post-quantum mode", "5 dashboard seats", "CSV bulk export", "API key rotation"],
+                  name: "Assurance", price: "$19", period: "/month", color: "#C8FF00", featured: true, badge: "14-day free trial",
+                  items: ["1,000 API calls / day", "Max 500 per request", "All 6 compliance presets", "Passphrase mode", "Post-quantum mode", "Compliance dashboard", "Certificates (50/mo)", "API key rotation"],
+                },
+                {
+                  name: "Authority", price: "$59", period: "/month", color: "#a0d000", featured: false,
+                  items: ["5,000 API calls / day", "Max 500 per request", "All 6 compliance presets", "Team workspaces (10 seats)", "Unlimited certificates", "Org policy engine", "CSV bulk export", "Priority support"],
                 },
               ].map(plan => (
                 <div key={plan.name} style={{ background: "rgba(10,10,14,.9)", border: `1px solid ${plan.featured ? "rgba(200,255,0,.25)" : "rgba(255,255,255,.06)"}`, borderRadius: 16, padding: "28px", position: "relative", overflow: "hidden" }}>
