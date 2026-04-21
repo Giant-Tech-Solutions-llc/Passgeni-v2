@@ -35,9 +35,10 @@ const PLANS = [
     annualNote: "Save 21%",
     tagline: "For security professionals who certify daily and need full compliance coverage.",
     cta: "Start 14-day free trial",
-    ctaMonthly: "/auth/signin?callbackUrl=/checkout?plan=assurance&billing=monthly",
-    ctaAnnual: "/auth/signin?callbackUrl=/checkout?plan=assurance&billing=annual",
-    featured: false,
+    ctaMonthly: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dassurance%26billing%3Dmonthly",
+    ctaAnnual: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dassurance%26billing%3Dannual",
+    badge: "⭐ Most Popular",
+    featured: true,
     trialNote: "14 days free — no card required",
     features: [
       "Unlimited compliance certificates",
@@ -56,11 +57,10 @@ const PLANS = [
     annualPeriod: "/year",
     annualNote: "Save 24%",
     tagline: "For compliance teams and enterprises that need API scale, audit logs, and team seats.",
-    badge: "⭐ Most Popular",
     cta: "Start 14-day free trial",
-    ctaMonthly: "/auth/signin?callbackUrl=/checkout?plan=authority&billing=monthly",
-    ctaAnnual: "/auth/signin?callbackUrl=/checkout?plan=authority&billing=annual",
-    featured: true,
+    ctaMonthly: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dauthority%26billing%3Dmonthly",
+    ctaAnnual: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dauthority%26billing%3Dannual",
+    featured: false,
     trialNote: "14 days free — no card required",
     features: [
       "Everything in Assurance",
@@ -134,7 +134,7 @@ function Check({ value }) {
 
 export default function PricingPage() {
   const [billing, setBilling] = useState("monthly");
-  const [openFaq, setOpenFaq] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
 
   return (
     <>
@@ -327,7 +327,7 @@ export default function PricingPage() {
                   {...btnPrimary}
                   style={{ fontSize: 15, padding: "14px 32px" }}
                 >Generate Now — Free →</motion.a>
-                <motion.a href="/auth/signin?callbackUrl=/checkout?plan=assurance" className="btn-ghost"
+                <motion.a href="/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dassurance%26billing%3Dmonthly" className="btn-ghost"
                   {...btnGhost}
                   style={{ fontSize: 15, padding: "14px 32px" }}
                 >Start Free Trial</motion.a>

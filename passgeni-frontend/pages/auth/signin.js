@@ -14,7 +14,7 @@ import PageLayout from "../../components/layout/PageLayout.js";
 
 export default function SignInPage() {
   const router        = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const [email,    setEmail]    = useState("");
   const [sent,     setSent]     = useState(false);
   const [loading,  setLoading]  = useState(false);
@@ -115,13 +115,13 @@ export default function SignInPage() {
             </motion.button>
 
             <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#555", marginTop: 20, textAlign: "center", lineHeight: 1.7 }}>
-              Only Team subscribers can access the dashboard.{" "}
-              <a href="/#pricing" style={{ color: "#C8FF00", textDecoration: "none" }}>Get Team plan →</a>
+              Sign in to access your dashboard.{" "}
+              <a href="/pricing" style={{ color: "#C8FF00", textDecoration: "none" }}>View plans →</a>
             </p>
           </div>
         ) : (
           /* ── Sent state ── */
-          <div style={{ background: "#050f05", border: "1px solid #C8FF0033", borderRadius: 16, padding: "40px 32px", textAlign: "center", animation: "fadeIn 0.4s ease" }}>
+          <div style={{ background: "#0a0a0c", border: "1px solid rgba(200,255,0,0.2)", borderRadius: 16, padding: "40px 32px", textAlign: "center" }}>
             <div style={{ fontSize: 40, marginBottom: 20 }}>✉️</div>
             <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 22, color: "#C8FF00", marginBottom: 12, letterSpacing: "-0.02em" }}>
               Check your inbox.
