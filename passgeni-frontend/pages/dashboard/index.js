@@ -629,10 +629,17 @@ export default function ComplianceDashboard() {
     setLoadError("");
     try {
       const res = await fetch("/api/dashboard/compliance");
-      if (!res.ok) throw new Error("Failed to load");
+      if (!res.ok) {
+        let detail = "";
+        try {
+          const body = await res.json();
+          detail = body.error ?? body.detail ?? JSON.stringify(body);
+        } catch { detail = await res.text().catch(() => ""); }
+        throw new Error(`HTTP ${res.status}: ${detail}`);
+      }
       setData(await res.json());
-    } catch {
-      setLoadError("Could not load dashboard data.");
+    } catch (err) {
+      setLoadError(err.message || "Could not load dashboard data.");
     }
   }, []);
 
