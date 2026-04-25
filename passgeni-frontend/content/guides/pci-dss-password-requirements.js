@@ -131,6 +131,6 @@ export const contentHtml = `
 </ol>
 
 <div class="callout">
-  PassGeni's PCI-DSS preset enforces 12-character minimum length and full character set requirements (upper + lower + numbers + symbols) — meeting Requirement 8.3.6. Use it when generating credentials for any system in your cardholder data environment.
+  PassGeni's PCI-DSS v4.0 preset enforces 12-character minimum length and full character set — meeting Requirement 8.3.6. After generation, certify the credential to receive an ES256-signed compliance certificate citing the specific PCI-DSS requirement — giving QSAs machine-verifiable audit evidence. <a href="/guides/how-to-prove-password-compliance-to-auditors" style="color:#c8ff00">See the full audit evidence playbook →</a>
 </div>
 `;

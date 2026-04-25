@@ -115,6 +115,6 @@ export const contentHtml = `
 </ol>
 
 <div class="callout">
-  PassGeni's SOC 2 preset generates 16-character minimum credentials with full character set — matching the privileged account standard that auditors expect to see. Use it when onboarding admin accounts or rotating shared service credentials before an audit window.
+  PassGeni's SOC 2 preset generates 16-character minimum credentials with full character set — matching CC6.1 expectations. After generation, certify the credential to receive an ES256-signed certificate your auditor can verify independently. Stack certificates across your audit period to demonstrate consistent enforcement for SOC 2 Type II. <a href="/guides/how-to-prove-password-compliance-to-auditors" style="color:#c8ff00">Full SOC 2 evidence package guide →</a>
 </div>
 `;

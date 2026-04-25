@@ -3,21 +3,30 @@
  * No auth required. Must look like a legal document.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Head from "next/head";
 import { getCertificate, logCertView } from "../../lib/db/certs.js";
 import { verifyCertJWT } from "../../lib/certs.js";
 import { STANDARDS } from "../../lib/compliance.js";
 import QRCode from "qrcode";
 import crypto from "crypto";
+import { IcCheck, IcX, IcAlert } from "../../lib/icons.js";
 
 const STANDARD_FULL = {
-  nist:  { label: "NIST SP 800-63B",       color: "#60a5fa", body: "Digital Identity Guidelines — Length-over-complexity model." },
-  hipaa: { label: "HIPAA §164.312(d)",      color: "#34d399", body: "Technical safeguards for electronic protected health information." },
-  pci:   { label: "PCI-DSS v4.0 Req 8.3",  color: "#a78bfa", body: "Payment Card Industry Data Security Standard." },
+  // Canonical IDs (from API)
+  "NIST-800-63B": { label: "NIST SP 800-63B",            color: "#60a5fa", body: "Digital Identity Guidelines — Length-over-complexity model." },
+  "HIPAA":        { label: "HIPAA §164.312(d)",           color: "#34d399", body: "Technical safeguards for electronic protected health information." },
+  "PCI-DSS":      { label: "PCI-DSS v4.0 Req 8.3",       color: "#a78bfa", body: "Payment Card Industry Data Security Standard." },
+  "SOC2":         { label: "SOC 2 Trust Criterion CC6.1", color: "#fb923c", body: "Logical and physical access controls for Type II audits." },
+  "ISO-27001":    { label: "ISO/IEC 27001:2022 A.9",      color: "#f472b6", body: "Information security access control policy." },
+  "FIPS-140-3":   { label: "FIPS PUB 140-3",              color: "#facc15", body: "Security requirements for cryptographic modules." },
+  // Legacy short IDs
+  nist:  { label: "NIST SP 800-63B",            color: "#60a5fa", body: "Digital Identity Guidelines — Length-over-complexity model." },
+  hipaa: { label: "HIPAA §164.312(d)",           color: "#34d399", body: "Technical safeguards for electronic protected health information." },
+  pci:   { label: "PCI-DSS v4.0 Req 8.3",       color: "#a78bfa", body: "Payment Card Industry Data Security Standard." },
   soc2:  { label: "SOC 2 Trust Criterion CC6.1", color: "#fb923c", body: "Logical and physical access controls for Type II audits." },
-  iso:   { label: "ISO/IEC 27001:2022 A.9", color: "#f472b6", body: "Information security access control policy." },
-  fips:  { label: "FIPS PUB 140-3",         color: "#facc15", body: "Security requirements for cryptographic modules." },
+  iso:   { label: "ISO/IEC 27001:2022 A.9",      color: "#f472b6", body: "Information security access control policy." },
+  fips:  { label: "FIPS PUB 140-3",              color: "#facc15", body: "Security requirements for cryptographic modules." },
 };
 
 export async function getServerSideProps({ params, req, res }) {
@@ -88,10 +97,10 @@ export async function getServerSideProps({ params, req, res }) {
 /* ─── Status badge ───────────────────────────────────────────────────────── */
 function StatusBadge({ status }) {
   const cfg = {
-    valid:   { bg: "rgba(0,208,132,0.1)",  border: "rgba(0,208,132,0.35)",  color: "#00d084", icon: "✦", label: "VERIFIED" },
-    revoked: { bg: "rgba(255,68,68,0.1)",  border: "rgba(255,68,68,0.35)",  color: "#ff4444", icon: "✕", label: "REVOKED" },
-    expired: { bg: "rgba(250,204,21,0.1)", border: "rgba(250,204,21,0.35)", color: "#facc15", icon: "!", label: "EXPIRED" },
-    invalid: { bg: "rgba(255,68,68,0.1)",  border: "rgba(255,68,68,0.35)",  color: "#ff4444", icon: "✕", label: "INVALID SIGNATURE" },
+    valid:   { bg: "rgba(0,208,132,0.1)",  border: "rgba(0,208,132,0.35)",  color: "#00d084", icon: <IcCheck size={14} color="#00d084" />, label: "VERIFIED" },
+    revoked: { bg: "rgba(255,68,68,0.1)",  border: "rgba(255,68,68,0.35)",  color: "#ff4444", icon: <IcX size={14} color="#ff4444" />,     label: "REVOKED" },
+    expired: { bg: "rgba(250,204,21,0.1)", border: "rgba(250,204,21,0.35)", color: "#facc15", icon: <IcAlert size={14} color="#facc15" />, label: "EXPIRED" },
+    invalid: { bg: "rgba(255,68,68,0.1)",  border: "rgba(255,68,68,0.35)",  color: "#ff4444", icon: <IcX size={14} color="#ff4444" />,     label: "INVALID SIGNATURE" },
   };
   const c = cfg[status] ?? cfg.invalid;
 
@@ -110,7 +119,7 @@ function StatusBadge({ status }) {
         background: c.color,
         boxShadow: status === "valid" ? `0 0 8px ${c.color}` : "none",
       }} />
-      <span style={{ fontFamily: "Space Mono, monospace", fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", color: c.color }}>
+      <span style={{ fontFamily: "Space Mono, monospace", fontWeight: 700, fontSize: 13, letterSpacing: "0.1em", color: c.color, display: "inline-flex", alignItems: "center", gap: 6 }}>
         {c.icon} {c.label}
       </span>
     </div>
@@ -123,27 +132,49 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
   const stdInfo = STANDARD_FULL[cert.compliance_standard] ?? { label: cert.standard_label, color: "#c8ff00", body: "" };
   const fmt = (iso) => new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
+  // Auto-print when opened with ?print=1 (e.g. from dashboard PDF button)
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("print=1")) {
+      setTimeout(() => window.print(), 800);
+    }
+  }, []);
+
   return (
     <>
       <Head>
         <title>PassGeni Certificate — {cert.standard_label}</title>
         <meta name="description" content={`PassGeni compliance certificate for ${cert.standard_label}. Entropy: ${cert.entropy_bits} bits. Issued ${fmt(cert.created_at)}.`} />
         <meta name="robots" content="noindex" />
+        <style>{`
+          @media print {
+            header, nav, footer, .no-print, [data-no-print] { display: none !important; }
+            body { background: white !important; color: #000 !important; }
+            .cert-card {
+              box-shadow: none !important;
+              border: 1px solid #ddd !important;
+              max-width: 100% !important;
+              page-break-inside: avoid;
+            }
+            .jwt-truncated { display: none !important; }
+            .jwt-full { display: block !important; }
+            @page { margin: 1.5cm; size: A4; }
+          }
+        `}</style>
       </Head>
 
       {/* outer page */}
       <div style={{ minHeight: "100vh", background: "#060608", color: "#e0e0e0", fontFamily: "Outfit, sans-serif" }}>
 
         {/* header bar */}
-        <div style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", padding: "14px 0" }}>
+        <div data-no-print style={{ borderBottom: "1px solid rgba(255,255,255,0.07)", padding: "14px 0" }}>
           <div style={{ maxWidth: 720, margin: "0 auto", padding: "0 24px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <a href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none" }}>
               <div style={{ width: 28, height: 28, background: "#c8ff00", borderRadius: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <span style={{ fontWeight: 900, color: "#000", fontSize: 14 }}>✦</span>
+                <IcCheck size={14} color="#000" />
               </div>
               <span style={{ fontWeight: 800, fontSize: 15, color: "#fff", letterSpacing: "-0.02em" }}>PassGeni</span>
             </a>
-            <a href="/signup" style={{ fontSize: 12, color: "#c8ff00", textDecoration: "none", border: "1px solid rgba(200,255,0,0.3)", padding: "5px 12px", borderRadius: 6 }}>
+            <a href="/auth/signin" style={{ fontSize: 12, color: "#c8ff00", textDecoration: "none", border: "1px solid rgba(200,255,0,0.3)", padding: "5px 12px", borderRadius: 6 }}>
               Get PassGeni →
             </a>
           </div>
@@ -153,7 +184,7 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
         <div style={{ maxWidth: 720, margin: "0 auto", padding: "48px 24px 80px" }}>
 
           {/* document header */}
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
             <div style={{ fontSize: 10, letterSpacing: "0.18em", color: "#555", marginBottom: 12, fontFamily: "Space Mono, monospace" }}>
               COMPLIANCE CERTIFICATE
             </div>
@@ -165,13 +196,31 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
             </p>
           </div>
 
+          {/* action buttons row */}
+          <div data-no-print style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 24 }}>
+            <button
+              onClick={() => navigator.clipboard.writeText(certUrl)}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, background: "transparent", border: "1px solid rgba(255,255,255,0.12)", color: "#888", padding: "6px 14px", borderRadius: 6, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              Copy URL
+            </button>
+            <button
+              onClick={() => window.print()}
+              title="Download as PDF"
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, background: "transparent", border: "1px solid rgba(255,255,255,0.12)", color: "#888", padding: "6px 14px", borderRadius: 6, cursor: "pointer", fontFamily: "inherit" }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Download PDF
+            </button>
+          </div>
+
           {/* status badge */}
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 40 }}>
             <StatusBadge status={status} />
           </div>
 
           {/* main certificate card */}
-          <div style={{
+          <div className="cert-card" style={{
             background: "#0a0a0c",
             border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: 16,
@@ -232,7 +281,12 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
                     textAlign: "right",
                     fontFamily: k === "JWT Fingerprint" || k === "Algorithm" ? "Space Mono, monospace" : "inherit",
                   }}>
-                    {v}
+                    {k === "JWT Fingerprint" ? (
+                      <>
+                        <span className="jwt-truncated">{v}</span>
+                        <span className="jwt-full" style={{ display: "none", wordBreak: "break-all" }}>{jwtFingerprintFull}</span>
+                      </>
+                    ) : v}
                   </span>
                 </div>
               ))}
@@ -282,7 +336,7 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
               <div style={{ maxWidth: 340, fontSize: 12, color: "#444", lineHeight: 1.65 }}>
                 This certificate was issued by PassGeni and cryptographically signed using ES256 (ECDSA P-256).
                 It can be verified offline using the public key at{" "}
-                <span style={{ color: "#666", fontFamily: "Space Mono, monospace" }}>passgeni.ai/api/certs/jwks</span>.
+                <span style={{ color: "#666", fontFamily: "Space Mono, monospace" }}>passgeni.ai/.well-known/jwks.json</span>.
                 The original credential is never stored.
               </div>
             </div>
@@ -330,11 +384,11 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
           </div>
 
           {/* footer CTA */}
-          <div style={{ textAlign: "center", marginTop: 52 }}>
+          <div data-no-print style={{ textAlign: "center", marginTop: 52 }}>
             <div style={{ fontSize: 12, color: "#444", marginBottom: 16 }}>
               This certificate was verified by PassGeni. Get your own.
             </div>
-            <a href="/signup" style={{
+            <a href="/auth/signin" style={{
               display: "inline-block",
               background: "#c8ff00",
               color: "#000",
@@ -345,7 +399,7 @@ export default function CertPage({ cert, status, signatureValid, jwtFingerprint,
               textDecoration: "none",
               letterSpacing: "-0.01em",
             }}>
-              Get PassGeni — Free →
+              Get PassGeni →
             </a>
           </div>
         </div>

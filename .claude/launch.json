@@ -1,0 +1,18 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "design-preview",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "-p", "4321", "passgeni-frontend/public"],
+      "port": 4321
+    },
+    {
+      "name": "passgeni-dev",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev", "--prefix", "passgeni-frontend"],
+      "port": 3001,
+      "autoPort": true
+    }
+  ]
+}

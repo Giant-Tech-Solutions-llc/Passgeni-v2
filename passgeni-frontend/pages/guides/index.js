@@ -9,10 +9,10 @@ import PageLayout from "../../components/layout/PageLayout.js";
 import { COMPLIANCE_GUIDES, PROFESSION_GUIDES, CONCEPT_GUIDES, COMPARISON_GUIDES } from "../../content/guides.js";
 
 const TIERS = [
-  { label: "Compliance Frameworks",   guides: COMPLIANCE_GUIDES,  desc: "Exact requirements for HIPAA, PCI-DSS, SOC 2, ISO 27001, NIST, and DoD." },
-  { label: "By Profession",           guides: PROFESSION_GUIDES,  desc: "Password security tailored to your role, from healthcare to legal to software development." },
-  { label: "Core Concepts",           guides: CONCEPT_GUIDES,     desc: "Entropy, passphrases, zero-knowledge, post-quantum — explained properly." },
-  { label: "Comparisons & Rankings",  guides: COMPARISON_GUIDES,  desc: "Head-to-head comparisons and ranked lists to help you choose the right tool." },
+  { label: "Compliance Frameworks",   guides: COMPLIANCE_GUIDES,  desc: "Exact requirements for HIPAA, PCI-DSS, SOC 2, ISO 27001, NIST 800-63B, and FIPS 140-3. Primary sources only — no guessing." },
+  { label: "By Profession",           guides: PROFESSION_GUIDES,  desc: "Password security and compliance tailored to your role — healthcare, legal, DevOps, SRE, security engineering, and more." },
+  { label: "Core Concepts",           guides: CONCEPT_GUIDES,     desc: "Entropy, compliance certificates, auditor proof, passphrases, zero-knowledge, and post-quantum — explained with the math." },
+  { label: "Comparisons & Rankings",  guides: COMPARISON_GUIDES,  desc: "Head-to-head comparisons and ranked lists to help you choose the right tool for generation, storage, and certification." },
 ];
 
 const fadeUp = {
@@ -54,8 +54,8 @@ function GuideCard({ guide, index }) {
 const schema = {
   "@context":    "https://schema.org",
   "@type":       "CollectionPage",
-  "name":        "Password Security Guides — PassGeni",
-  "description": "Comprehensive password security guides: compliance frameworks, profession-specific advice, core cryptographic concepts, and tool comparisons.",
+  "name":        "Password Security & Compliance Guides — PassGeni",
+  "description": "Comprehensive guides on password security, compliance certificates, and credential best practices. HIPAA, PCI-DSS, SOC 2, ISO 27001, NIST 800-63B, FIPS 140-3, and compliance audit evidence.",
   "url":         "https://passgeni.ai/guides",
 };
 
@@ -64,8 +64,8 @@ export default function GuidesIndexPage() {
 
   return (
     <PageLayout
-      title="Password Security Guides — HIPAA, NIST, SOC 2, and More | PassGeni"
-      description="Comprehensive guides on password security, compliance requirements, and credential best practices. HIPAA, PCI-DSS, SOC 2, ISO 27001, NIST 800-63B, and more."
+      title="Password Security & Compliance Guides — HIPAA, NIST, SOC 2, FIPS 140-3 | PassGeni"
+      description="Reference-grade guides on password compliance: HIPAA, PCI-DSS v4.0, SOC 2, ISO 27001, NIST 800-63B, FIPS 140-3. Plus compliance certificates, audit evidence, and role-specific playbooks."
       canonical="https://passgeni.ai/guides"
       schema={schema}
     >

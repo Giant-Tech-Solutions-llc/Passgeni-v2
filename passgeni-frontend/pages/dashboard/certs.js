@@ -9,6 +9,7 @@ import Head from "next/head";
 import Header from "../../components/layout/Header.js";
 import Footer from "../../components/layout/Footer.js";
 import UpgradeModal from "../../components/ui/UpgradeModal.js";
+import { IcCheck, IcStar } from "../../lib/icons.js";
 
 const STANDARD_LABELS = {
   nist:  "NIST SP 800-63B",
@@ -33,6 +34,10 @@ function certStatus(cert) {
 
 function fmtDate(iso) {
   return new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function downloadCertPdf(certId) {
+  window.open(`/cert/${certId}?print=1`, "_blank");
 }
 
 /* ─── Certify flow ───────────────────────────────────────────────────────── */
@@ -150,7 +155,7 @@ function CertifyPanel({ onCertified, onPaywallHit }) {
                 border: `1px solid ${compliance === key ? "rgba(200,255,0,0.4)" : "rgba(255,255,255,0.1)"}`,
                 color: compliance === key ? "#c8ff00" : tier === "paid" ? "#888" : "#ccc",
               }}>
-              {label}{tier === "paid" ? " ★" : ""}
+              {label}{tier === "paid" ? <><span style={{ display: "inline-flex", verticalAlign: "middle", marginLeft: 4 }}><IcStar size={10} color="#888" /></span></> : ""}
             </button>
           ))}
         </div>
@@ -188,7 +193,7 @@ function CertifyPanel({ onCertified, onPaywallHit }) {
       {sessionInfo && (
         <div style={{ marginBottom: 16, padding: "10px 14px", borderRadius: 8, background: sessionInfo.compliance_valid ? "rgba(0,208,132,0.07)" : "rgba(255,68,68,0.07)", border: `1px solid ${sessionInfo.compliance_valid ? "rgba(0,208,132,0.2)" : "rgba(255,68,68,0.2)"}`, fontSize: 12 }}>
           {sessionInfo.compliance_valid
-            ? <span style={{ color: "#00d084" }}>✓ Meets {STANDARD_LABELS[compliance]} requirements</span>
+            ? <span style={{ color: "#00d084", display: "inline-flex", alignItems: "center", gap: 5 }}><IcCheck size={12} color="#00d084" /> Meets {STANDARD_LABELS[compliance]} requirements</span>
             : <span style={{ color: "#ff9999" }}>{sessionInfo.gaps?.[0]}</span>}
         </div>
       )}
@@ -411,7 +416,7 @@ export default function CertsDashboard() {
                   return (
                     <div key={cert.id} style={{
                       display: "grid",
-                      gridTemplateColumns: "1fr auto auto auto",
+                      gridTemplateColumns: "1fr auto auto auto auto",
                       alignItems: "center",
                       gap: 12,
                       padding: "14px 18px",
@@ -441,9 +446,28 @@ export default function CertsDashboard() {
                         style={{ fontSize: 12, color: "#c8ff00", textDecoration: "none", whiteSpace: "nowrap" }}>
                         View →
                       </a>
-                      <button onClick={() => copyUrl(cert.id)} style={{ background: "transparent", border: "none", color: "#555", fontSize: 12, cursor: "pointer", padding: "4px 8px" }}>
-                        {copied === cert.id ? "✓" : "Copy"}
+                      <button onClick={() => copyUrl(cert.id)} style={{ background: "transparent", border: "none", color: copied === cert.id ? "#c8ff00" : "#555", fontSize: 12, cursor: "pointer", padding: "4px 8px", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                        {copied === cert.id ? <><IcCheck size={12} color="#c8ff00" /> Copied</> : "Copy"}
                       </button>
+                      {session?.user?.plan === "free" ? (
+                        <button
+                          disabled
+                          title="Upgrade to Assurance for PDF export"
+                          style={{ background: "transparent", border: "none", color: "#333", fontSize: 12, cursor: "not-allowed", padding: "4px 8px", display: "inline-flex", alignItems: "center", gap: 3 }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          PDF
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => downloadCertPdf(cert.id)}
+                          title="Download as PDF"
+                          style={{ background: "transparent", border: "none", color: "#555", fontSize: 12, cursor: "pointer", padding: "4px 8px", display: "inline-flex", alignItems: "center", gap: 3 }}
+                        >
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                          PDF
+                        </button>
+                      )}
                     </div>
                   );
                 })}

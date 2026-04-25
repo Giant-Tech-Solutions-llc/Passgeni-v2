@@ -148,6 +148,6 @@ export const contentHtml = `
 </ol>
 
 <div class="callout">
-  <strong>Generate a HIPAA-compliant password now.</strong> PassGeni's HIPAA preset enforces minimum 12-character length, full character set, and entropy requirements that meet HHS guidance. Free, client-side, zero storage — nothing leaves your browser.
+  <strong>Generate and certify a HIPAA-compliant password.</strong> PassGeni's HIPAA preset enforces minimum 12-character length, full character set, and entropy requirements per HHS guidance. After generation, click 'Certify this password' to receive an ES256-signed compliance certificate — machine-readable audit evidence for §164.312 assessments. <a href="/guides/what-is-a-compliance-certificate" style="color:#c8ff00">Learn how compliance certificates work →</a>
 </div>
 `;

@@ -11,6 +11,7 @@ import PageLayout                                   from "../../components/layou
 import UpgradeModal                                 from "../../components/ui/UpgradeModal.js";
 import { btnPrimary, btnGhost }                     from "../../lib/motion.js";
 import { useRemindDismissed }                       from "../../lib/useRemindDismissed.js";
+import { IcAlert, IcStar, IcShield, IcCheck, IcBolt } from "../../lib/icons.js";
 
 // ─── CONSTANTS ────────────────────────────────────────────────
 const STANDARD_LABELS = {
@@ -64,6 +65,10 @@ function certStatus(cert) {
   if (new Date(cert.expires_at) < new Date()) return "expired";
   return "valid";
 }
+function downloadCertPdf(certId) {
+  window.open(`/cert/${certId}?print=1`, "_blank");
+}
+
 function downloadCertJson(cert) {
   const payload = {
     id:                 cert.id,
@@ -178,7 +183,7 @@ function QuickFixPanel({ risks }) {
           Active Risks
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <span style={{ fontSize: 15 }}>🚨</span>
+          <IcAlert size={18} color="#ff4444" />
           <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, color: "#ff9999" }}>
             {risks.length} certificate{risks.length !== 1 ? "s" : ""} need attention
           </span>
@@ -403,7 +408,7 @@ function SortTh({ label, field, sortBy, sortDir, onSort, style }) {
 }
 
 // ─── CERT TABLE ───────────────────────────────────────────────
-function CertTable({ certs }) {
+function CertTable({ certs, plan }) {
   const [sortBy,  setSortBy]  = useState("created_at");
   const [sortDir, setSortDir] = useState("desc");
   const [copied,  setCopied]  = useState(null);
@@ -510,9 +515,9 @@ function CertTable({ certs }) {
                     </a>
                     <button
                       onClick={() => copyUrl(cert.id)}
-                      style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: copied === cert.id ? "#c8ff00" : "#555", padding: "5px 10px", borderRadius: 6, cursor: "pointer" }}
+                      style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: copied === cert.id ? "#c8ff00" : "#555", padding: "5px 10px", borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
                     >
-                      {copied === cert.id ? "✓" : "Copy"}
+                      {copied === cert.id ? <><IcCheck size={11} color="#c8ff00" /> Copied</> : "Copy"}
                     </button>
                     <button
                       onClick={() => downloadCertJson(cert)}
@@ -521,6 +526,25 @@ function CertTable({ certs }) {
                     >
                       ↓
                     </button>
+                    {plan === "free" ? (
+                      <button
+                        disabled
+                        title="Upgrade to Assurance for PDF export"
+                        style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "#333", padding: "5px 8px", borderRadius: 6, cursor: "not-allowed", display: "inline-flex", alignItems: "center", gap: 3 }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        PDF
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => downloadCertPdf(cert.id)}
+                        title="Download as PDF"
+                        style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "#555", padding: "5px 8px", borderRadius: 6, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 3 }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        PDF
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>
@@ -542,7 +566,7 @@ function CertTable({ certs }) {
 
 // ─── RECENT ACTIVITY ─────────────────────────────────────────
 function RecentActivity({ events }) {
-  const ICONS = { generated: "✦", viewed: "◎" };
+  const ICON_MAP = { generated: <IcBolt size={11} color="#c8ff00" />, viewed: <IcShield size={11} color="#555" /> };
   const COLORS = { generated: "#c8ff00", viewed: "#555" };
 
   if (!events?.length) {
@@ -570,7 +594,7 @@ function RecentActivity({ events }) {
             display:      "flex", alignItems: "center", justifyContent: "center",
             fontSize:     11, color: COLORS[ev.type] ?? "#555",
           }}>
-            {ICONS[ev.type] ?? "·"}
+            {ICON_MAP[ev.type] ?? <span style={{ fontSize: 11 }}>·</span>}
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.3 }}>
@@ -649,7 +673,7 @@ export default function ComplianceDashboard() {
     return (
       <PageLayout title="Dashboard — PassGeni" description="">
         <main style={{ maxWidth: 480, margin: "0 auto", padding: "120px var(--page-pad)", textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 16 }}>⚠️</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><IcAlert size={36} color="#ff6644" /></div>
           <div style={{ fontFamily: "var(--font-body)", fontSize: 15, color: "#ff6644", marginBottom: 20 }}>{loadError}</div>
           <motion.button onClick={fetchData} className="btn-ghost" {...btnGhost} style={{ fontSize: 13 }}>Try again →</motion.button>
         </main>
@@ -810,7 +834,7 @@ export default function ComplianceDashboard() {
           </motion.div>
 
           {/* Stats 3-up */}
-          <StatCard label="Active Certs"    value={data.validCerts}    sub="non-expired, non-revoked"  accentColor="#00d084" icon="✦" delay={0.06} />
+          <StatCard label="Active Certs"    value={data.validCerts}    sub="non-expired, non-revoked"  accentColor="#00d084" icon={<IcBolt size={16} color="#00d084" />} delay={0.06} />
           <StatCard
             label="Expiring Soon"
             value={expiringSoonCount}
@@ -858,7 +882,7 @@ export default function ComplianceDashboard() {
                 Click column headers to sort
               </span>
             </div>
-            <CertTable certs={data.certs ?? []} />
+            <CertTable certs={data.certs ?? []} plan={data.plan} />
           </motion.div>
 
           {/* Recent activity */}
@@ -902,7 +926,7 @@ export default function ComplianceDashboard() {
                   alignItems:  "center",
                   gap:         6,
                 }}>
-                  <span style={{ fontSize: 8 }}>{hasCert ? "✓" : isLocked ? "★" : "○"}</span>
+                  {hasCert ? <IcCheck size={10} color="#00d084" /> : isLocked ? <IcStar size={10} color="#333" /> : <IcShield size={10} color="#333" />}
                   {label}
                 </div>
               );
@@ -910,7 +934,7 @@ export default function ComplianceDashboard() {
           </div>
           {!isPaid && (
             <div style={{ marginTop: 12, fontSize: 11, color: "#444" }}>
-              ★ Requires Assurance or Authority plan ·{" "}
+              <span style={{ display: "inline-flex", verticalAlign: "middle", marginRight: 4 }}><IcStar size={11} color="#444" /></span> Requires Assurance or Authority plan ·{" "}
               <a href="/pricing" style={{ color: "#c8ff00", textDecoration: "none" }}>Upgrade →</a>
             </div>
           )}

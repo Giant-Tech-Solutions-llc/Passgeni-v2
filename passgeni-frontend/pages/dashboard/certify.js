@@ -11,6 +11,7 @@ import { useRouter } from "next/router";
 import Head from "next/head";
 import { motion, AnimatePresence } from "framer-motion";
 import PageLayout from "../../components/layout/PageLayout.js";
+import { IcCheck } from "../../lib/icons.js";
 
 // ─── STANDARDS ────────────────────────────────────────────────────────────────
 const STANDARDS = [
@@ -63,7 +64,7 @@ function StepIndicator({ step, total = 3 }) {
               color: done ? "#000" : active ? "#c8ff00" : "#555",
               transition: "all 0.2s",
             }}>
-              {done ? "✓" : n}
+              {done ? <IcCheck size={13} color="#000" /> : n}
             </div>
             {n < total && (
               <div style={{
@@ -118,7 +119,7 @@ function Step1({ selected, onSelect, plan }) {
                 background: active ? "#c8ff00" : "transparent",
                 display: "flex", alignItems: "center", justifyContent: "center",
               }}>
-                {active && <span style={{ fontSize: 9, color: "#000", fontWeight: 900 }}>✓</span>}
+                {active && <IcCheck size={10} color="#000" />}
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
@@ -206,7 +207,7 @@ function Step2({ standard, length, setLength, opts, setOpts }) {
                   border: `1px solid ${on ? "#c8ff00" : "rgba(255,255,255,0.15)"}`,
                   display: "flex", alignItems: "center", justifyContent: "center",
                 }}>
-                  {on && <span style={{ fontSize: 9, color: "#000", fontWeight: 900, lineHeight: 1 }}>✓</span>}
+                  {on && <IcCheck size={10} color="#000" />}
                 </div>
                 <div>
                   <div style={{ fontSize: 12, color: on ? "#ccc" : "#555", lineHeight: 1.2 }}>{label}</div>
@@ -241,7 +242,7 @@ function Step2({ standard, length, setLength, opts, setOpts }) {
 }
 
 // ─── STEP 3 — GENERATE & CERTIFY ─────────────────────────────────────────────
-function Step3({ standard, length, opts, onDone, onUpgradeHit }) {
+function Step3({ standard, length, opts, onDone, onUpgradeHit, atLimit }) {
   const [phase, setPhase]   = useState("idle"); // idle | generating | certifying | done | error
   const [password, setPassword] = useState("");
   const [revealed, setRevealed] = useState(false);
@@ -309,7 +310,7 @@ function Step3({ standard, length, opts, onDone, onUpgradeHit }) {
 
     setResult(certData);
     setPhase("done");
-    onDone?.();
+    onDone?.(certData);
   }, [standard, length, opts, bits, pool.length, onDone, onUpgradeHit]);
 
   if (phase === "done" && result) {
@@ -404,20 +405,35 @@ function Step3({ standard, length, opts, onDone, onUpgradeHit }) {
         </div>
       )}
 
+      {atLimit && (
+        <div style={{
+          padding: '12px 16px', borderRadius: 8,
+          background: 'rgba(255,68,68,0.08)', border: '1px solid rgba(255,68,68,0.25)',
+          marginBottom: 12, fontSize: 13, color: '#ff8080', lineHeight: 1.5,
+        }}>
+          <strong style={{color:'#ff6b6b'}}>Monthly limit reached.</strong>{' '}
+          You've used all 3 free certificates this month.{' '}
+          <a href="/pricing" style={{color:'var(--accent)', fontWeight:600}}>
+            Upgrade to Assurance →
+          </a>
+        </div>
+      )}
+
       <button
         onClick={run}
-        disabled={phase === "generating" || phase === "certifying"}
+        disabled={atLimit || phase === "generating" || phase === "certifying"}
+        title={atLimit ? "Monthly limit reached — upgrade to Assurance for unlimited certificates" : undefined}
         style={{
           width: "100%",
           padding: "16px 24px",
-          background: phase === "idle" || phase === "error" ? "#c8ff00" : "rgba(200,255,0,0.2)",
+          background: atLimit ? "rgba(200,255,0,0.1)" : phase === "idle" || phase === "error" ? "#c8ff00" : "rgba(200,255,0,0.2)",
           border: "none",
           borderRadius: 8,
           fontFamily: "var(--font-body)",
           fontWeight: 700,
           fontSize: 15,
-          color: phase === "idle" || phase === "error" ? "#000" : "#c8ff00",
-          cursor: phase === "generating" || phase === "certifying" ? "not-allowed" : "pointer",
+          color: atLimit ? "#666" : phase === "idle" || phase === "error" ? "#000" : "#c8ff00",
+          cursor: atLimit || phase === "generating" || phase === "certifying" ? "not-allowed" : "pointer",
           letterSpacing: "-0.01em",
           transition: "all 0.2s",
         }}
@@ -444,10 +460,48 @@ export default function CertifyPage() {
   const [length, setLength]   = useState(16);
   const [opts, setOpts]     = useState({ upper: true, lower: true, numbers: true, special: false });
   const [upgradeModal, setUpgradeModal] = useState(null);
+  const [monthlyUsed, setMonthlyUsed] = useState(null);
+  const [fetchedPlan, setFetchedPlan] = useState(null);
+  const [certResult, setCertResult] = useState(null);
+  const [showNps, setShowNps] = useState(false);
+  const [npsRating, setNpsRating] = useState(null);
+  const [npsSubmitted, setNpsSubmitted] = useState(false);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/signin?callbackUrl=/dashboard/certify");
   }, [status, router]);
+
+  useEffect(() => {
+    if (!session) return;
+    fetch('/api/dashboard/compliance')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (d) {
+          setMonthlyUsed(d.monthly_used ?? d.monthlyUsed ?? null);
+          setFetchedPlan(d.plan ?? null);
+        }
+      })
+      .catch(() => {});
+  }, [session]);
+
+  // Show NPS modal 1.5s after cert is issued (once per session)
+  useEffect(() => {
+    if (certResult && !sessionStorage.getItem("nps_shown")) {
+      const t = setTimeout(() => setShowNps(true), 1500);
+      return () => clearTimeout(t);
+    }
+  }, [certResult]);
+
+  const submitNps = (rating) => {
+    setNpsRating(rating);
+    sessionStorage.setItem("nps_shown", "1");
+    fetch("/api/nps", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ rating, cert_id: certResult?.cert_id }),
+    }).catch(() => {});
+    setTimeout(() => setNpsSubmitted(true), 300);
+  };
 
   // Pre-select standard from ?standard= query param (e.g. from Quick Fix panel deep-link)
   useEffect(() => {
@@ -473,6 +527,9 @@ export default function CertifyPage() {
   if (status === "loading" || status === "unauthenticated") return null;
 
   const plan = session?.user?.plan_type ?? session?.user?.plan ?? "free";
+  const effectivePlan = fetchedPlan ?? plan;
+  const FREE_LIMIT = 3;
+  const atLimit = effectivePlan === 'free' && monthlyUsed !== null && monthlyUsed >= FREE_LIMIT;
 
   return (
     <PageLayout title="Issue Certificate — PassGeni" description="Generate a compliant password and issue a cryptographically signed compliance certificate.">
@@ -509,6 +566,8 @@ export default function CertifyPage() {
                 standard={standard}
                 length={length}
                 opts={opts}
+                atLimit={atLimit}
+                onDone={(data) => setCertResult(data)}
                 onUpgradeHit={(info) => {
                   setUpgradeModal(info);
                   setStep(1);
@@ -537,6 +596,92 @@ export default function CertifyPage() {
             </button>
           </div>
         )}
+
+        {/* NPS post-cert survey modal */}
+        <AnimatePresence>
+          {showNps && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              style={{
+                position: "fixed", inset: 0, zIndex: 999,
+                background: "rgba(5,5,7,0.82)", backdropFilter: "blur(6px)",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                padding: "0 20px",
+              }}
+              onClick={(e) => { if (e.target === e.currentTarget) setShowNps(false); }}
+            >
+              <motion.div
+                initial={{ opacity: 0, y: 24, scale: 0.97 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 12 }}
+                transition={{ duration: 0.25, ease: "easeOut" }}
+                style={{
+                  width: "100%", maxWidth: 440,
+                  background: "#0e0e11", border: "1px solid rgba(255,255,255,0.09)",
+                  borderRadius: 14, padding: "28px 28px 24px",
+                }}
+              >
+                {npsSubmitted ? (
+                  <div style={{ textAlign: "center", padding: "12px 0" }}>
+                    <div style={{ fontSize: 28, marginBottom: 12 }}>🎉</div>
+                    <div style={{ fontWeight: 700, fontSize: 16, color: "#fff", marginBottom: 6 }}>Thanks for the feedback!</div>
+                    <div style={{ fontSize: 13, color: "#555" }}>It helps us improve PassGeni.</div>
+                    <button
+                      onClick={() => setShowNps(false)}
+                      style={{ marginTop: 20, background: "#c8ff00", color: "#000", fontWeight: 700, fontSize: 13, padding: "9px 22px", borderRadius: 7, border: "none", cursor: "pointer", fontFamily: "var(--font-body)" }}
+                    >
+                      Done
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 18 }}>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 15, color: "#fff", marginBottom: 4 }}>How likely are you to recommend PassGeni?</div>
+                        <div style={{ fontSize: 12, color: "#555" }}>0 = Not at all · 10 = Definitely</div>
+                      </div>
+                      <button
+                        onClick={() => setShowNps(false)}
+                        style={{ background: "none", border: "none", color: "#444", fontSize: 18, cursor: "pointer", lineHeight: 1, padding: "0 0 0 12px" }}
+                        aria-label="Close"
+                      >×</button>
+                    </div>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(11, 1fr)", gap: 5, marginBottom: 10 }}>
+                      {Array.from({ length: 11 }, (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() => submitNps(i)}
+                          style={{
+                            aspectRatio: "1", borderRadius: 6,
+                            background: npsRating === i ? "#c8ff00" : "rgba(255,255,255,0.04)",
+                            border: `1px solid ${npsRating === i ? "#c8ff00" : "rgba(255,255,255,0.08)"}`,
+                            color: npsRating === i ? "#000" : "#888",
+                            fontFamily: "var(--font-mono)", fontSize: 12, fontWeight: 700,
+                            cursor: "pointer",
+                            transition: "all 0.12s",
+                          }}
+                          onMouseEnter={(e) => { if (npsRating !== i) { e.currentTarget.style.borderColor = "rgba(200,255,0,0.4)"; e.currentTarget.style.color = "#c8ff00"; }}}
+                          onMouseLeave={(e) => { if (npsRating !== i) { e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "#888"; }}}
+                        >
+                          {i}
+                        </button>
+                      ))}
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: 10, color: "#333", fontFamily: "var(--font-mono)", marginTop: 4 }}>
+                      <span>Not likely</span>
+                      <span>Very likely</span>
+                    </div>
+                    <div style={{ marginTop: 16, fontSize: 11, color: "#333", textAlign: "center" }}>
+                      Select a rating to submit · takes 3 seconds
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Upgrade prompt */}
         {upgradeModal && (

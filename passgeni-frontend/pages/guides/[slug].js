@@ -11,6 +11,7 @@ import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
 import { ALL_GUIDES, getGuideBySlug, getRelatedGuides } from "../../content/guides.js";
 import { getGuideSchema, getFAQSchema } from "../../seo/schema.js";
+import { IcAlert, IcX, IcArrow } from "../../lib/icons.js";
 
 // ─── PROSE COMPONENTS (exported so content files can import them) ─
 
@@ -81,8 +82,8 @@ export function Callout({ type = "info", children }) {
   const s = styles[type] || styles.info;
   return (
     <div style={{ border: `1px solid ${s.border}`, background: s.bg, borderRadius: 10, padding: "16px 20px", marginBottom: 24, display: "flex", gap: 12 }}>
-      <span style={{ color: s.dot, fontSize: 14, flexShrink: 0, marginTop: 1 }}>
-        {type === "warning" ? "⚠" : type === "danger" ? "✕" : "→"}
+      <span style={{ color: s.dot, flexShrink: 0, marginTop: 1, display: "flex" }}>
+        {type === "warning" ? <IcAlert size={14} color="currentColor" /> : type === "danger" ? <IcX size={14} color="currentColor" /> : <IcArrow size={14} color="currentColor" />}
       </span>
       <span style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#ccc", lineHeight: 1.8 }}>{children}</span>
     </div>

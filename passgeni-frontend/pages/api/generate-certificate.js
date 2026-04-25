@@ -23,11 +23,9 @@ import {
 import { createCertificate, getMonthlyCount } from "../../lib/db/certs.js";
 import { getDB } from "../../lib/db/client.js";
 import { resolveApiCaller } from "../../lib/apiAuth.js";
-import { createRateLimiter, burstLimit, rateLimit } from "../../lib/rateLimit.js";
+import { burstLimit } from "../../lib/rateLimit.js";
+import { rateLimitDb } from "../../lib/rateLimitDb.js";
 import { getClientIp } from "../../lib/request.js";
-
-// 30 cert generations per minute per user/key
-const checkRateLimit = createRateLimiter({ limit: 30, windowMs: 60_000 });
 
 // IP rate limit: 10 cert attempts per hour (free-tier / unauthenticated scraping protection)
 const IP_LIMIT = 10;
@@ -40,7 +38,7 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   // ── IP rate limit (PRD §9.0C) — enforced before auth ─────────────────────
-  const ipCheck = rateLimit(`ip:cert:${getClientIp(req)}`, IP_LIMIT, IP_WINDOW_MS);
+  const ipCheck = await rateLimitDb(`ip:cert:${getClientIp(req)}`, IP_LIMIT, IP_WINDOW_MS);
   if (!ipCheck.allowed) {
     const retryAfterSecs = Math.ceil((ipCheck.resetAt - Date.now()) / 1000);
     res.setHeader("Retry-After", String(retryAfterSecs));
@@ -56,9 +54,24 @@ export default async function handler(req, res) {
   const caller = await resolveApiCaller(req, res);
   if (!caller) return; // resolveApiCaller already sent the error response
 
-  if (!checkRateLimit(req, res, caller)) return;
-
   const { userId, email, plan } = caller;
+
+  // User-level rate limit: 60 cert generations per minute (DB-backed, works across Vercel instances)
+  const userRlKey = `user:cert:${userId}`;
+  const userRl = await rateLimitDb(userRlKey, 60, 60_000);
+  res.setHeader("X-RateLimit-Limit", "60");
+  res.setHeader("X-RateLimit-Remaining", String(userRl.remaining));
+  res.setHeader("X-RateLimit-Reset", String(Math.ceil(userRl.resetAt / 1000)));
+  if (!userRl.allowed) {
+    const retryAfterSecs = Math.ceil((userRl.resetAt - Date.now()) / 1000);
+    res.setHeader("Retry-After", String(retryAfterSecs));
+    return res.status(429).json({
+      error: `Rate limit exceeded. Max 60 certificate requests per minute.`,
+      code: "RATE_LIMITED",
+      retry_after: retryAfterSecs,
+      fix: "Wait before making more certificate requests.",
+    });
+  }
 
   // ── Burst protection: 5 immediate, then 1/second ──────────────────────────
   const burst = burstLimit(`burst:cert:${userId}`, { burstSize: 5, cooldownMs: 1000 });
@@ -276,6 +289,11 @@ export default async function handler(req, res) {
     if (anomaly) console.warn(`[anomaly] User ${userId} generated ${count} certs in 24h`);
   });
 
+  // NOTE: jwt_token is intentionally NOT returned in the API response (PRD §7.1 delta).
+  // The JWT is stored in the DB and publicly verifiable via /cert/[id] and /.well-known/jwks.json.
+  // Returning the raw JWT would expose it to browser history, logs, and network traces.
+  // Auditors verify via the public cert URL, not the raw token. This is a security improvement over the PRD spec.
+  // If raw JWT access is needed for Enterprise integrations, it can be added as an opt-in via API key scope.
   return res.status(201).json({
     cert_id: certId,
     cert_url,

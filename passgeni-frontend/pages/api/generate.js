@@ -18,9 +18,29 @@ import {
   validateAgainstStandard,
   getStandardsMet,
 } from "../../lib/compliance.js";
+import { createRateLimiter } from "../../lib/rateLimit.js";
+import { rateLimitDb } from "../../lib/rateLimitDb.js";
+import { getClientIp } from "../../lib/request.js";
+
+// 30 session requests per minute per IP (prevents session token flooding)
+const checkSessionRateLimit = createRateLimiter({ limit: 30, windowMs: 60_000 });
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
+
+  // IP-based rate limit for session generation
+  const ip = getClientIp(req);
+  const ipSessionCheck = await rateLimitDb(`ip:session:${ip}`, 30, 60_000);
+  if (!ipSessionCheck.allowed) {
+    const retryAfterSecs = Math.ceil((ipSessionCheck.resetAt - Date.now()) / 1000);
+    res.setHeader("Retry-After", String(retryAfterSecs));
+    return res.status(429).json({
+      error: "Too many session requests from this IP. Please slow down.",
+      code: "RATE_LIMITED",
+      retry_after: retryAfterSecs,
+      fix: "Wait before requesting more generation sessions.",
+    });
+  }
 
   const {
     compliance_standard,
