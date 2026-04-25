@@ -62,7 +62,15 @@ export default async function handler(req, res) {
     ]);
 
     // Surface real DB errors instead of swallowing them
+    // Exception: 42P01 = table does not exist (schema not yet migrated) → return empty state
     if (certsResult.error) {
+      const isTableMissing =
+        certsResult.error.code === "42P01" ||
+        certsResult.error.message?.includes("does not exist");
+      if (isTableMissing) {
+        console.warn("[compliance] certificates table not found — schema migration pending. Returning empty state.");
+        return res.status(200).json(buildEmpty(plan, session, token));
+      }
       console.error("[compliance] certs query error:", certsResult.error);
       return res.status(500).json({
         error:   "Database query failed",
@@ -71,6 +79,13 @@ export default async function handler(req, res) {
       });
     }
     if (monthResult.error) {
+      const isTableMissing =
+        monthResult.error.code === "42P01" ||
+        monthResult.error.message?.includes("does not exist");
+      if (isTableMissing) {
+        console.warn("[compliance] certificates table not found (month count) — returning empty state.");
+        return res.status(200).json(buildEmpty(plan, session, token));
+      }
       console.error("[compliance] monthly count error:", monthResult.error);
       return res.status(500).json({
         error:  "Database query failed",
@@ -150,7 +165,8 @@ export default async function handler(req, res) {
         .order("created_at", { ascending: false })
         .limit(10);
       if (viewErr) {
-        console.warn("[compliance] cert_views query error (non-fatal):", viewErr.message);
+        // 42P01 = table doesn't exist yet — treat as non-fatal (views are cosmetic)
+        console.warn("[compliance] cert_views query error (non-fatal):", viewErr.code, viewErr.message);
       } else {
         recentViews = views ?? [];
       }
@@ -186,6 +202,7 @@ export default async function handler(req, res) {
       certs:        allCerts.slice(0, 100),
       recentActivity,
       monthlyCount,
+      monthly_used: monthlyCount, // alias for certify.js compatibility
       monthlyLimit: isPaid ? null : 3,
       plan,
       planStatus:   session.user.planStatus ?? token?.planStatus ?? null,
@@ -211,6 +228,7 @@ function buildEmpty(plan, session, token) {
     certs:           [],
     recentActivity:  [],
     monthlyCount:    0,
+    monthly_used:    0, // alias for certify.js compatibility
     monthlyLimit:    plan === "free" ? 3 : null,
     plan,
     planStatus:      session?.user?.planStatus ?? token?.planStatus ?? null,
