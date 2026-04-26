@@ -146,7 +146,7 @@ const Chk = ({ c=C.green, size=11 }) => (
 function Hero() {
   return (
     <section style={{ background:C.surf1, padding:"112px clamp(16px,4vw,48px) 96px" }}>
-      <div style={{ maxWidth:1200, margin:"0 auto", display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center" }}>
+      <div data-hero style={{ maxWidth:1200, margin:"0 auto", display:"grid", gridTemplateColumns:"1fr 1fr", gap:64, alignItems:"center" }}>
 
         {/* ── Left: headline + CTAs ── */}
         <div>
@@ -206,7 +206,7 @@ function Hero() {
         </div>
 
         {/* ── Right: layered product cards ── */}
-        <FI d={0.1}>
+        <FI d={0.1} className="hero-cards-col">
           <div style={{ position:"relative", height:480 }}>
 
             {/* Back card — Certificate */}
@@ -288,7 +288,6 @@ function Hero() {
         </FI>
 
       </div>
-      <style>{`@media(max-width:900px){[data-hero-grid]{grid-template-columns:1fr!important}[data-hero-cards]{display:none!important}}`}</style>
     </section>
   );
 }
@@ -562,7 +561,7 @@ function GeneratorPanel() {
 function ProductSplit() {
   return (
     <section id="generator" style={{ background:C.surf1, padding:"96px clamp(16px,4vw,48px)" }}>
-      <div style={{ maxWidth:1200, margin:"0 auto", display:"grid", gridTemplateColumns:"1fr 1fr", gap:60, alignItems:"center" }}>
+      <div className="split-grid" style={{ maxWidth:1200, margin:"0 auto", alignItems:"center" }}>
         <FI y={8}>
           <GeneratorPanel/>
         </FI>
@@ -599,7 +598,6 @@ function ProductSplit() {
           </div>
         </FI>
       </div>
-      <style>{`@media(max-width:860px){#generator>[style]{grid-template-columns:1fr!important;gap:40px!important}}`}</style>
     </section>
   );
 }
@@ -625,7 +623,7 @@ function ValueGrid() {
 
         {/* Row 1 — 60/40 */}
         <FI d={0.05}>
-          <div style={{ display:"grid",gridTemplateColumns:"1.5fr 1fr",gap:16,marginBottom:16 }}>
+          <div className="vg-row" style={{ display:"grid",gridTemplateColumns:"1.5fr 1fr",gap:16,marginBottom:16 }}>
             <Card label="Entropy · 128-bit floor" title="Post-quantum resistant by default."
               body="Most generators produce 40–60 bits of entropy. PassGeni enforces a 128-bit minimum — identical to government HSM standards. Post-Quantum mode targets 256 bits, aligning with NIST 2024 guidance on Grover-resistant credentials."
               metric="128+" metricSub="bits minimum — government HSM standard">
@@ -646,7 +644,7 @@ function ValueGrid() {
 
         {/* Row 2 — 40/60 */}
         <FI d={0.1}>
-          <div style={{ display:"grid",gridTemplateColumns:"1fr 1.5fr",gap:16,marginBottom:16 }}>
+          <div className="vg-row" style={{ display:"grid",gridTemplateColumns:"1fr 1.5fr",gap:16,marginBottom:16 }}>
             <Card label="Compliance · 6 frameworks" title="One click. Full configuration."
               body="HIPAA, PCI-DSS v4.0, SOC 2 Type II, ISO/IEC 27001, DoD IL2, and NIST SP 800-63B. Each preset auto-configures length, character requirements, and entropy floor."
               metric="6" metricSub="compliance frameworks auto-configured">
@@ -673,7 +671,7 @@ function ValueGrid() {
 
         {/* Row 3 — 3 mixed non-uniform */}
         <FI d={0.15}>
-          <div style={{ display:"grid",gridTemplateColumns:"1.2fr 0.9fr 0.9fr",gap:16 }}>
+          <div className="vg-row3" style={{ display:"grid",gridTemplateColumns:"1.2fr 0.9fr 0.9fr",gap:16 }}>
             <Card label="Audit Trail · ES256 JWT" title="Signed certificates for every generation."
               body="Every password can be certified with an ES256-signed JWT containing generation parameters, entropy score, compliance badges, and SHA-256 fingerprint. Send it to your auditor."
               metric="ES256" metricSub="JWT signature standard">
@@ -704,7 +702,6 @@ function ValueGrid() {
           </div>
         </FI>
       </div>
-      <style>{`@media(max-width:720px){[data-vg1],[data-vg2],[data-vg3]{grid-template-columns:1fr!important}}`}</style>
     </section>
   );
 }
@@ -750,7 +747,7 @@ function Dashboard() {
               <span style={{ fontSize:11,color:C.textMut }}>Team plan</span>
             </div>
 
-            <div style={{ display:"grid",gridTemplateColumns:"1fr 340px" }}>
+            <div className="db-grid" style={{ display:"grid",gridTemplateColumns:"1fr 340px" }}>
               {/* cert table */}
               <div style={{ padding:"28px 32px",borderRight:`1px solid ${C.border}` }}>
                 <div style={{ fontSize:12,fontWeight:700,color:C.text,marginBottom:16 }}>Certificate Log</div>
@@ -867,18 +864,23 @@ export default function HomePage() {
         <script type="application/ld+json" dangerouslySetInnerHTML={{__html:JSON.stringify(faqSchema)}}/>
         <style>{`
           @keyframes dot-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+          [data-hero]{display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
           @media(max-width:900px){
             [data-hero]{grid-template-columns:1fr!important}
-            [data-hero-cards]{display:none!important}
+            .hero-cards-col{display:none!important}
           }
+          .split-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;max-width:1200px;margin:0 auto}
           @media(max-width:860px){
-            [data-split]{grid-template-columns:1fr!important;gap:40px!important}
+            .split-grid{grid-template-columns:1fr!important;gap:40px!important}
           }
+          .vg-row{display:grid;gap:16px}
+          .vg-row3{display:grid;gap:16px}
           @media(max-width:720px){
-            [data-vg1],[data-vg2],[data-vg3]{grid-template-columns:1fr!important}
+            .vg-row,.vg-row3{grid-template-columns:1fr!important}
           }
+          .db-grid{display:grid;grid-template-columns:1fr 340px}
           @media(max-width:700px){
-            [data-db]{grid-template-columns:1fr!important}
+            .db-grid{grid-template-columns:1fr!important}
           }
         `}</style>
       </Head>
