@@ -193,11 +193,11 @@ export const TOOLS_PREVIEW = {
       label:  "Audit passwords",
     },
     {
-      icon:   "📶",
-      title:  "WiFi QR Generator",
-      body:   "Generate a QR code for your WiFi network. Anyone scans to connect. Your password never leaves your browser.",
-      href:   "/tools/wifi-qr",
-      label:  "Generate QR",
+      icon:   "🛡",
+      title:  "Credential Compliance Fixer",
+      body:   "Paste any credential. Detect compliance gaps against SOC2, HIPAA, PCI-DSS, and NIST. Generate a certified replacement.",
+      href:   "/tools/compliance-fixer",
+      label:  "Fix credential",
     },
   ],
 };

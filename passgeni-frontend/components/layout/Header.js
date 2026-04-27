@@ -5,23 +5,22 @@ import{useSession}from"next-auth/react";
 import{NAV}from"../../content/copy.js";
 import PassGeniLogo from"./Logo.js";
 import{btnPrimary,btnGhost}from"../../lib/motion.js";
+import { IcSearch, IcLink, IcBarChart, IcShield, IcClipboard, IcBolt, IcCompass } from "../../lib/icons.js";
 
 // ─── Menu Data ────────────────────────────────────────────────
 const TOOLS_MENU={
   columns:[
     {label:"Security",items:[
-      {icon:"🔍",label:"Breach Checker",desc:"See if your password appeared in any known data breach",href:"/tools/breach-checker"},
-      {icon:"🔗",label:"Secure Password Sharing",desc:"Send credentials via AES-256 encrypted one-time links",href:"/tools/secure-share"},
+      {icon:<IcSearch size={18} color="var(--accent)" />,label:"Breach Checker",desc:"See if your password appeared in any known data breach",href:"/tools/breach-checker"},
+      {icon:<IcLink size={18} color="var(--accent)" />,label:"Secure Password Sharing",desc:"Send credentials via AES-256 encrypted one-time links",href:"/tools/secure-share"},
     ]},
     {label:"Analysis",items:[
-      {icon:"📊",label:"Password Strength Checker",desc:"Entropy bits, crack time estimate, DNA grade A–F",href:"/tools/strength-checker"},
-      {icon:"🛡️",label:"Password Audit Tool",desc:"Audit multiple passwords at once for your whole team",href:"/tools/audit",business:true},
+      {icon:<IcBarChart size={18} color="var(--accent)" />,label:"Password Strength Checker",desc:"Entropy bits, crack time estimate, DNA grade A–F",href:"/tools/strength-checker"},
+      {icon:<IcShield size={18} color="var(--accent)" />,label:"Password Audit Tool",desc:"Audit multiple passwords at once for your whole team",href:"/tools/audit",business:true},
     ]},
-    {label:"Business",items:[
-      {icon:"📋",label:"Password Policy Generator",desc:"Generate a written, HIPAA/PCI/SOC2-aligned password policy",href:"/tools/policy-generator",business:true},
-    ]},
-    {label:"Utility",items:[
-      {icon:"📶",label:"WiFi QR Generator",desc:"One-click QR code for your network — guests scan, done",href:"/tools/wifi-qr",business:true},
+    {label:"Compliance",items:[
+      {icon:<IcShield size={18} color="var(--accent)" />,label:"Credential Compliance Fixer",desc:"Fix non-compliant credentials — detect gaps, generate certified replacement",href:"/tools/compliance-fixer",business:true},
+      {icon:<IcClipboard size={18} color="var(--accent)" />,label:"Password Policy Generator",desc:"Generate a written, HIPAA/PCI/SOC2-aligned password policy",href:"/tools/policy-generator",business:true},
     ]},
   ],
   featured:{
@@ -51,11 +50,11 @@ const GUIDES_MENU={
       {label:"Finance & Legal",href:"/guides/finance-legal-password-security"},
       {label:"Educators & HR",href:"/guides/education-hr-password-security"},
     ]},
-    {label:"Fundamentals",items:[
+    {label:"Reference",items:[
       {label:"What is Password Entropy",href:"/guides/what-is-password-entropy"},
       {label:"Passphrase vs Password",href:"/guides/passphrase-vs-password"},
-      {label:"Zero-Knowledge Security",href:"/guides/zero-knowledge-security"},
-      {label:"Post-Quantum Passwords",href:"/guides/post-quantum-passwords"},
+      {label:"Compliance Certificate Explained",href:"/password-compliance-certificate"},
+      {label:"Security Glossary",href:"/glossary"},
     ]},
   ],
   featured:{
@@ -121,7 +120,7 @@ function MenuItem({href,icon,label,desc,badge}){
       onMouseEnter={e=>e.currentTarget.style.background="rgba(200,255,0,0.05)"}
       onMouseLeave={e=>e.currentTarget.style.background="transparent"}
     >
-      <div style={{width:38,height:38,borderRadius:9,background:"rgba(200,255,0,0.06)",border:"1px solid rgba(200,255,0,0.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:17,flexShrink:0,marginTop:1}}>
+      <div style={{width:38,height:38,borderRadius:9,background:"rgba(200,255,0,0.06)",border:"1px solid rgba(200,255,0,0.1)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
         {icon||"⚙️"}
       </div>
       <div style={{flex:1,minWidth:0}}>
@@ -153,7 +152,7 @@ function ToolsFeaturedPanel({f}){
   return(
     <div style={{background:"rgba(200,255,0,0.03)",borderLeft:"1px solid rgba(200,255,0,0.07)",padding:"28px 24px",display:"flex",flexDirection:"column",justifyContent:"space-between",minHeight:"100%"}}>
       <div>
-        <div style={{width:44,height:44,borderRadius:10,background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:16}}>⚡</div>
+        <div style={{width:44,height:44,borderRadius:10,background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16}}><IcBolt size={22} color="var(--accent)" /></div>
         <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"rgba(200,255,0,.5)",letterSpacing:".14em",textTransform:"uppercase",marginBottom:10}}>{f.label}</div>
         <p style={{fontFamily:"var(--font-body)",fontSize:13,color:"#666",lineHeight:1.7,marginBottom:20}}>{f.desc}</p>
         <a href={f.href}
@@ -179,7 +178,7 @@ function GuidesFeaturedPanel({f}){
   return(
     <div style={{background:"rgba(200,255,0,0.03)",borderLeft:"1px solid rgba(200,255,0,0.07)",padding:"28px 24px",display:"flex",flexDirection:"column",gap:20}}>
       <div>
-        <div style={{width:44,height:44,borderRadius:10,background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:22,marginBottom:16}}>🧭</div>
+        <div style={{width:44,height:44,borderRadius:10,background:"rgba(200,255,0,0.08)",border:"1px solid rgba(200,255,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",marginBottom:16}}><IcCompass size={22} color="var(--accent)" /></div>
         <div style={{fontFamily:"var(--font-body)",fontSize:10,fontWeight:700,color:"rgba(200,255,0,.5)",letterSpacing:".14em",textTransform:"uppercase",marginBottom:10}}>{f.label}</div>
         <p style={{fontFamily:"var(--font-body)",fontSize:13,color:"#666",lineHeight:1.7,marginBottom:20}}>{f.desc}</p>
         <div style={{display:"flex",flexDirection:"column",gap:6}}>
@@ -251,7 +250,7 @@ function GuidesDropdown(){
           ))}
         </div>
         <div style={{borderTop:"1px solid rgba(255,255,255,.05)",paddingTop:14,display:"flex",alignItems:"center",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-          <span style={{fontFamily:"var(--font-body)",fontSize:11,color:"#333"}}>Free compliance guides · Updated 2024</span>
+          <span style={{fontFamily:"var(--font-body)",fontSize:11,color:"#333"}}>Free compliance guides · Updated 2026</span>
           <a href={GUIDES_MENU.footer.href}
             style={{fontFamily:"var(--font-body)",fontSize:12,fontWeight:600,color:"rgba(200,255,0,.7)",textDecoration:"none",transition:"color .15s"}}
             onMouseEnter={e=>e.currentTarget.style.color="#C8FF00"}

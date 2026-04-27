@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Layout from '../../components/Layout';
 import BlogHeroSVG from '../../components/BlogHeroSVG';
 import { BLOG_POSTS } from '../../data/blogPosts';
+import { IcSearch } from '../../lib/icons.js';
 
 const POSTS_PER_PAGE = 9;
 
@@ -137,12 +138,14 @@ export default function BlogIndex() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const filtered = useMemo(() => {
-    return BLOG_POSTS.filter(p => {
-      const matchesCat = activeCategory === 'All' || p.category === activeCategory;
-      const q = searchQuery.toLowerCase();
-      const matchesSearch = !q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
-      return matchesCat && matchesSearch;
-    });
+    return BLOG_POSTS
+      .filter(p => {
+        const matchesCat = activeCategory === 'All' || p.category === activeCategory;
+        const q = searchQuery.toLowerCase();
+        const matchesSearch = !q || p.title.toLowerCase().includes(q) || p.excerpt.toLowerCase().includes(q);
+        return matchesCat && matchesSearch;
+      })
+      .sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
   }, [activeCategory, searchQuery]);
 
   const totalPages = Math.ceil(filtered.length / POSTS_PER_PAGE);
@@ -206,7 +209,7 @@ export default function BlogIndex() {
                 onFocus={e => e.target.style.borderColor = 'rgba(200,255,0,0.4)'}
                 onBlur={e => e.target.style.borderColor = 'var(--border-2)'}
               />
-              <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted-2)', fontSize: 15 }}>⌕</span>
+              <span style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: 'var(--muted-2)', display: 'flex' }}><IcSearch size={15} color="currentColor" /></span>
             </div>
           </div>
 
@@ -238,7 +241,7 @@ export default function BlogIndex() {
               exit={{ opacity: 0 }}
               style={{ textAlign: 'center', padding: '80px 0', color: 'var(--muted-2)' }}
             >
-              <div style={{ fontSize: 40, marginBottom: 16 }}>⌕</div>
+              <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'center' }}><IcSearch size={40} color="var(--muted-2)" /></div>
               <p style={{ fontFamily: 'var(--font-body)', fontSize: 15, color: 'var(--muted)' }}>No posts match your search.</p>
             </motion.div>
           ) : (

@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import Header from "../components/layout/Header.js";
 import Footer from "../components/layout/Footer.js";
 import { sectionHeadReveal, bcCard, heroEntrance, btnPrimary, btnGhost } from "../lib/motion.js";
+import { IcStar, IcShield, IcBolt, IcLock, IcCheck } from "../lib/icons.js";
 
 // ── CHARS for background streams ──────────────────────────────
 const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*";
@@ -44,12 +45,22 @@ const STREAMS = [
   { left: 92, delay: 1.5, dur: 15, op: .03 },
 ];
 
+// Icon helper for trust chips
+function TrustIcon({ type }) {
+  if (type === "star")   return <IcStar size={12} color="rgba(200,255,0,0.5)" />;
+  if (type === "shield") return <IcShield size={12} color="rgba(200,255,0,0.5)" />;
+  if (type === "bolt")   return <IcBolt size={12} color="rgba(200,255,0,0.5)" />;
+  if (type === "lock")   return <IcLock size={12} color="rgba(200,255,0,0.5)" />;
+  if (type === "check")  return <IcCheck size={12} color="rgba(200,255,0,0.5)" />;
+  return <IcStar size={12} color="rgba(200,255,0,0.5)" />;
+}
+
 const TRUST_POINTS = [
-  { icon: "◈", label: "Zero storage" },
-  { icon: "✦", label: "Client-side only" },
-  { icon: "⬡", label: "NIST SP\u00a0800-63B" },
-  { icon: "◎", label: "Zero knowledge" },
-  { icon: "⚡", label: "No account needed" },
+  { iconType: "lock",   label: "Zero storage" },
+  { iconType: "star",   label: "Client-side only" },
+  { iconType: "check",  label: "NIST SP\u00a0800-63B" },
+  { iconType: "shield", label: "Zero knowledge" },
+  { iconType: "bolt",   label: "No account needed" },
 ];
 
 const HOW_STEPS = [
@@ -71,23 +82,29 @@ const HOW_STEPS = [
     body: "Open DevTools. Go to the Network tab. Generate a password. Watch nothing happen. That is not a marketing claim. That is verifiable architecture you can confirm yourself right now.",
     accent: "Verify it yourself",
   },
+  {
+    step: "04",
+    title: "Need a certificate? Certified Mode activates.",
+    body: "When you request a compliance certificate, only your generation parameters — length, character classes, compliance standard — are sent to our server. Never the password itself. The server validates the parameters and signs a certificate. Two modes, one guarantee: your password never travels.",
+    accent: "Zero-knowledge by design",
+  },
 ];
 
 const VALUES = [
   {
-    icon: "◈",
+    iconType: "lock",
     title: "Zero Storage — Always",
     body: "We don't store your passwords. We can't — the architecture makes it technically impossible. Even a full breach of our servers reveals nothing about any password ever generated.",
   },
   {
-    icon: "✦",
+    iconType: "star",
     title: "No Dark Patterns — Ever",
     body: "No countdown timers. No hiding the free tier behind friction. No ads. No selling access to your behavior. If something feels manipulative, we won't build it.",
   },
   {
-    icon: "⚡",
+    iconType: "bolt",
     title: "Honest Limits — Upfront",
-    body: "The free tier is real. Fifteen passwords a day, no account required, no data collected. We make money from Pro and Team plans — not from monetizing your security choices.",
+    body: "The free tier is real. Unlimited password generation, no account required, no data collected. Compliance certificates are limited to 3 per month on the free plan. We make money from Assurance and Authority plans — not from monetizing your security choices.",
   },
 ];
 
@@ -191,9 +208,9 @@ export default function AboutPage() {
 
             {/* Trust chips */}
             <motion.div className="hero-trust" {...heroEntrance(0.55)}>
-              {TRUST_POINTS.map(({ icon, label }) => (
+              {TRUST_POINTS.map(({ iconType, label }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <span aria-hidden style={{ color: "rgba(200,255,0,.5)", fontSize: "clamp(10px,1.5vw,13px)" }}>{icon}</span>
+                  <TrustIcon type={iconType} />
                   <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(9px,1.2vw,11px)", fontWeight: 600, color: "var(--muted)", letterSpacing: ".08em", textTransform: "uppercase" }}>{label}</span>
                 </div>
               ))}
@@ -293,7 +310,9 @@ export default function AboutPage() {
             {VALUES.map((card, i) => (
               <motion.article key={card.title} {...bcCard(i)} className="bc bc-a">
                 <div className="bc-line" />
-                <div style={{ fontSize: "clamp(22px,3.5vw,28px)", marginBottom: 16, color: "var(--accent)", lineHeight: 1 }}>{card.icon}</div>
+                <div style={{ marginBottom: 16, color: "var(--accent)", lineHeight: 1 }}>
+                  <TrustIcon type={card.iconType} />
+                </div>
                 <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(15px,2vw,17px)", color: "var(--text)", marginBottom: 10, letterSpacing: "-.02em", lineHeight: 1.3 }}>{card.title}</h3>
                 <p style={{ fontSize: "var(--text-base)", color: "var(--muted)", lineHeight: 1.8 }}>{card.body}</p>
               </motion.article>
@@ -364,14 +383,14 @@ export default function AboutPage() {
 
             <div className="hero-trust" style={{ justifyContent: "center", flexWrap: "wrap" }}>
               {[
-                { icon: "◈", label: "Founded 2021" },
-                { icon: "✦", label: "Bootstrapped" },
-                { icon: "⬡", label: "Client-side" },
-                { icon: "◎", label: "NIST SP\u00a0800-63B" },
-                { icon: "⚡", label: "Zero breach history" },
-              ].map(({ icon, label }) => (
+                { iconType: "lock",   label: "Founded 2021" },
+                { iconType: "star",   label: "Bootstrapped" },
+                { iconType: "check",  label: "Client-side" },
+                { iconType: "shield", label: "NIST SP\u00a0800-63B" },
+                { iconType: "bolt",   label: "Zero breach history" },
+              ].map(({ iconType, label }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <span aria-hidden style={{ color: "rgba(200,255,0,.5)", fontSize: "clamp(10px,1.5vw,13px)" }}>{icon}</span>
+                  <TrustIcon type={iconType} />
                   <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(9px,1.2vw,11px)", fontWeight: 600, color: "var(--muted)", letterSpacing: ".08em", textTransform: "uppercase" }}>{label}</span>
                 </div>
               ))}
@@ -427,19 +446,19 @@ export default function AboutPage() {
           >
             <div style={{ display: "flex", gap: "clamp(10px,1.5vw,14px)", justifyContent: "center", flexWrap: "wrap" }}>
               <motion.a href="/pricing" className="btn-ghost" {...btnGhost} style={{ fontSize: "clamp(13px,1.6vw,15px)", padding: "clamp(14px,1.8vw,16px) clamp(24px,3vw,36px)" }}>
-                See Team pricing
+                See plans →
               </motion.a>
             </div>
 
             <div className="hero-trust">
               {[
-                { icon: "◈", label: "Zero storage" },
-                { icon: "✦", label: "Client-side only" },
-                { icon: "⬡", label: "NIST SP\u00a0800-63B" },
-                { icon: "◎", label: "Free forever" },
-              ].map(({ icon, label }) => (
+                { iconType: "lock",   label: "Zero storage" },
+                { iconType: "star",   label: "Client-side only" },
+                { iconType: "check",  label: "NIST SP\u00a0800-63B" },
+                { iconType: "shield", label: "Free forever" },
+              ].map(({ iconType, label }) => (
                 <div key={label} style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                  <span aria-hidden style={{ color: "rgba(200,255,0,.5)", fontSize: "clamp(10px,1.5vw,13px)" }}>{icon}</span>
+                  <TrustIcon type={iconType} />
                   <span style={{ fontFamily: "var(--font-body)", fontSize: "clamp(9px,1.2vw,11px)", fontWeight: 600, color: "var(--muted)", letterSpacing: ".08em", textTransform: "uppercase" }}>{label}</span>
                 </div>
               ))}

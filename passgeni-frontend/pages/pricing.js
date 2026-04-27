@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import Header from "../components/layout/Header.js";
 import Footer from "../components/layout/Footer.js";
 import { btnPrimary, btnGhost, heroEntrance, sectionHeadReveal, bcCard } from "../lib/motion.js";
+import { IcCheck, IcStar } from "../lib/icons.js";
 
 const PLANS = [
   {
@@ -16,139 +17,134 @@ const PLANS = [
     ctaHref: "/#generator",
     featured: false,
     features: [
-      "15 passwords per day",
-      "All 6 profession seeds (5/day limit)",
-      "Passphrase mode (NIST 800-63B)",
-      "Basic password strength meter",
-      "DNA Score (1 per day)",
-      "Post-Quantum mode (1 per day)",
-      "Zero data retention — always",
-      "Secure Password Sharing",
-    ],
-  },
-  {
-    name: "Pro",
-    monthly: "$9",
-    annual: "$89",
-    period: "/month",
-    annualPeriod: "/year",
-    annualNote: "Save 17%",
-    tagline: "For power users who generate daily and need compliance tools.",
-    cta: "Get Pro",
-    ctaMonthly: "/auth/signin?callbackUrl=/checkout?plan=pro&billing=monthly",
-    ctaAnnual: "/auth/signin?callbackUrl=/checkout?plan=pro&billing=annual",
-    featured: false,
-    features: [
-      "150 passwords per day",
-      "All seeds + custom AI profession",
-      "Unlimited DNA Score",
-      "Password history (last 20)",
-      "Bulk generator — 25 at once",
-      "Breach Checker",
-      "Strength Checker",
-      "Unlimited Secure Sharing",
-    ],
-  },
-  {
-    name: "Team",
-    monthly: "$29",
-    annual: "$249",
-    period: "/month",
-    annualPeriod: "/year",
-    annualNote: "Save 28%",
-    tagline: "For teams that need compliance, API access, and audit-ready outputs.",
-    badge: "⭐ Most Popular",
-    cta: "Start 14-day free trial",
-    ctaMonthly: "/auth/signin?callbackUrl=/checkout?plan=team&billing=monthly",
-    ctaAnnual: "/auth/signin?callbackUrl=/checkout?plan=team&billing=annual",
-    featured: true,
-    features: [
       "Unlimited password generation",
-      "All 8 seeds + custom vocabulary",
-      "All compliance presets (HIPAA · PCI-DSS · SOC 2 · ISO 27001 · NIST · DoD · Post-Quantum)",
-      "Bulk generator — 500 at once",
-      "REST API — 5,000 calls/day",
-      "CSV export",
-      "5 team seats",
-      "All 6 security tools",
-      "Rotation reminders",
+      "NIST SP 800-63B compliance standard",
+      "3 compliance certificates per month",
+      "Certificate sharing + QR codes",
+      "Post-Quantum mode (1/day)",
+      "k-Anonymity breach check",
+      "Secure password sharing",
+      "Zero data retention — always",
+    ],
+  },
+  {
+    name: "Assurance",
+    monthly: "$19",
+    annual: "$179",
+    period: "/month",
+    annualPeriod: "/year",
+    annualNote: "Save 21%",
+    tagline: "For security professionals who certify daily and need full compliance coverage.",
+    cta: "Start 14-day free trial",
+    ctaMonthly: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dassurance%26billing%3Dmonthly",
+    ctaAnnual: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dassurance%26billing%3Dannual",
+    badge: "Most Popular",
+    featured: true,
+    trialNote: "14 days free — no card required",
+    features: [
+      "Unlimited compliance certificates",
+      "All 6 standards: HIPAA · PCI-DSS · SOC 2 · ISO 27001 · NIST · FIPS 140-3",
+      "Certificate verification page + QR codes",
+      "REST API — 1,000 calls/day",
+      "Bulk generator — 50 at once",
       "Priority support",
     ],
+  },
+  {
+    name: "Authority",
+    monthly: "$59",
+    annual: "$539",
+    period: "/month",
+    annualPeriod: "/year",
+    annualNote: "Save 24%",
+    tagline: "For compliance teams and enterprises that need API scale, audit logs, and team seats.",
+    cta: "Start 14-day free trial",
+    ctaMonthly: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dauthority%26billing%3Dmonthly",
+    ctaAnnual: "/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dauthority%26billing%3Dannual",
+    featured: false,
     trialNote: "14 days free — no card required",
+    features: [
+      "Everything in Assurance",
+      "REST API — 10,000 calls/day",
+      "Bulk generator — 500 at once",
+      "10 team seats",
+      "CSV export + full audit logs",
+      "Password policy generator",
+      "Rotation reminders",
+      "Dedicated support channel",
+    ],
   },
   {
     name: "Enterprise",
     monthly: "Custom",
     annual: "Custom",
     period: "",
-    tagline: "For large orgs needing unlimited scale, SSO, and dedicated support.",
+    tagline: "For large orgs needing unlimited scale, SSO, and a dedicated compliance partner.",
     cta: "Contact us",
     ctaHref: "/contact",
     featured: false,
     features: [
-      "Everything in Team",
+      "Everything in Authority",
       "Unlimited API calls",
-      "Unlimited seats",
+      "Unlimited team seats",
       "SSO / SAML",
-      "On-premise deployment",
+      "On-premise deployment option",
       "Dedicated Slack channel",
       "Custom SLA",
-      "Paddle invoice billing",
+      "Invoice billing via Paddle",
     ],
   },
 ];
 
 const COMPARISON_ROWS = [
-  { feature: "Passwords per day",            free: "15",  pro: "150",   team: "Unlimited" },
-  { feature: "Profession seeds",             free: "6 (5/day)", pro: "6 + custom AI", team: "8 + custom" },
-  { feature: "Passphrase mode",             free: true,  pro: true,    team: true },
-  { feature: "Password DNA Score",          free: "1/day", pro: true,  team: true },
-  { feature: "Post-Quantum mode",           free: "1/day", pro: true,  team: true },
-  { feature: "Compliance presets",          free: false, pro: false,   team: true },
-  { feature: "Bulk generator",             free: false, pro: "25",    team: "500" },
-  { feature: "Password history",           free: false, pro: "Last 20", team: "Last 20" },
-  { feature: "Breach Checker",             free: false, pro: true,    team: true },
-  { feature: "Strength Checker",           free: false, pro: true,    team: true },
-  { feature: "Secure Password Sharing",    free: true,  pro: true,    team: true },
-  { feature: "Password Policy Generator",  free: false, pro: false,   team: true },
-  { feature: "Password Audit Tool",        free: false, pro: false,   team: true },
-  { feature: "REST API",                   free: false, pro: false,   team: "5,000/day" },
-  { feature: "CSV export",                 free: false, pro: false,   team: true },
-  { feature: "Team seats",                 free: "1",   pro: "1",     team: "5" },
-  { feature: "Rotation reminders",         free: false, pro: false,   team: true },
-  { feature: "Zero data retention",        free: true,  pro: true,    team: true },
-  { feature: "Priority support",           free: false, pro: false,   team: true },
+  { feature: "Compliance certificates/mo",  free: "3",    assurance: "Unlimited", authority: "Unlimited" },
+  { feature: "Compliance standards",        free: "NIST", assurance: "All 6",     authority: "All 6" },
+  { feature: "Certificate verification page", free: true, assurance: true,        authority: true },
+  { feature: "QR code + shareable URL",     free: true,   assurance: true,        authority: true },
+  { feature: "Post-Quantum mode",           free: "1/day", assurance: true,       authority: true },
+  { feature: "k-Anonymity breach check",    free: true,   assurance: true,        authority: true },
+  { feature: "Secure password sharing",     free: true,   assurance: true,        authority: true },
+  { feature: "REST API",                    free: false,  assurance: "1,000/day", authority: "10,000/day" },
+  { feature: "Bulk generator",              free: false,  assurance: "50",        authority: "500" },
+  { feature: "CSV export",                  free: false,  assurance: false,       authority: true },
+  { feature: "Audit logs",                  free: false,  assurance: false,       authority: true },
+  { feature: "Team seats",                  free: "1",    assurance: "1",         authority: "10" },
+  { feature: "Password policy generator",   free: false,  assurance: false,       authority: true },
+  { feature: "Rotation reminders",          free: false,  assurance: false,       authority: true },
+  { feature: "Zero data retention",         free: true,   assurance: true,        authority: true },
+  { feature: "14-day free trial",           free: false,  assurance: true,        authority: true },
+  { feature: "Priority support",            free: false,  assurance: true,        authority: "Dedicated" },
 ];
 
 const PRICING_FAQS = [
-  { q: "Can I cancel anytime?", a: "Yes. Cancel from your dashboard at any time — no questions asked. If you're on an annual plan, we issue a prorated refund for unused months." },
-  { q: "Is the 14-day Team trial really free?", a: "Completely free — no credit card required to start. You get full Team plan access for 14 days. If you don't upgrade, your account reverts to Free automatically." },
+  { q: "Can I cancel anytime?", a: "Yes. Cancel from your billing portal at any time — no questions asked. Annual plans receive a prorated refund for unused months." },
+  { q: "Is the 14-day trial really free?", a: "Completely free — no credit card required. You get full Assurance or Authority access for 14 days. If you don't upgrade, your account reverts to the Free plan automatically." },
   { q: "What payment methods do you accept?", a: "All major credit and debit cards (Visa, Mastercard, Amex), Apple Pay, and Google Pay — processed securely via Paddle." },
-  { q: "Can I upgrade from Pro to Team later?", a: "Yes. Upgrade anytime from your dashboard. We'll prorate the difference so you only pay for what you use." },
-  { q: "Is there an annual discount?", a: "Pro annual saves 17% vs monthly ($89/yr vs $108). Team annual saves 28% vs monthly ($249/yr vs $348). Billed once per year." },
-  { q: "Do you store passwords on the server?", a: "Never. All password generation happens client-side in your browser. Zero data is sent to our servers. This is an architectural guarantee, not a policy." },
-  { q: "What compliance presets does Team include?", a: "HIPAA, PCI-DSS v4.0, SOC 2, ISO 27001, NIST SP 800-63B, DoD / Government, and Post-Quantum. Each preset auto-configures the correct minimum length, character classes, and complexity rules." },
-  { q: "What is the Password DNA Score?", a: "A 7-point cryptographic quality metric that grades your password A to F. It checks length thresholds, character class diversity, repeat-character patterns, and entropy — weighted by security impact." },
+  { q: "Can I upgrade from Assurance to Authority?", a: "Yes. Upgrade anytime from your dashboard. We prorate the difference so you only pay for what you use going forward." },
+  { q: "Is there an annual discount?", a: "Assurance annual saves 21% ($179/yr vs $228). Authority annual saves 24% ($539/yr vs $708). Billed once per year." },
+  { q: "Do you store passwords on the server?", a: "Never. All password generation happens in your browser. Only the compliance parameters (length, character classes, entropy) are sent to our servers to generate the certificate. The actual password is never transmitted." },
+  { q: "What compliance standards are included?", a: "Assurance and Authority include all 6 standards: NIST SP 800-63B, HIPAA §164.312, PCI-DSS v4.0, SOC 2 CC6.1, ISO/IEC 27001:2022, and FIPS PUB 140-3. Free users get NIST only." },
+  { q: "What is a compliance certificate?", a: "A cryptographically signed ES256 JWT that attests your password met a specific compliance standard's requirements at the time of generation. Each certificate has a unique verification URL you can share with auditors." },
 ];
 
 function Check({ value }) {
-  if (value === true) return <span style={{ color: "#C8FF00", fontSize: 15 }}>✓</span>;
-  if (value === false) return <span style={{ color: "#333", fontSize: 14 }}>—</span>;
+  if (value === true) return <IcCheck size={13} color="#C8FF00" />;
+  if (value === false) return <span style={{ color: "#2a2a2a", fontSize: 14, fontWeight: 700 }}>—</span>;
   return <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#aaa" }}>{value}</span>;
 }
 
 export default function PricingPage() {
   const [billing, setBilling] = useState("monthly");
-  const [openFaq, setOpenFaq] = useState(null);
+  const [openFaq, setOpenFaq] = useState(0);
 
   return (
     <>
       <Head>
-        <title>Pricing — PassGeni | Free, Pro & Team Plans</title>
-        <meta name="description" content="PassGeni pricing: Free forever, Pro at $9/month, Team at $29/month with 14-day free trial. Compliance presets, REST API, bulk generation and more." />
+        <title>Pricing — PassGeni | Free, Assurance & Authority Plans</title>
+        <meta name="description" content="PassGeni pricing: Free forever, Assurance at $19/month, Authority at $59/month. Unlimited compliance certificates, REST API, team seats, and 14-day free trial." />
         <link rel="canonical" href="https://passgeni.ai/pricing" />
-        <meta property="og:title" content="PassGeni Pricing — Free, Pro & Team" />
-        <meta property="og:description" content="Start free. Upgrade when you need compliance presets, REST API, or team seats." />
+        <meta property="og:title" content="PassGeni Pricing — Free, Assurance & Authority" />
+        <meta property="og:description" content="Start free. Upgrade when you need unlimited certificates, all 6 compliance standards, REST API, or team seats." />
       </Head>
       <div style={{ background: "var(--bg)", color: "var(--text)", minHeight: "100vh" }}>
         <Header />
@@ -241,7 +237,7 @@ export default function PricingPage() {
                     <div style={{ borderTop: "1px solid rgba(200,255,0,0.08)", paddingTop: 16, flex: 1 }}>
                       {plan.features.map((f, fi) => (
                         <div key={fi} style={{ display: "flex", gap: 10, alignItems: "flex-start", marginBottom: 9 }}>
-                          <span style={{ color: "var(--accent)", fontSize: 12, marginTop: 3, flexShrink: 0 }}>✓</span>
+                          <IcCheck size={11} color="var(--accent)" />
                           <span style={{ fontFamily: "var(--font-body)", fontSize: "var(--text-base)", color: "var(--text)", lineHeight: 1.5 }}>{f}</span>
                         </div>
                       ))}
@@ -269,8 +265,8 @@ export default function PricingPage() {
                 <thead>
                   <tr>
                     <th style={{ textAlign: "left", padding: "14px 16px", fontSize: 12, fontWeight: 700, color: "var(--muted-2)", letterSpacing: ".08em", textTransform: "uppercase", borderBottom: "1px solid #1e1e1e" }}>Feature</th>
-                    {["Free", "Pro", "Team"].map(col => (
-                      <th key={col} style={{ textAlign: "center", padding: "14px 16px", fontSize: 13, fontWeight: 700, color: col === "Team" ? "var(--accent)" : "var(--text)", borderBottom: "1px solid #1e1e1e", minWidth: 100 }}>{col}</th>
+                    {["Free", "Assurance", "Authority"].map(col => (
+                      <th key={col} style={{ textAlign: "center", padding: "14px 16px", fontSize: 13, fontWeight: 700, color: col === "Authority" ? "var(--accent)" : "var(--text)", borderBottom: "1px solid #1e1e1e", minWidth: 100 }}>{col}</th>
                     ))}
                   </tr>
                 </thead>
@@ -282,8 +278,8 @@ export default function PricingPage() {
                     >
                       <td style={{ padding: "12px 16px", fontSize: "clamp(13px,1.4vw,15px)", color: "var(--muted)", lineHeight: 1.45 }}>{row.feature}</td>
                       <td style={{ padding: "12px 16px", textAlign: "center" }}><Check value={row.free} /></td>
-                      <td style={{ padding: "12px 16px", textAlign: "center" }}><Check value={row.pro} /></td>
-                      <td style={{ padding: "12px 16px", textAlign: "center" }}><Check value={row.team} /></td>
+                      <td style={{ padding: "12px 16px", textAlign: "center" }}><Check value={row.assurance} /></td>
+                      <td style={{ padding: "12px 16px", textAlign: "center" }}><Check value={row.authority} /></td>
                     </tr>
                   ))}
                 </tbody>
@@ -332,10 +328,38 @@ export default function PricingPage() {
                   {...btnPrimary}
                   style={{ fontSize: 15, padding: "14px 32px" }}
                 >Generate Now — Free →</motion.a>
-                <motion.a href="/auth/signin?callbackUrl=/checkout?plan=team" className="btn-ghost"
+                <motion.a href="/auth/signin?callbackUrl=%2Fcheckout%3Fplan%3Dassurance%26billing%3Dmonthly" className="btn-ghost"
                   {...btnGhost}
                   style={{ fontSize: 15, padding: "14px 32px" }}
-                >Start Team Trial</motion.a>
+                >Start Free Trial</motion.a>
+              </div>
+            </div>
+          </section>
+
+          {/* ── SEO: Compliance guides ──────────────────────── */}
+          <section style={{ maxWidth: 900, margin: "0 auto", padding: "0 var(--page-pad) 64px" }}>
+            <div style={{ borderTop: "1px solid rgba(200,255,0,0.07)", paddingTop: 40 }}>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "rgba(200,255,0,0.3)", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: 20 }}>
+                Compliance resources
+              </div>
+              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                {[
+                  { href: "/password-compliance-certificate", label: "What is a compliance certificate?" },
+                  { href: "/guides/hipaa-password-requirements", label: "HIPAA requirements" },
+                  { href: "/guides/pci-dss-password-requirements", label: "PCI-DSS v4.0" },
+                  { href: "/guides/soc2-password-requirements", label: "SOC 2 CC6.1" },
+                  { href: "/guides/nist-800-63b-password-guidelines", label: "NIST 800-63B" },
+                  { href: "/guides/iso-27001-password-requirements", label: "ISO 27001" },
+                  { href: "/glossary/password-compliance", label: "Password compliance glossary" },
+                  { href: "/glossary/audit-trail", label: "Audit trail glossary" },
+                ].map(({ href, label }) => (
+                  <a key={href} href={href} style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "rgba(255,255,255,0.3)", textDecoration: "none", padding: "7px 12px", background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.04)", borderRadius: 7, transition: "color 0.15s" }}
+                    onMouseEnter={e => e.currentTarget.style.color = "rgba(200,255,0,0.7)"}
+                    onMouseLeave={e => e.currentTarget.style.color = "rgba(255,255,255,0.3)"}
+                  >
+                    {label}
+                  </a>
+                ))}
               </div>
             </div>
           </section>

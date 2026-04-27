@@ -1,31 +1,97 @@
-// =============================================================
-// PASSGENI — TEAM DASHBOARD
-// passgeni.ai/dashboard
-// =============================================================
+/**
+ * /dashboard — Compliance Monitoring Dashboard
+ * Primary view for all plan users.
+ */
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { btnPrimary, btnGhost } from "../../lib/motion.js";
-import { useSession, signOut } from "next-auth/react";
-import { useRouter }           from "next/router";
-import PageLayout              from "../../components/layout/PageLayout.js";
+import { motion, AnimatePresence }                  from "framer-motion";
+import { useSession, signOut }                      from "next-auth/react";
+import { useRouter }                                from "next/router";
+import PageLayout                                   from "../../components/layout/PageLayout.js";
+import UpgradeModal                                 from "../../components/ui/UpgradeModal.js";
+import { btnPrimary, btnGhost }                     from "../../lib/motion.js";
+import { useRemindDismissed }                       from "../../lib/useRemindDismissed.js";
+import { IcAlert, IcStar, IcShield, IcCheck, IcBolt } from "../../lib/icons.js";
+
+// ─── CONSTANTS ────────────────────────────────────────────────
+const STANDARD_LABELS = {
+  // Canonical IDs (from API)
+  "NIST-800-63B":  "NIST SP 800-63B",
+  "HIPAA":         "HIPAA §164.312",
+  "PCI-DSS":       "PCI-DSS v4.0",
+  "SOC2":          "SOC 2 CC6.1",
+  "ISO-27001":     "ISO 27001:2022",
+  "FIPS-140-3":    "FIPS 140-3",
+  // Legacy short IDs (backward compat)
+  nist:  "NIST SP 800-63B",
+  hipaa: "HIPAA §164.312",
+  pci:   "PCI-DSS v4.0",
+  soc2:  "SOC 2 CC6.1",
+  iso:   "ISO 27001:2022",
+  fips:  "FIPS 140-3",
+};
+
+const SCORE_PALETTE = {
+  green: { color: "#00d084", bg: "rgba(0,208,132,0.08)",  ring: "#00d084" },
+  amber: { color: "#facc15", bg: "rgba(250,204,21,0.08)", ring: "#facc15" },
+  red:   { color: "#ff4444", bg: "rgba(255,68,68,0.08)",  ring: "#ff4444" },
+};
+
+const ISSUE_LABELS = {
+  expired:       { text: "Expired",         color: "#ff4444" },
+  expiring_soon: { text: "Expiring soon",   color: "#facc15" },
+  revoked:       { text: "Revoked",         color: "#ff6644" },
+};
 
 // ─── HELPERS ─────────────────────────────────────────────────
-function maskKey(prefix) { return `${prefix}••••••••••••••••••••`; }
 function fmtDate(iso) {
   if (!iso) return "—";
   return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
-function fmtShort(iso) {
+function fmtRelative(iso) {
   if (!iso) return "";
-  const d = new Date(iso);
-  return `${d.getMonth() + 1}/${d.getDate()}`;
+  const diff = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return fmtDate(iso);
 }
-function accent(pct) {
-  return pct > 0.9 ? "#ff4444" : pct > 0.7 ? "#ffaa00" : "#C8FF00";
+function certStatus(cert) {
+  if (cert.is_revoked) return "revoked";
+  if (new Date(cert.expires_at) < new Date()) return "expired";
+  return "valid";
+}
+function downloadCertPdf(certId) {
+  window.open(`/cert/${certId}?print=1`, "_blank");
 }
 
-// ─── LOADING SKELETON ────────────────────────────────────────
+function downloadCertJson(cert) {
+  const payload = {
+    id:                 cert.id,
+    compliance_standard: cert.compliance_standard,
+    entropy_bits:       cert.entropy_bits,
+    char_pool_size:     cert.char_pool_size,
+    generation_params:  cert.generation_params,
+    standards_met:      cert.standards_met,
+    issued:             cert.created_at,
+    expires:            cert.expires_at,
+    status:             certStatus(cert),
+    verify_url:         `${window.location.origin}/cert/${cert.id}`,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement("a");
+  a.href     = url;
+  a.download = `passgeni-cert-${cert.id.slice(0, 8)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ─── SKELETON ────────────────────────────────────────────────
 function Skeleton({ w = "100%", h = 18, r = 6 }) {
   return (
     <div style={{
@@ -37,364 +103,523 @@ function Skeleton({ w = "100%", h = 18, r = 6 }) {
   );
 }
 
-// ─── 30-DAY BAR CHART ────────────────────────────────────────
-function UsageBarChart({ data = [], limit }) {
-  const [tooltip, setTooltip] = useState(null);
-
-  if (!data.length) {
-    return (
-      <div style={{ height: 100, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 8 }}>
-        <span style={{ fontSize: 22 }}>📊</span>
-        <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#333" }}>No usage data yet</span>
-      </div>
-    );
-  }
-
-  const W = 100, H = 64, GAP = 0.4, n = data.length;
-  const barW   = (W - (n - 1) * GAP) / n;
-  const maxVal = Math.max(...data.map((d) => d.total), 1);
+// ─── SCORE RING ───────────────────────────────────────────────
+function ScoreRing({ score, colorName }) {
+  const pal  = SCORE_PALETTE[colorName] ?? SCORE_PALETTE.green;
+  const r    = 52;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (score / 100) * circ;
 
   return (
-    <div style={{ position: "relative", width: "100%" }}>
-      <svg viewBox={`0 0 ${W} ${H + 14}`} preserveAspectRatio="none"
-        style={{ width: "100%", height: 100, overflow: "visible", display: "block" }}>
-        {[0.25, 0.5, 0.75, 1].map((f) => (
-          <line key={f} x1={0} y1={H - f * H} x2={W} y2={H - f * H} stroke="#161618" strokeWidth={0.3} />
-        ))}
-        {data.map((d, i) => {
-          const x     = i * (barW + GAP);
-          const pct   = d.total / (limit || 1);
-          const barH  = Math.max(0.5, (d.total / maxVal) * H);
-          const y     = H - barH;
-          const col   = accent(pct);
-          const today = i === n - 1;
-          return (
-            <rect key={i} x={x} y={y} width={barW} height={barH}
-              fill={col} opacity={today ? 1 : 0.45} rx={0.5}
-              style={{ cursor: "pointer", transition: "opacity .1s" }}
-              onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; setTooltip({ i, date: d.date, total: d.total, pct }); }}
-              onMouseLeave={(e) => { e.currentTarget.style.opacity = today ? 1 : 0.45; setTooltip(null); }}
-            />
-          );
-        })}
-        {[0, Math.floor(n / 2)].map((i) => (
-          <text key={i} x={i * (barW + GAP) + barW / 2} y={H + 11}
-            textAnchor="middle" style={{ fontFamily: "monospace", fontSize: 4.5, fill: "#2e2e2e" }}>
-            {fmtShort(data[i]?.date)}
-          </text>
-        ))}
-        <text x={(n - 1) * (barW + GAP) + barW / 2} y={H + 11}
-          textAnchor="middle" style={{ fontFamily: "monospace", fontSize: 4.5, fill: "#C8FF00" }}>
-          today
-        </text>
-      </svg>
-      <AnimatePresence>
-        {tooltip && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.1 }}
-            style={{ position: "absolute", top: 4, right: 4, background: "rgba(8,8,11,.97)", border: "1px solid #222", borderRadius: 8, padding: "8px 12px", pointerEvents: "none", zIndex: 10, backdropFilter: "blur(8px)" }}>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".08em", marginBottom: 3 }}>{tooltip.date}</div>
-            <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 20, color: accent(tooltip.pct), lineHeight: 1.1 }}>
-              {tooltip.total.toLocaleString()}
-            </div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", marginTop: 2 }}>
-              calls · {Math.round(tooltip.pct * 100)}% of limit
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-}
-
-// ─── API KEY CARD ────────────────────────────────────────────
-function ApiKeyCard({ apiKey, newRawKey, onRotate }) {
-  const [revealed,    setRevealed]    = useState(!!newRawKey);
-  const [copied,      setCopied]      = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [rotating,    setRotating]    = useState(false);
-  const [rotateError, setRotateError] = useState("");
-  const [freshKey,    setFreshKey]    = useState(newRawKey || null);
-
-  const displayKey = freshKey ? (revealed ? freshKey : maskKey(apiKey.key_prefix)) : maskKey(apiKey.key_prefix);
-
-  const copy = async () => {
-    const toCopy = freshKey || maskKey(apiKey.key_prefix);
-    try { await navigator.clipboard.writeText(toCopy); } catch (_) {}
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const doRotate = async () => {
-    setRotating(true); setRotateError("");
-    try {
-      const res  = await fetch("/api/keys/rotate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ keyId: apiKey.id }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setFreshKey(data.newKey); setRevealed(true); setShowConfirm(false);
-      if (onRotate) onRotate();
-    } catch (e) { setRotateError(e.message || "Rotation failed"); }
-    setRotating(false);
-  };
-
-  return (
-    <div style={{ background: "rgba(8,8,11,.9)", border: `1px solid ${freshKey ? "rgba(200,255,0,.25)" : "rgba(255,255,255,.06)"}`, borderRadius: 12, overflow: "hidden", transition: "border-color .3s" }}>
-      {/* Header row */}
-      <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,.04)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div style={{ width: 28, height: 28, borderRadius: 7, background: "linear-gradient(135deg,rgba(200,255,0,.15),rgba(200,255,0,.04))", border: "1px solid rgba(200,255,0,.15)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13 }}>🔑</div>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "#aaa", letterSpacing: ".04em" }}>{apiKey.label || "Default API Key"}</span>
-          {freshKey && (
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 8, color: "#000", background: "var(--accent)", borderRadius: 100, padding: "2px 8px", letterSpacing: ".08em", fontWeight: 700 }}>
-              NEW — COPY NOW
-            </span>
-          )}
-        </div>
-        <div style={{ display: "flex", gap: 6 }}>
-          {freshKey && (
-            <button onClick={() => setRevealed(v => !v)}
-              style={{ background: "none", border: "1px solid rgba(255,255,255,.08)", borderRadius: 6, padding: "5px 12px", fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", cursor: "pointer", transition: "all .15s" }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = "rgba(200,255,0,.2)"; e.currentTarget.style.color = "#C8FF00"; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; e.currentTarget.style.color = "#888"; }}>
-              {revealed ? "Hide" : "Reveal"}
-            </button>
-          )}
-          <button onClick={copy}
-            style={{ background: copied ? "rgba(200,255,0,.08)" : "none", border: `1px solid ${copied ? "rgba(200,255,0,.25)" : "rgba(255,255,255,.08)"}`, borderRadius: 6, padding: "5px 12px", fontFamily: "var(--font-mono)", fontSize: 10, color: copied ? "#C8FF00" : "#888", cursor: "pointer", transition: "all .15s" }}>
-            {copied ? "✓ Copied" : "Copy"}
-          </button>
-        </div>
-      </div>
-
-      {/* Key display */}
-      <div style={{ padding: "14px 20px", background: "#050507", fontFamily: "var(--font-mono)", fontSize: 12, color: (freshKey && revealed) ? "#C8FF00" : "#3a3a3a", letterSpacing: ".06em", wordBreak: "break-all", lineHeight: 1.7 }}>
-        {displayKey}
-      </div>
-
-      {/* Footer */}
-      <div style={{ padding: "12px 20px", borderTop: "1px solid rgba(255,255,255,.04)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-        <div style={{ display: "flex", gap: 16 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444" }}>Created {fmtDate(apiKey.created_at)}</span>
-          {apiKey.last_used_at && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#444" }}>Last used {fmtDate(apiKey.last_used_at)}</span>}
-        </div>
-        {!showConfirm ? (
-          <button onClick={() => setShowConfirm(true)}
-            style={{ background: "none", border: "1px solid rgba(255,255,255,.06)", borderRadius: 6, padding: "5px 12px", fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", cursor: "pointer", transition: "all .15s" }}
-            onMouseEnter={e => { e.currentTarget.style.color = "#ff6644"; e.currentTarget.style.borderColor = "rgba(255,68,68,.3)"; }}
-            onMouseLeave={e => { e.currentTarget.style.color = "#555"; e.currentTarget.style.borderColor = "rgba(255,255,255,.06)"; }}>
-            Rotate key
-          </button>
-        ) : (
-          <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "#ffaa44" }}>Old key invalidated immediately</span>
-            <button onClick={() => setShowConfirm(false)} style={{ background: "none", border: "1px solid rgba(255,255,255,.06)", borderRadius: 5, padding: "4px 10px", fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", cursor: "pointer" }}>Cancel</button>
-            <button onClick={doRotate} disabled={rotating} style={{ background: "rgba(255,68,68,.06)", border: "1px solid rgba(255,68,68,.25)", borderRadius: 5, padding: "4px 12px", fontFamily: "var(--font-mono)", fontSize: 10, color: "#ff6644", cursor: "pointer" }}>
-              {rotating ? "Rotating…" : "Confirm"}
-            </button>
-          </div>
-        )}
-      </div>
-      {rotateError && <div style={{ padding: "8px 20px 12px", fontFamily: "var(--font-body)", fontSize: 12, color: "#ff6644" }}>{rotateError}</div>}
-    </div>
-  );
-}
-
-// ─── TEAM MANAGER ────────────────────────────────────────────
-function TeamManager({ members, onUpdate }) {
-  const [email,   setEmail]   = useState("");
-  const [name,    setName]    = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error,   setError]   = useState("");
-  const [success, setSuccess] = useState("");
-
-  const invite = async () => {
-    if (!email.trim()) return;
-    setLoading(true); setError(""); setSuccess("");
-    try {
-      const res  = await fetch("/api/keys/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "invite", email: email.trim(), name: name.trim() }) });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setSuccess(`Invitation sent to ${email}`); setEmail(""); setName("");
-      if (onUpdate) onUpdate();
-    } catch (e) { setError(e.message || "Invite failed. Please try again."); }
-    setLoading(false);
-  };
-
-  const remove = async (memberId) => {
-    try {
-      await fetch("/api/keys/team", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "remove", memberId }) });
-      if (onUpdate) onUpdate();
-    } catch (e) { console.error(e); }
-  };
-
-  const activeMembers = members?.filter(m => m.status !== "removed") || [];
-  const remaining     = Math.max(0, 5 - activeMembers.length - 1); // -1 for the owner
-
-  const STATUS_COLOR  = { active: "#C8FF00", trialing: "#ffaa00", invited: "#aaa", past_due: "#ff4444" };
-  const INPUT = { background: "rgba(8,8,11,.9)", border: "1px solid rgba(255,255,255,.07)", borderRadius: 8, padding: "10px 14px", fontFamily: "var(--font-body)", fontSize: 13, color: "#fff", outline: "none", transition: "border-color .2s" };
-
-  return (
-    <div style={{ background: "rgba(10,10,13,.8)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 14, overflow: "hidden" }}>
-      <div style={{ padding: "16px 22px", borderBottom: "1px solid rgba(255,255,255,.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: ".12em", textTransform: "uppercase" }}>Team Members</span>
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, background: "rgba(200,255,0,.08)", border: "1px solid rgba(200,255,0,.15)", color: "#C8FF00", borderRadius: 100, padding: "2px 8px" }}>
-            {activeMembers.length + 1}/5 seats
-          </span>
-        </div>
-        {remaining > 0 && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555" }}>{remaining} seat{remaining !== 1 ? "s" : ""} available</span>
-        )}
-      </div>
-
-      <div style={{ padding: "6px 0" }}>
-        {activeMembers.length === 0 && (
-          <div style={{ padding: "20px 22px", display: "flex", gap: 12, alignItems: "flex-start" }}>
-            <span style={{ fontSize: 20 }}>👥</span>
-            <div>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#777", lineHeight: 1.6 }}>No team members yet.</div>
-              <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#444", marginTop: 2 }}>Invite up to 4 seats below — they&apos;ll get a magic link to the dashboard.</div>
-            </div>
-          </div>
-        )}
-        {activeMembers.map((m, i) => (
-          <div key={m.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 22px", borderBottom: i < activeMembers.length - 1 ? "1px solid rgba(255,255,255,.03)" : "none" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-              <div style={{
-                width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                background: "linear-gradient(135deg,rgba(200,255,0,.14),rgba(200,255,0,.04))",
-                border: "1px solid rgba(200,255,0,.14)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 12, color: "rgba(200,255,0,.8)",
-              }}>
-                {(m.name || m.email || "?").slice(0, 1).toUpperCase()}
-              </div>
-              <div>
-                <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#ccc", lineHeight: 1.2 }}>{m.name || m.email}</div>
-                {m.name && <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", marginTop: 2 }}>{m.email}</div>}
-              </div>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{
-                fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: ".08em", textTransform: "uppercase",
-                color: STATUS_COLOR[m.status] || "#888",
-                background: `${STATUS_COLOR[m.status] || "#888"}12`,
-                border: `1px solid ${STATUS_COLOR[m.status] || "#888"}30`,
-                borderRadius: 100, padding: "2px 8px",
-              }}>{m.role === "owner" ? "owner" : m.status}</span>
-              {m.role !== "owner" && (
-                <button onClick={() => remove(m.id)}
-                  style={{ background: "none", border: "none", color: "#444", cursor: "pointer", fontSize: 14, padding: "2px 4px", transition: "color .15s", lineHeight: 1 }}
-                  onMouseEnter={e => (e.currentTarget.style.color = "#ff6644")}
-                  onMouseLeave={e => (e.currentTarget.style.color = "#444")}
-                  title="Remove member">✕</button>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {remaining > 0 && (
-        <div style={{ padding: "16px 22px", borderTop: "1px solid rgba(255,255,255,.04)" }}>
-          <div style={{ display: "flex", gap: 8, marginBottom: 10, flexWrap: "wrap" }}>
-            <input type="text" placeholder="Name (optional)" value={name} onChange={e => setName(e.target.value)}
-              style={{ ...INPUT, flex: "0 0 150px" }}
-              onFocus={e => (e.currentTarget.style.borderColor = "rgba(200,255,0,.3)")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,.07)")} />
-            <input type="email" placeholder="colleague@company.com" value={email} onChange={e => setEmail(e.target.value)} onKeyDown={e => e.key === "Enter" && invite()}
-              style={{ ...INPUT, flex: 1, minWidth: 160 }}
-              onFocus={e => (e.currentTarget.style.borderColor = "rgba(200,255,0,.3)")}
-              onBlur={e => (e.currentTarget.style.borderColor = "rgba(255,255,255,.07)")} />
-            <motion.button onClick={invite} disabled={loading || !email.trim()} className="btn-primary"
-              {...btnPrimary}
-              style={{ fontSize: 12, padding: "10px 18px", flexShrink: 0, opacity: !email.trim() ? 0.45 : 1 }}>
-              {loading ? "Sending…" : "Invite →"}
-            </motion.button>
-          </div>
-          {error   && <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#ff6644", margin: 0 }}>{error}</p>}
-          {success && <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#C8FF00", margin: 0 }}>✓ {success}</p>}
-        </div>
-      )}
-    </div>
+    <svg width={136} height={136} viewBox="0 0 136 136" style={{ display: "block" }}>
+      <circle cx={68} cy={68} r={r} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={10} />
+      <motion.circle
+        cx={68} cy={68} r={r} fill="none"
+        stroke={pal.ring} strokeWidth={10}
+        strokeDasharray={circ}
+        initial={{ strokeDashoffset: circ }}
+        animate={{ strokeDashoffset: offset }}
+        transition={{ duration: 1.2, ease: "easeOut" }}
+        strokeLinecap="round"
+        transform="rotate(-90 68 68)"
+      />
+      <text x={68} y={62} textAnchor="middle" fill={pal.color}
+        style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 28 }}>
+        {score}%
+      </text>
+      <text x={68} y={80} textAnchor="middle" fill="rgba(255,255,255,0.35)"
+        style={{ fontFamily: "var(--font-mono)", fontSize: 9, letterSpacing: "0.12em" }}>
+        COMPLIANCE
+      </text>
+    </svg>
   );
 }
 
 // ─── STAT CARD ────────────────────────────────────────────────
-function StatCard({ label, value, sub, accent: ac, delay = 0, icon, trend }) {
+function StatCard({ label, value, sub, accentColor, icon, delay = 0 }) {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut", delay }}
-      style={{ background: "rgba(10,10,13,.8)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 14, padding: "20px 22px", position: "relative", overflow: "hidden" }}>
-      {/* Subtle top shimmer */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg,transparent,${ac || "rgba(200,255,0,.12)"},transparent)`, pointerEvents: "none" }} />
+      style={{
+        background:   "#0a0a0c",
+        border:       "1px solid rgba(255,255,255,0.07)",
+        borderRadius: 12,
+        padding:      "18px 20px",
+        position:     "relative",
+        overflow:     "hidden",
+      }}
+    >
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: `linear-gradient(90deg,transparent,${accentColor ?? "rgba(200,255,0,0.12)"},transparent)` }} />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
         <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".14em", textTransform: "uppercase" }}>{label}</span>
-        {icon && <span style={{ fontSize: 16, opacity: .5 }}>{icon}</span>}
+        {icon && <span style={{ fontSize: 16, opacity: 0.4 }}>{icon}</span>}
       </div>
-      <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(22px,2.5vw,32px)", color: ac || "#fff", letterSpacing: "-.03em", lineHeight: 1, marginBottom: 6 }}>
+      <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(22px,2.5vw,30px)", color: accentColor ?? "#fff", letterSpacing: "-.03em", lineHeight: 1, marginBottom: 5 }}>
         {value}
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#555" }}>{sub}</span>
-        {trend !== undefined && trend !== null && (
-          <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: trend >= 0 ? "#C8FF00" : "#ff6644" }}>
-            {trend >= 0 ? "▲" : "▼"} {Math.abs(trend)}%
+      {sub && <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#555" }}>{sub}</div>}
+    </motion.div>
+  );
+}
+
+// ─── QUICK FIX PANEL ─────────────────────────────────────────
+function QuickFixPanel({ risks }) {
+  if (!risks?.length) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35 }}
+      style={{
+        background:   "rgba(255,68,68,0.05)",
+        border:       "1px solid rgba(255,68,68,0.22)",
+        borderRadius: 12,
+        overflow:     "hidden",
+        marginBottom: 16,
+      }}
+    >
+      <div style={{ padding: "14px 20px", borderBottom: "1px solid rgba(255,68,68,0.1)" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ff444488", letterSpacing: ".16em", textTransform: "uppercase", marginBottom: 6 }}>
+          Active Risks
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <IcAlert size={18} color="#ff4444" />
+          <span style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 13, color: "#ff9999" }}>
+            {risks.length} certificate{risks.length !== 1 ? "s" : ""} need attention
           </span>
-        )}
+        </div>
+      </div>
+      <div>
+        {risks.map((risk, i) => {
+          const issue = ISSUE_LABELS[risk.issue] ?? { text: risk.issue, color: "#ff9999" };
+          return (
+            <div key={risk.id} style={{
+              display:       "flex",
+              alignItems:    "center",
+              justifyContent: "space-between",
+              padding:       "12px 20px",
+              borderBottom:  i < risks.length - 1 ? "1px solid rgba(255,68,68,0.07)" : "none",
+              gap:           12,
+              flexWrap:      "wrap",
+            }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+                <span style={{
+                  fontSize: 10, padding: "3px 9px", borderRadius: 99, fontWeight: 700,
+                  color: issue.color,
+                  background: `${issue.color}18`,
+                  border: `1px solid ${issue.color}35`,
+                  letterSpacing: "0.07em", whiteSpace: "nowrap", flexShrink: 0,
+                }}>
+                  {issue.text.toUpperCase()}
+                  {risk.days != null && ` · ${risk.days}d`}
+                </span>
+                <span style={{ fontSize: 13, color: "#ccc", fontFamily: "var(--font-body)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {risk.label}
+                </span>
+                <span style={{ fontSize: 11, color: "#555", fontFamily: "var(--font-mono)", flexShrink: 0 }}>
+                  {risk.issue === "revoked" ? `revoked ${fmtDate(risk.revoked_at)}` : `expires ${fmtDate(risk.expires_at)}`}
+                </span>
+              </div>
+              <a
+                href={`/dashboard/certify?standard=${encodeURIComponent(risk.standard)}`}
+                style={{ fontSize: 12, fontWeight: 700, color: "#c8ff00", textDecoration: "none", border: "1px solid rgba(200,255,0,0.25)", padding: "5px 13px", borderRadius: 6, whiteSpace: "nowrap", flexShrink: 0 }}
+              >
+                Re-certify →
+              </a>
+            </div>
+          );
+        })}
       </div>
     </motion.div>
   );
 }
 
-// ─── UPGRADE BANNER ──────────────────────────────────────────
-function UpgradeBanner() {
+// ─── FREE TIER CERT LIMIT BANNERS ────────────────────────────
+// Shown above the MonthlyUsageBar for free-tier users.
+// At 2/3: informational warning (no CTA). At 3/3: upgrade banner + CTA.
+function CertLimitBanners({ used, limit, onUpgrade }) {
+  if (!limit || limit <= 0 || used < limit - 1) return null;
+
+  const remaining = limit - used;
+
+  // At 2/3: informational only — no upgrade CTA
+  if (remaining === 1) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        style={{
+          padding: "12px 18px",
+          background: "rgba(250,204,21,0.06)",
+          border: "1px solid rgba(250,204,21,0.25)",
+          borderRadius: 10,
+          fontSize: 13,
+          color: "#facc15",
+          marginBottom: 12,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+        }}
+      >
+        <span style={{ flexShrink: 0 }}>⚠</span>
+        <span>You have 1 free certificate remaining this month.</span>
+      </motion.div>
+    );
+  }
+
+  // At 3/3: full upgrade banner
   return (
     <motion.div
-      initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: 0.2 }}
+      initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
       style={{
-        background: "linear-gradient(135deg,rgba(200,255,0,.06) 0%,rgba(10,10,13,.9) 60%)",
-        border: "1px solid rgba(200,255,0,.18)",
-        borderRadius: 14, padding: "20px 24px",
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        gap: 16, flexWrap: "wrap", marginBottom: 20,
-        position: "relative", overflow: "hidden",
-      }}>
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg,transparent,rgba(200,255,0,.35),transparent)", pointerEvents: "none" }} />
-      <div>
-        <div style={{ fontFamily: "var(--font-body)", fontWeight: 700, fontSize: 14, color: "#fff", marginBottom: 4 }}>
-          You&apos;re on the Free plan · 50 API calls/day
+        background: "rgba(200,255,0,0.04)",
+        border: "1px solid rgba(200,255,0,0.25)",
+        borderRadius: 12,
+        overflow: "hidden",
+        marginBottom: 12,
+      }}
+    >
+      <div style={{ height: 1, background: "linear-gradient(90deg,transparent,rgba(200,255,0,.5),transparent)" }} />
+      <div style={{ padding: "16px 20px" }}>
+        <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.65, marginBottom: 16 }}>
+          You've used all {limit} free certificates this month. Upgrade to Assurance for unlimited certificates and all compliance standards.
         </div>
-        <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#666" }}>
-          Upgrade to Team for 5,000 calls/day, 5 seats, compliance exports, and full API access.
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <button
+            onClick={onUpgrade}
+            style={{
+              background: "#c8ff00",
+              color: "#000",
+              border: "none",
+              borderRadius: 8,
+              padding: "10px 20px",
+              fontWeight: 800,
+              fontSize: 13,
+              cursor: "pointer",
+              letterSpacing: "-0.01em",
+              flex: 1,
+              maxWidth: 280,
+            }}
+          >
+            Upgrade to Assurance — $19/month →
+          </button>
+          <RemindMeNextMonth />
         </div>
       </div>
-      <motion.a href="/pricing" className="btn-primary" {...btnPrimary} style={{ whiteSpace: "nowrap", flexShrink: 0, fontSize: 12 }}>
-        Upgrade to Team →
-      </motion.a>
     </motion.div>
+  );
+}
+
+// ─── "REMIND ME NEXT MONTH" BUTTON ───────────────────────────
+function RemindMeNextMonth() {
+  const [dismissed, dismiss] = useRemindDismissed();
+  if (dismissed) return null;
+  return (
+    <button
+      onClick={dismiss}
+      style={{
+        background: "transparent",
+        border: "1px solid rgba(255,255,255,0.1)",
+        borderRadius: 8,
+        padding: "10px 16px",
+        fontSize: 12,
+        color: "#555",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+      }}
+    >
+      Remind me next month
+    </button>
+  );
+}
+
+// ─── MONTHLY USAGE BAR ────────────────────────────────────────
+function MonthlyUsageBar({ used, limit, plan }) {
+  const isPaid = !limit;
+  const pct    = isPaid ? 0 : Math.min(used / limit, 1);
+  const barColor = pct >= 1 ? "#ff4444" : pct >= 0.66 ? "#facc15" : "#c8ff00";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.2 }}
+      style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, padding: "18px 20px" }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".14em", textTransform: "uppercase" }}>Certificates This Month</span>
+        <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#ccc" }}>
+          {used}
+          {limit && <span style={{ color: "#444" }}> / {limit}</span>}
+          {!limit && <span style={{ color: "#555", fontSize: 10 }}> issued</span>}
+        </span>
+      </div>
+      {limit ? (
+        <>
+          <div style={{ height: 6, background: "rgba(255,255,255,0.05)", borderRadius: 100, overflow: "hidden", marginBottom: 8 }}>
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${pct * 100}%` }}
+              transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
+              style={{ height: "100%", borderRadius: 100, background: barColor, boxShadow: `0 0 8px ${barColor}66` }}
+            />
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ fontFamily: "var(--font-body)", fontSize: 11, color: "#444" }}>
+              {limit - used > 0 ? `${limit - used} remaining` : "Limit reached"}
+            </span>
+          </div>
+        </>
+      ) : (
+        <div style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#555" }}>
+          Unlimited on {plan === "assurance" ? "Assurance" : "Authority"} plan
+        </div>
+      )}
+    </motion.div>
+  );
+}
+
+// ─── SORT HEADER ─────────────────────────────────────────────
+function SortTh({ label, field, sortBy, sortDir, onSort, style }) {
+  const active = sortBy === field;
+  return (
+    <th
+      onClick={() => onSort(field)}
+      style={{
+        padding:    "10px 14px",
+        fontSize:   11,
+        fontFamily: "var(--font-mono)",
+        fontWeight: 700,
+        color:      active ? "#c8ff00" : "#555",
+        letterSpacing: ".08em",
+        textTransform: "uppercase",
+        textAlign:  "left",
+        cursor:     "pointer",
+        userSelect: "none",
+        whiteSpace: "nowrap",
+        borderBottom: "1px solid rgba(255,255,255,0.06)",
+        ...style,
+      }}
+    >
+      {label}
+      {active && <span style={{ marginLeft: 4, fontSize: 9 }}>{sortDir === "asc" ? "▲" : "▼"}</span>}
+    </th>
+  );
+}
+
+// ─── CERT TABLE ───────────────────────────────────────────────
+function CertTable({ certs, plan }) {
+  const [sortBy,  setSortBy]  = useState("created_at");
+  const [sortDir, setSortDir] = useState("desc");
+  const [copied,  setCopied]  = useState(null);
+
+  function handleSort(field) {
+    if (sortBy === field) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortBy(field); setSortDir("asc"); }
+  }
+
+  const STATUS_STYLE = {
+    valid:   { color: "#00d084", bg: "rgba(0,208,132,0.1)",  label: "VALID"   },
+    revoked: { color: "#ff4444", bg: "rgba(255,68,68,0.1)",  label: "REVOKED" },
+    expired: { color: "#facc15", bg: "rgba(250,204,21,0.1)", label: "EXPIRED" },
+  };
+
+  const sorted = [...certs].sort((a, b) => {
+    let av, bv;
+    if (sortBy === "status") {
+      av = certStatus(a); bv = certStatus(b);
+    } else if (sortBy === "standard") {
+      av = a.compliance_standard; bv = b.compliance_standard;
+    } else {
+      av = a[sortBy] ?? ""; bv = b[sortBy] ?? "";
+    }
+    if (av < bv) return sortDir === "asc" ? -1 : 1;
+    if (av > bv) return sortDir === "asc" ? 1 : -1;
+    return 0;
+  });
+
+  const copyUrl = (id) => {
+    navigator.clipboard.writeText(`${window.location.origin}/cert/${id}`).then(() => {
+      setCopied(id);
+      setTimeout(() => setCopied(null), 1800);
+    });
+  };
+
+  if (!certs.length) {
+    return (
+      <div style={{ padding: "48px 20px", textAlign: "center", color: "#333", fontSize: 14 }}>
+        No certificates yet. Issue your first one →
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <thead>
+          <tr>
+            <SortTh label="Standard"  field="standard"   sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+            <SortTh label="Entropy"   field="entropy_bits" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} style={{ textAlign: "right" }} />
+            <SortTh label="Issued"    field="created_at" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+            <SortTh label="Expires"   field="expires_at" sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+            <SortTh label="Status"    field="status"     sortBy={sortBy} sortDir={sortDir} onSort={handleSort} />
+            <th style={{ padding: "10px 14px", borderBottom: "1px solid rgba(255,255,255,0.06)" }} />
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.map((cert) => {
+            const st     = certStatus(cert);
+            const stStyle = STATUS_STYLE[st];
+            return (
+              <tr key={cert.id}
+                style={{ borderBottom: "1px solid rgba(255,255,255,0.03)", transition: "background .1s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(200,255,0,0.02)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+              >
+                <td style={{ padding: "12px 14px" }}>
+                  <div style={{ fontSize: 13, color: "#e0e0e0", fontWeight: 600 }}>
+                    {STANDARD_LABELS[cert.compliance_standard] ?? cert.compliance_standard}
+                  </div>
+                  <div style={{ fontSize: 10, color: "#444", fontFamily: "var(--font-mono)", marginTop: 2 }}>
+                    {cert.id.slice(0, 8)}…
+                  </div>
+                </td>
+                <td style={{ padding: "12px 14px", textAlign: "right", fontFamily: "var(--font-mono)", fontSize: 12, color: "#888" }}>
+                  {cert.entropy_bits}b
+                </td>
+                <td style={{ padding: "12px 14px", fontSize: 12, color: "#666", whiteSpace: "nowrap" }}>
+                  {fmtDate(cert.created_at)}
+                </td>
+                <td style={{ padding: "12px 14px", fontSize: 12, color: "#666", whiteSpace: "nowrap" }}>
+                  {fmtDate(cert.expires_at)}
+                </td>
+                <td style={{ padding: "12px 14px" }}>
+                  <span style={{
+                    fontSize: 9, padding: "3px 9px", borderRadius: 99, fontWeight: 700,
+                    color: stStyle.color,
+                    background: stStyle.bg,
+                    letterSpacing: "0.07em",
+                  }}>
+                    {stStyle.label}
+                  </span>
+                </td>
+                <td style={{ padding: "8px 14px" }}>
+                  <div style={{ display: "flex", gap: 4, justifyContent: "flex-end" }}>
+                    <a
+                      href={`/cert/${cert.id}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ fontSize: 11, color: "#c8ff00", textDecoration: "none", padding: "5px 10px", border: "1px solid rgba(200,255,0,0.2)", borderRadius: 6, whiteSpace: "nowrap" }}
+                    >
+                      View →
+                    </a>
+                    <button
+                      onClick={() => copyUrl(cert.id)}
+                      style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: copied === cert.id ? "#c8ff00" : "#555", padding: "5px 10px", borderRadius: 6, cursor: "pointer", display: "flex", alignItems: "center", gap: 4 }}
+                    >
+                      {copied === cert.id ? <><IcCheck size={11} color="#c8ff00" /> Copied</> : "Copy"}
+                    </button>
+                    <button
+                      onClick={() => downloadCertJson(cert)}
+                      title="Download as JSON"
+                      style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "#555", padding: "5px 10px", borderRadius: 6, cursor: "pointer" }}
+                    >
+                      ↓
+                    </button>
+                    {plan === "free" ? (
+                      <button
+                        disabled
+                        title="Upgrade to Assurance for PDF export"
+                        style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "#333", padding: "5px 8px", borderRadius: 6, cursor: "not-allowed", display: "inline-flex", alignItems: "center", gap: 3 }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        PDF
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => downloadCertPdf(cert.id)}
+                        title="Download as PDF"
+                        style={{ fontSize: 11, background: "transparent", border: "1px solid rgba(255,255,255,0.07)", color: "#555", padding: "5px 8px", borderRadius: 6, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 3 }}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        PDF
+                      </button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      <div style={{ padding: "10px 14px", borderTop: "1px solid rgba(255,255,255,0.04)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span style={{ fontSize: 11, color: "#444", fontFamily: "var(--font-mono)" }}>
+          Showing {sorted.length} certificate{sorted.length !== 1 ? "s" : ""}
+        </span>
+        <a href="/dashboard/certs" style={{ fontSize: 11, color: "#c8ff00", textDecoration: "none" }}>
+          Manage all →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+// ─── RECENT ACTIVITY ─────────────────────────────────────────
+function RecentActivity({ events }) {
+  const ICON_MAP = { generated: <IcBolt size={11} color="#c8ff00" />, viewed: <IcShield size={11} color="#555" /> };
+  const COLORS = { generated: "#c8ff00", viewed: "#555" };
+
+  if (!events?.length) {
+    return (
+      <div style={{ padding: "32px 20px", textAlign: "center", color: "#333", fontSize: 13 }}>
+        No activity yet
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {events.map((ev, i) => (
+        <div key={i} style={{
+          display:      "flex",
+          alignItems:   "flex-start",
+          gap:          12,
+          padding:      "12px 20px",
+          borderBottom: i < events.length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+        }}>
+          <div style={{
+            width:        28, height: 28, borderRadius: "50%", flexShrink: 0,
+            background:   `${COLORS[ev.type] ?? "#555"}14`,
+            border:       `1px solid ${COLORS[ev.type] ?? "#555"}28`,
+            display:      "flex", alignItems: "center", justifyContent: "center",
+            fontSize:     11, color: COLORS[ev.type] ?? "#555",
+          }}>
+            {ICON_MAP[ev.type] ?? <span style={{ fontSize: 11 }}>·</span>}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 13, color: "#ccc", lineHeight: 1.3 }}>
+              {ev.type === "generated" ? "Certificate issued" : "Certificate viewed"}
+            </div>
+            <div style={{ fontSize: 11, color: "#555", marginTop: 3, fontFamily: "var(--font-mono)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {ev.label}
+            </div>
+          </div>
+          <div style={{ fontSize: 11, color: "#444", whiteSpace: "nowrap", fontFamily: "var(--font-mono)" }}>
+            {fmtRelative(ev.at)}
+          </div>
+        </div>
+      ))}
+    </div>
   );
 }
 
 // ─── MAIN PAGE ────────────────────────────────────────────────
-export default function DashboardPage() {
+export default function ComplianceDashboard() {
   const router  = useRouter();
   const { data: session, status } = useSession();
-  const [data,           setData]           = useState(null);
-  const [loadError,      setLoadError]      = useState("");
-  const [billingLoading, setBillingLoading] = useState(false);
-  const [billingError,   setBillingError]   = useState("");
-  const [newRawKey,      setNewRawKey]      = useState(null);
-
-  // Detect new key from sessionStorage (set after key creation flow)
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem("pg_new_api_key");
-      if (stored) { setNewRawKey(stored); sessionStorage.removeItem("pg_new_api_key"); }
-    } catch (_) {}
-  }, []);
+  const [data,         setData]         = useState(null);
+  const [loadError,    setLoadError]    = useState("");
+  const [upgradeModal, setUpgradeModal] = useState(null);
 
   useEffect(() => {
     if (status === "unauthenticated") router.push("/auth/signin?callbackUrl=/dashboard");
@@ -403,11 +628,18 @@ export default function DashboardPage() {
   const fetchData = useCallback(async () => {
     setLoadError("");
     try {
-      const res = await fetch("/api/dashboard/summary");
-      if (!res.ok) throw new Error("Failed to load");
+      const res = await fetch("/api/dashboard/compliance");
+      if (!res.ok) {
+        let detail = "";
+        try {
+          const body = await res.json();
+          detail = body.error ?? body.detail ?? JSON.stringify(body);
+        } catch { detail = await res.text().catch(() => ""); }
+        throw new Error(`HTTP ${res.status}: ${detail}`);
+      }
       setData(await res.json());
-    } catch {
-      setLoadError("Could not load dashboard data.");
+    } catch (err) {
+      setLoadError(err.message || "Could not load dashboard data.");
     }
   }, []);
 
@@ -415,43 +647,28 @@ export default function DashboardPage() {
     if (status !== "authenticated") return;
     fetchData();
     const params = new URLSearchParams(window.location.search);
-    if (params.get("status") === "success") window.history.replaceState({}, "", "/dashboard");
+    if (params.get("status") === "success") {
+      window.history.replaceState({}, "", "/dashboard");
+    }
   }, [status, fetchData]);
 
-  const openBillingPortal = async () => {
-    if (!data?.paddleCustomerId) return;
-    setBillingLoading(true); setBillingError("");
-    try {
-      const res  = await fetch("/api/paddle/portal", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ customerId: data.paddleCustomerId }) });
-      const json = await res.json();
-      if (json.url) window.location.href = json.url;
-      else throw new Error("No portal URL returned");
-    } catch { setBillingError("Could not open billing portal. Contact hello@passgeni.ai"); }
-    setBillingLoading(false);
-  };
-
   // ── Loading ────────────────────────────────────────────────
-  if (status === "loading" || (!data && !loadError)) {
+  if (status === "loading" || (status === "authenticated" && !data && !loadError)) {
     return (
       <PageLayout title="Dashboard — PassGeni" description="">
         <main style={{ maxWidth: 1100, margin: "0 auto", padding: "60px var(--page-pad) 100px" }}>
-          {/* Header skeleton */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 36, flexWrap: "wrap", gap: 16 }}>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               <Skeleton w={120} h={10} />
               <Skeleton w={280} h={32} r={8} />
               <Skeleton w={80} h={24} r={10} />
             </div>
-            <div style={{ display: "flex", gap: 8 }}>
-              <Skeleton w={90} h={40} r={8} />
-              <Skeleton w={90} h={40} r={8} />
-              <Skeleton w={90} h={40} r={8} />
-            </div>
+            <Skeleton w={140} h={40} r={8} />
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 16 }}>
-            {[1,2,3,4].map(i => <Skeleton key={i} h={90} r={14} />)}
+            {[1,2,3,4].map((i) => <Skeleton key={i} h={90} r={12} />)}
           </div>
-          <Skeleton h={160} r={14} />
+          <Skeleton h={200} r={12} />
           <style>{`@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}`}</style>
         </main>
       </PageLayout>
@@ -463,7 +680,7 @@ export default function DashboardPage() {
     return (
       <PageLayout title="Dashboard — PassGeni" description="">
         <main style={{ maxWidth: 480, margin: "0 auto", padding: "120px var(--page-pad)", textAlign: "center" }}>
-          <div style={{ fontSize: 36, marginBottom: 16 }}>⚠️</div>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 16 }}><IcAlert size={36} color="#ff6644" /></div>
           <div style={{ fontFamily: "var(--font-body)", fontSize: 15, color: "#ff6644", marginBottom: 20 }}>{loadError}</div>
           <motion.button onClick={fetchData} className="btn-ghost" {...btnGhost} style={{ fontSize: 13 }}>Try again →</motion.button>
         </main>
@@ -471,225 +688,263 @@ export default function DashboardPage() {
     );
   }
 
-  const stats           = data.stats || {};
-  const isTeam          = data.plan === "team";
-  const activeMembers   = (data.teamMembers || []).filter(m => m.status !== "removed");
-  const seatCount       = activeMembers.length + 1; // +1 for owner
-  const usedPct         = data.usageLimit > 0 ? (data.usageToday / data.usageLimit) : 0;
-  const utilisationStr  = `${Math.round(usedPct * 100)}% of limit`;
-  const planSub         = isTeam ? "$29/month" : "Free forever";
+  if (!data) return null;
+
+  const pal          = SCORE_PALETTE[data.scoreColor] ?? SCORE_PALETTE.green;
+  const isPaid       = data.monthlyLimit === null;
+  const isTrialing   = data.planStatus === "trialing";
+  const trialDaysLeft = isTrialing && data.trialEnd
+    ? Math.max(0, Math.ceil((new Date(data.trialEnd) - new Date()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  const expiredCount    = (data.certs ?? []).filter((c) => !c.is_revoked && new Date(c.expires_at) < new Date()).length;
+  const expiringSoonCount = (data.risks ?? []).filter((r) => r.issue === "expiring_soon").length;
+  const planLabel = { free: "Free", assurance: "Assurance", authority: "Authority" }[data.plan] ?? data.plan;
 
   return (
-    <PageLayout title="Dashboard — PassGeni Team" description="">
+    <PageLayout title="Compliance Dashboard — PassGeni" description="">
+      <UpgradeModal
+        open={!!upgradeModal}
+        onClose={() => setUpgradeModal(null)}
+        reason={upgradeModal?.reason}
+        used={upgradeModal?.used}
+        limit={upgradeModal?.limit}
+      />
+
       <main style={{ maxWidth: 1100, margin: "0 auto", padding: "56px var(--page-pad) 100px" }}>
 
-        {/* ── Header ──────────────────────────────────────── */}
+        {/* ── Page header ─────────────────────────────────── */}
         <motion.div
           initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}>
+          style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 16 }}
+        >
           <div>
-            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".16em", textTransform: "uppercase", marginBottom: 8 }}>Dashboard</div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".16em", textTransform: "uppercase", marginBottom: 8 }}>
+              Compliance Monitoring
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
-              {/* Avatar */}
               <div style={{
                 width: 44, height: 44, borderRadius: "50%", flexShrink: 0,
                 background: "linear-gradient(135deg,rgba(200,255,0,.2),rgba(200,255,0,.05))",
                 border: "1px solid rgba(200,255,0,.2)",
-                boxShadow: "0 0 20px rgba(200,255,0,.08)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontFamily: "var(--font-body)", fontWeight: 800, fontSize: 16, color: "rgba(200,255,0,.9)",
               }}>
                 {(session?.user?.email || "U").slice(0, 1).toUpperCase()}
               </div>
-              <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(18px,2.5vw,28px)", color: "#fff", letterSpacing: "-.02em", lineHeight: 1.1, margin: 0 }}>
-                {data.name || session?.user?.email}
+              <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(18px,2.5vw,26px)", color: "#fff", letterSpacing: "-.02em", lineHeight: 1.1, margin: 0 }}>
+                {session?.user?.email}
               </h1>
             </div>
-            {/* Plan badge */}
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
+            {/* Plan badge row */}
+            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
               <span style={{
                 fontFamily: "var(--font-mono)", fontWeight: 700, fontSize: 11,
-                color: isTeam ? "#000" : "#888",
-                background: isTeam ? "var(--accent)" : "rgba(255,255,255,.05)",
-                border: isTeam ? "none" : "1px solid rgba(255,255,255,.08)",
+                color: isPaid ? "#000" : "#888",
+                background: isPaid ? "var(--accent)" : "rgba(255,255,255,.05)",
+                border: isPaid ? "none" : "1px solid rgba(255,255,255,.08)",
                 borderRadius: 8, padding: "5px 12px", letterSpacing: ".06em",
-              }}>{isTeam ? "TEAM" : "FREE"}</span>
-              {data.planStatus === "trialing" && (
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ffaa00", background: "rgba(255,170,0,.08)", border: "1px solid rgba(255,170,0,.25)", borderRadius: 100, padding: "3px 10px", letterSpacing: ".08em" }}>
-                  TRIAL · ends {fmtDate(data.trialEnd)}
+              }}>
+                {planLabel.toUpperCase()}
+              </span>
+              {isTrialing && trialDaysLeft > 0 && (
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ffaa00", background: "rgba(255,170,0,.08)", border: "1px solid rgba(255,170,0,.25)", borderRadius: 100, padding: "3px 10px", letterSpacing: ".07em" }}>
+                  TRIAL · {trialDaysLeft}d left
                 </span>
               )}
               {data.planStatus === "past_due" && (
-                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ff4444", background: "rgba(255,68,68,.08)", border: "1px solid rgba(255,68,68,.25)", borderRadius: 100, padding: "3px 10px", letterSpacing: ".08em" }}>
+                <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#ff4444", background: "rgba(255,68,68,.08)", border: "1px solid rgba(255,68,68,.25)", borderRadius: 100, padding: "3px 10px", letterSpacing: ".07em" }}>
                   ⚠ PAYMENT PAST DUE
                 </span>
               )}
             </div>
           </div>
 
-          {/* Actions */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
-            <motion.a href="/api-docs" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>API Docs</motion.a>
-            {data.paddleCustomerId && (
-              <motion.button onClick={openBillingPortal} disabled={billingLoading} className="btn-ghost"
-                {...btnGhost}
-                style={{ fontSize: 12, padding: "9px 16px", cursor: "pointer" }}>
-                {billingLoading ? "Loading…" : "Billing →"}
-              </motion.button>
+          {/* Header actions */}
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <motion.a
+              href="/dashboard/certs"
+              className="btn-primary"
+              {...btnPrimary}
+              style={{ fontSize: 13, padding: "10px 20px", whiteSpace: "nowrap" }}
+            >
+              New Certificate →
+            </motion.a>
+            {!isPaid && (
+              <motion.a href="/pricing" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+                Upgrade
+              </motion.a>
             )}
-            <button onClick={() => signOut({ callbackUrl: "/" })}
+            {data.plan === "authority" && (
+              <motion.a href="/dashboard/team" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+                Team →
+              </motion.a>
+            )}
+            <motion.a href="/dashboard/api-keys" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+              API Keys
+            </motion.a>
+            <motion.a href="/settings" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+              Settings
+            </motion.a>
+            <motion.a href="/api-docs" className="btn-ghost" {...btnGhost} style={{ fontSize: 12, padding: "9px 16px" }}>
+              API Docs
+            </motion.a>
+            <button
+              onClick={() => signOut({ callbackUrl: "/" })}
               style={{ background: "none", border: "1px solid rgba(255,255,255,.07)", borderRadius: 8, padding: "9px 16px", fontFamily: "var(--font-body)", fontSize: 12, color: "#555", cursor: "pointer", transition: "all .15s" }}
-              onMouseEnter={e => { e.currentTarget.style.color = "#ff6644"; e.currentTarget.style.borderColor = "rgba(255,68,68,.3)"; }}
-              onMouseLeave={e => { e.currentTarget.style.color = "#555"; e.currentTarget.style.borderColor = "rgba(255,255,255,.07)"; }}>
+              onMouseEnter={(e) => { e.currentTarget.style.color = "#ff6644"; e.currentTarget.style.borderColor = "rgba(255,68,68,.3)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "#555"; e.currentTarget.style.borderColor = "rgba(255,255,255,.07)"; }}
+            >
               Sign out
             </button>
           </div>
         </motion.div>
 
-        {/* Billing error inline */}
-        {billingError && (
-          <div style={{ background: "rgba(255,68,68,.06)", border: "1px solid rgba(255,68,68,.2)", borderRadius: 10, padding: "12px 18px", marginBottom: 16, fontFamily: "var(--font-body)", fontSize: 13, color: "#ff6644", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            {billingError}
-            <button onClick={() => setBillingError("")} style={{ background: "none", border: "none", color: "#ff6644", cursor: "pointer", fontSize: 16 }}>×</button>
-          </div>
-        )}
+        {/* ── Quick Fix Panel ─────────────────────────────── */}
+        <QuickFixPanel risks={data.risks} />
 
-        {/* ── Upgrade banner (free users) ──────────────────── */}
-        {!isTeam && <UpgradeBanner />}
+        {/* ── Top stats row ───────────────────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "auto 1fr 1fr 1fr", gap: 12, marginBottom: 12, alignItems: "stretch" }}>
 
-        {/* ── 4 stat cards ─────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(160px,1fr))", gap: 12, marginBottom: 12 }}>
-          <StatCard label="Plan"        value={isTeam ? "Team" : "Free"} sub={planSub}           icon="◈" ac={isTeam ? "#C8FF00" : "#888"}  delay={0}    />
-          <StatCard label="Daily limit" value={data.usageLimit.toLocaleString()} sub="API calls/day"  icon="⚡" delay={0.06} />
-          <StatCard label="Used today"  value={data.usageToday.toLocaleString()} sub={utilisationStr} icon="📈" ac={accent(usedPct)} delay={0.12} />
-          <StatCard label="Team seats"  value={`${seatCount}/5`} sub="including you" icon="👥" delay={0.18} />
-        </div>
-
-        {/* ── 30-day mini stats ────────────────────────────── */}
-        {stats.totalCalls30d !== undefined && (
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 12, marginBottom: 12 }}>
-            {[
-              { label: "Total (30d)",  value: stats.totalCalls30d?.toLocaleString() ?? "0" },
-              { label: "Avg / day",    value: stats.avgDaily?.toLocaleString() ?? "0",  sub: "30-day avg" },
-              { label: "Peak day",     value: stats.peakCalls?.toLocaleString() ?? "0", sub: stats.peakDay ? fmtShort(stats.peakDay) : "—" },
-            ].map(({ label, value, sub }, i) => (
-              <motion.div key={label}
-                initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 + i * 0.06 }}
-                style={{ background: "rgba(10,10,13,.8)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 12, padding: "16px 20px" }}>
-                <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".12em", textTransform: "uppercase", marginBottom: 6 }}>{label}</div>
-                <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 20, color: "#fff", letterSpacing: "-.02em", lineHeight: 1 }}>
-                  {value}
-                  {sub && <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", fontWeight: 400, marginLeft: 8 }}>{sub}</span>}
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        )}
-
-        {/* ── Usage bar + 30-day chart ─────────────────────── */}
-        <motion.div
-          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.26 }}
-          style={{ background: "rgba(10,10,13,.8)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 14, padding: "22px 24px", marginBottom: 12 }}>
-          {/* Today progress */}
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12 }}>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#888", letterSpacing: ".12em", textTransform: "uppercase" }}>API Usage Today</span>
-            <span style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: "#ccc" }}>
-              {data.usageToday.toLocaleString()} <span style={{ color: "#444" }}>/ {data.usageLimit.toLocaleString()}</span>
-            </span>
-          </div>
-          <div style={{ height: 5, background: "rgba(255,255,255,.05)", borderRadius: 100, overflow: "hidden", marginBottom: 8 }}>
-            <motion.div
-              initial={{ width: 0 }} animate={{ width: `${Math.min(usedPct * 100, 100)}%` }}
-              transition={{ duration: 1, ease: "easeOut", delay: 0.4 }}
-              style={{ height: "100%", borderRadius: 100, background: accent(usedPct), boxShadow: `0 0 8px ${accent(usedPct)}66` }}
-            />
-          </div>
-          <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#444" }}>
-            {(data.usageLimit - data.usageToday).toLocaleString()} calls remaining today
-          </span>
-
-          {/* 30-day chart */}
-          <div style={{ marginTop: 24 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".12em", textTransform: "uppercase" }}>Last 30 Days</span>
-              <div style={{ display: "flex", gap: 12 }}>
-                {[["#C8FF00", "≤70%"], ["#ffaa00", "70–90%"], ["#ff4444", ">90%"]].map(([col, lbl]) => (
-                  <div key={lbl} style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <div style={{ width: 6, height: 6, background: col, borderRadius: 2 }} />
-                    <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555" }}>{lbl}</span>
-                  </div>
-                ))}
+          {/* Compliance score ring */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5 }}
+            style={{
+              background:   "#0a0a0c",
+              border:       `1px solid ${pal.color}30`,
+              borderRadius: 12,
+              padding:      "20px 24px",
+              display:      "flex",
+              flexDirection: "column",
+              alignItems:   "center",
+              justifyContent: "center",
+              gap:          10,
+              minWidth:     160,
+            }}
+          >
+            <ScoreRing score={data.complianceScore} colorName={data.scoreColor} />
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 11, color: "#555", fontFamily: "var(--font-mono)", letterSpacing: ".1em", textTransform: "uppercase" }}>
+                {data.scoreColor === "green" ? "On track" : data.scoreColor === "amber" ? "Needs attention" : "Action required"}
               </div>
-            </div>
-            <UsageBarChart data={data.usageMonth || data.usageWeek || []} limit={data.usageLimit} />
-          </div>
-        </motion.div>
-
-        {/* ── API Keys + Team (2-col on wide) ──────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(340px,1fr))", gap: 16, marginBottom: 16 }}>
-
-          {/* API Keys */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.32 }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-              <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 16, color: "#fff", letterSpacing: "-.01em", margin: 0 }}>API Keys</h2>
-              <a href="/api-docs" style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF00", textDecoration: "none", letterSpacing: ".06em" }}>View docs →</a>
-            </div>
-            {data.keys?.length > 0 ? (
-              data.keys.map((k) => (
-                <div key={k.id} style={{ marginBottom: 10 }}>
-                  <ApiKeyCard apiKey={k} newRawKey={newRawKey} onRotate={fetchData} />
-                </div>
-              ))
-            ) : (
-              <div style={{ background: "rgba(10,10,13,.8)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 14, padding: "28px", textAlign: "center" }}>
-                <div style={{ fontSize: 28, marginBottom: 12 }}>🔑</div>
-                <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#666", lineHeight: 1.7, margin: 0 }}>
-                  No API key yet. Check your welcome email or contact{" "}
-                  <a href="mailto:hello@passgeni.ai" style={{ color: "#C8FF00", textDecoration: "none" }}>hello@passgeni.ai</a>.
-                </p>
+              <div style={{ fontSize: 11, color: "#444", marginTop: 3 }}>
+                {data.validCerts} / {data.totalCerts} valid
               </div>
-            )}
+              {data.primaryStandardLabel && (
+                <div style={{ fontSize: 10, color: "#333", marginTop: 4, fontFamily: "var(--font-mono)" }}>
+                  {data.primaryStandardLabel}
+                </div>
+              )}
+            </div>
           </motion.div>
 
-          {/* Team */}
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.38 }}>
-            <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 16, color: "#fff", letterSpacing: "-.01em", marginBottom: 10 }}>Team</h2>
-            <TeamManager members={data.teamMembers} onUpdate={fetchData} />
+          {/* Stats 3-up */}
+          <StatCard label="Active Certs"    value={data.validCerts}    sub="non-expired, non-revoked"  accentColor="#00d084" icon={<IcBolt size={16} color="#00d084" />} delay={0.06} />
+          <StatCard
+            label="Expiring Soon"
+            value={expiringSoonCount}
+            sub="within 30 days"
+            accentColor={expiringSoonCount > 0 ? "#facc15" : "#555"}
+            icon="⏱"
+            delay={0.12}
+          />
+          <StatCard
+            label="Revoked / Expired"
+            value={(data.risks ?? []).filter((r) => r.issue === "revoked" || r.issue === "expired").length}
+            sub="need re-certification"
+            accentColor={(data.risks ?? []).filter((r) => r.issue !== "expiring_soon").length > 0 ? "#ff4444" : "#555"}
+            icon="⚠"
+            delay={0.18}
+          />
+        </div>
+
+        {/* ── Free tier cert limit banners ─────────────────── */}
+        {!isPaid && (
+          <CertLimitBanners
+            used={data.monthlyCount}
+            limit={data.monthlyLimit}
+            onUpgrade={() => setUpgradeModal({ reason: "LIMIT_REACHED", used: data.monthlyCount, limit: data.monthlyLimit })}
+          />
+        )}
+
+        {/* ── Monthly usage bar ────────────────────────────── */}
+        <div style={{ marginBottom: 20 }}>
+          <MonthlyUsageBar used={data.monthlyCount} limit={data.monthlyLimit} plan={data.plan} />
+        </div>
+
+        {/* ── Main 2-col: table + activity ────────────────── */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 16, marginBottom: 20, alignItems: "start" }}>
+
+          {/* Certificate table */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.24 }}
+            style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, overflow: "hidden" }}
+          >
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".14em", textTransform: "uppercase" }}>Certificate History</span>
+              <span style={{ fontSize: 11, color: "#333", fontFamily: "var(--font-mono)" }}>
+                Click column headers to sort
+              </span>
+            </div>
+            <CertTable certs={data.certs ?? []} plan={data.plan} />
+          </motion.div>
+
+          {/* Recent activity */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
+            style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 12, overflow: "hidden" }}
+          >
+            <div style={{ padding: "16px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
+              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".14em", textTransform: "uppercase" }}>Recent Activity</span>
+            </div>
+            <RecentActivity events={data.recentActivity} />
           </motion.div>
         </div>
 
-        {/* ── Compliance presets ───────────────────────────── */}
+        {/* ── Compliance standards coverage ───────────────── */}
         <motion.div
           initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.44 }}
-          style={{ background: "rgba(10,10,13,.8)", border: "1px solid rgba(255,255,255,.06)", borderRadius: 14, padding: "20px 24px" }}>
+          transition={{ duration: 0.4, delay: 0.36 }}
+          style={{ background: "#0a0a0c", border: "1px solid rgba(255,255,255,0.06)", borderRadius: 12, padding: "18px 20px", marginBottom: 20 }}
+        >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14, flexWrap: "wrap", gap: 8 }}>
-            <div>
-              <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".14em", textTransform: "uppercase" }}>Compliance Presets</span>
-              <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#444", margin: "4px 0 0" }}>All active on your account — available in the generator.</p>
-            </div>
-            <a href="/#generator" style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF00", textDecoration: "none", letterSpacing: ".06em" }}>Open generator →</a>
+            <span style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#555", letterSpacing: ".14em", textTransform: "uppercase" }}>Coverage This Month</span>
+            <a href="/dashboard/certs" style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#c8ff00", textDecoration: "none" }}>Issue certificate →</a>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            {[
-              { label: "HIPAA",        c: "#4fc3f7", href: "/guides/hipaa-password-requirements" },
-              { label: "PCI-DSS v4.0", c: "#ffb74d", href: "/guides/pci-dss-password-requirements" },
-              { label: "SOC 2",        c: "#ce93d8", href: "/guides/soc2-password-requirements" },
-              { label: "ISO 27001",    c: "#80cbc4", href: "/guides/iso-27001-password-requirements" },
-              { label: "NIST 800-63B", c: "#a5d6a7", href: "/guides/nist-800-63b-password-guidelines" },
-              { label: "DoD 8570",     c: "#ef9a9a", href: "/guides" },
-            ].map(({ label, c, href }) => (
-              <a key={label} href={href}
-                style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: c, background: `${c}10`, border: `1px solid ${c}28`, borderRadius: 100, padding: "5px 14px", letterSpacing: ".08em", textDecoration: "none", transition: "all .15s", display: "inline-flex", alignItems: "center", gap: 5 }}
-                onMouseEnter={e => { e.currentTarget.style.background = `${c}20`; e.currentTarget.style.borderColor = `${c}55`; }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${c}10`; e.currentTarget.style.borderColor = `${c}28`; }}>
-                ✓ {label}
-              </a>
-            ))}
+            {[["NIST-800-63B","NIST SP 800-63B"],["HIPAA","HIPAA §164.312"],["PCI-DSS","PCI-DSS v4.0"],["SOC2","SOC 2 CC6.1"],["ISO-27001","ISO 27001:2022"],["FIPS-140-3","FIPS 140-3"]].map(([key, label]) => {
+              const hasCert = (data.certs ?? []).some((c) => c.compliance_standard === key && !c.is_revoked && new Date(c.expires_at) > new Date());
+              const isLocked = !isPaid && key !== "NIST-800-63B";
+              return (
+                <div key={key} style={{
+                  fontFamily:  "var(--font-mono)",
+                  fontSize:    10,
+                  color:       hasCert ? "#00d084" : isLocked ? "#333" : "#555",
+                  background:  hasCert ? "rgba(0,208,132,0.08)" : "rgba(255,255,255,0.02)",
+                  border:      `1px solid ${hasCert ? "rgba(0,208,132,0.25)" : "rgba(255,255,255,0.06)"}`,
+                  borderRadius: 100,
+                  padding:     "5px 14px",
+                  letterSpacing: ".07em",
+                  display:     "flex",
+                  alignItems:  "center",
+                  gap:         6,
+                }}>
+                  {hasCert ? <IcCheck size={10} color="#00d084" /> : isLocked ? <IcStar size={10} color="#333" /> : <IcShield size={10} color="#333" />}
+                  {label}
+                </div>
+              );
+            })}
           </div>
+          {!isPaid && (
+            <div style={{ marginTop: 12, fontSize: 11, color: "#444" }}>
+              <span style={{ display: "inline-flex", verticalAlign: "middle", marginRight: 4 }}><IcStar size={11} color="#444" /></span> Requires Assurance or Authority plan ·{" "}
+              <a href="/pricing" style={{ color: "#c8ff00", textDecoration: "none" }}>Upgrade →</a>
+            </div>
+          )}
         </motion.div>
 
       </main>
@@ -698,6 +953,10 @@ export default function DashboardPage() {
         @keyframes shimmer {
           0%   { background-position:  200% 0 }
           100% { background-position: -200% 0 }
+        }
+        @media (max-width: 900px) {
+          .dash-main-grid { grid-template-columns: 1fr !important; }
+          .dash-stats-row { grid-template-columns: 1fr 1fr !important; }
         }
       `}</style>
     </PageLayout>

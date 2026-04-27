@@ -8,6 +8,7 @@ import { motion } from "framer-motion";
 import { btnPrimary } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 import { getStrength, getEntropy, getCrackTime, getDNAScore } from "../../lib/strength.js";
+import { IcCheck, IcX, IcEye, IcEyeOff } from "../../lib/icons.js";
 
 function StrengthMeter({ password }) {
   const strength  = getStrength(password);
@@ -49,15 +50,19 @@ function StrengthMeter({ password }) {
         {/* Stats row */}
         <div style={{ display: "flex", gap: 24, flexWrap: "wrap" }}>
           {[
-            { label: "Length",       value: `${password.length} chars`      },
-            { label: "Entropy",      value: `${entropy} bits`               },
-            { label: "Uppercase",    value: /[A-Z]/.test(password) ? "✓ Yes" : "✗ No" },
-            { label: "Numbers",      value: /[0-9]/.test(password) ? "✓ Yes" : "✗ No" },
-            { label: "Symbols",      value: /[^A-Za-z0-9]/.test(password) ? "✓ Yes" : "✗ No" },
-          ].map(({ label, value }) => (
+            { label: "Length",    value: `${password.length} chars`, pass: null },
+            { label: "Entropy",   value: `${entropy} bits`,          pass: null },
+            { label: "Uppercase", value: /[A-Z]/.test(password) ? "Yes" : "No", pass: /[A-Z]/.test(password) },
+            { label: "Numbers",   value: /[0-9]/.test(password) ? "Yes" : "No", pass: /[0-9]/.test(password) },
+            { label: "Symbols",   value: /[^A-Za-z0-9]/.test(password) ? "Yes" : "No", pass: /[^A-Za-z0-9]/.test(password) },
+          ].map(({ label, value, pass }) => (
             <div key={label}>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#666", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 4 }}>{label}</div>
-              <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: value.startsWith("✓") ? "#C8FF00" : value.startsWith("✗") ? "#ff4444" : "#ccc" }}>{value}</div>
+              <div style={{ fontFamily: "var(--font-mono)", fontSize: 12, color: pass === true ? "#C8FF00" : pass === false ? "#ff4444" : "#ccc", display: "inline-flex", alignItems: "center", gap: 4 }}>
+                {pass === true && <IcCheck size={11} color="#C8FF00" />}
+                {pass === false && <IcX size={11} color="#ff4444" />}
+                {value}
+              </div>
             </div>
           ))}
         </div>
@@ -73,8 +78,8 @@ function StrengthMeter({ password }) {
             {dna.checks.map((c, i) => (
               <div key={i}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontFamily: "var(--font-body)", fontSize: 13, color: c.pass ? "#ccc" : "#555" }}>
-                    <span style={{ color: c.pass ? "#C8FF00" : "#ff4444", marginRight: 8 }}>{c.pass ? "✓" : "✗"}</span>
+                  <span style={{ fontFamily: "var(--font-body)", fontSize: 13, color: c.pass ? "#ccc" : "#555", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                    {c.pass ? <IcCheck size={13} color="#C8FF00" /> : <IcX size={13} color="#ff4444" />}
                     {c.label}
                   </span>
                   <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: c.pass ? "#C8FF0088" : "#333" }}>
@@ -126,7 +131,7 @@ function StrengthMeter({ password }) {
       {/* ── Perfect score ── */}
       {dna && dna.total >= 85 && (
         <div style={{ background: "#050f05", border: "1px solid #C8FF0033", borderRadius: 12, padding: "20px 28px", display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ fontSize: 28 }}>✅</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 40, height: 40, borderRadius: "50%", background: "rgba(200,255,0,0.12)", flexShrink: 0 }}><IcCheck size={22} color="#C8FF00" /></div>
           <div>
             <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 16, color: "#C8FF00", marginBottom: 4 }}>This password passes all quality checks.</div>
             <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888" }}>Make sure it's unique and stored in a password manager.</div>
@@ -182,7 +187,7 @@ export default function StrengthCheckerPage() {
             onClick={() => setShowPw((v) => !v)}
             style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#555" }}
             aria-label={showPw ? "Hide" : "Show"}
-          >{showPw ? "🙈" : "👁"}</button>
+          >{showPw ? <IcEyeOff size={18} color="#555" /> : <IcEye size={18} color="#555" />}</button>
         </div>
         {password && (
           <div style={{ display: "flex", gap: 4, marginTop: 10 }}>
@@ -205,12 +210,38 @@ export default function StrengthCheckerPage() {
           { q: "What crack time estimates are based on?", a: "Estimates assume a dedicated attacker using a modern GPU cluster capable of approximately 10 billion guesses per second — the realistic threat model for offline attacks on stolen credential databases. Online attacks are limited to a few thousand per second by rate limiting." },
           { q: "Why might a long password still score poorly?", a: "Length alone is not enough if the characters are predictable. 'aaaaaaaaaaaaaaaa' is 16 characters but has near-zero entropy because it contains only one character. Good passwords combine length with genuine randomness across multiple character classes." },
           { q: "What is the DNA Score?", a: "PassGeni's proprietary 7-point quality audit. It checks length thresholds (12+ and 16+ characters), presence of uppercase, lowercase, numbers, and symbols, and absence of triple-repeat patterns. Each check is weighted by security impact and combined into a 0–100 score graded A+ to C." },
+          { q: "Does this tool prove compliance for an audit?", a: "Strength analysis shows whether a credential meets quality thresholds, but does not constitute audit evidence on its own. To obtain machine-verifiable proof for HIPAA, PCI-DSS, SOC 2, or ISO 27001 auditors, use the Credential Compliance Fixer and issue an ES256-signed compliance certificate." },
         ].map(({ q, a }, i) => (
           <div key={i} style={{ borderBottom: "1px solid #111", padding: "20px 0" }}>
             <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 16, color: "#fff", marginBottom: 10 }}>{q}</h3>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#aaa", lineHeight: 1.8, margin: 0 }}>{a}</p>
           </div>
         ))}
+      </div>
+
+      {/* Compliance linkage */}
+      <div style={{ marginTop: 48, background: "#0a0a0c", border: "1px solid #1e1e22", borderRadius: 14, padding: "24px 28px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14 }}>
+          From analysis to proof
+        </div>
+        <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#777", lineHeight: 1.8, marginBottom: 18 }}>
+          Strength analysis tells you a credential is strong. A{" "}
+          <a href="/password-compliance-certificate" style={{ color: "#C8FF00", textDecoration: "none" }}>compliance certificate</a>
+          {" "}tells your auditor it was generated correctly. Use the{" "}
+          <a href="/tools/compliance-fixer" style={{ color: "#C8FF00", textDecoration: "none" }}>Credential Compliance Fixer</a>{" "}
+          to check this credential against NIST, HIPAA, PCI-DSS, SOC 2, ISO 27001, or FIPS 140-3 and issue an ES256-signed certificate.
+        </p>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <a href="/tools/compliance-fixer" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#C8FF00", background: "rgba(200,255,0,0.06)", border: "1px solid rgba(200,255,0,0.2)", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            Compliance Fixer →
+          </a>
+          <a href="/glossary/entropy" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            What is entropy? →
+          </a>
+          <a href="/guides/nist-800-63b-password-guidelines" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            NIST 800-63B guide →
+          </a>
+        </div>
       </div>
     </ToolPage>
   );

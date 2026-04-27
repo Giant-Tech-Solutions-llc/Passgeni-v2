@@ -34,23 +34,32 @@ function Breadcrumb({ toolName }) {
   );
 }
 
-// ─── GENERATOR CTA ────────────────────────────────────────────
+// ─── CERTIFY CTA ──────────────────────────────────────────────
 function GeneratorCTA() {
   return (
     <section style={{ margin: "80px auto 0", maxWidth: 760, padding: "0 var(--page-pad) 80px" }}>
-      <div style={{ background: "#0a0a0c", border: "1px solid #141416", borderRadius: 16, padding: "40px 48px", textAlign: "center" }}>
-        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF0066", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 16 }}>
-          Try the generator
+      <div style={{ background: "#0a0a0c", border: "1px solid #141416", borderRadius: 16, padding: "40px 48px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 24 }}>
+          <div>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF0066", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: 12 }}>
+              Next step
+            </div>
+            <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(18px,2.5vw,26px)", color: "#fff", marginBottom: 10, letterSpacing: "-0.02em", lineHeight: 1.2 }}>
+              Certify this credential.
+            </h2>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", maxWidth: 360, lineHeight: 1.7 }}>
+              Analysis proves strength. A certificate proves compliance — ES256-signed, auditor-verifiable, standard-specific.
+            </p>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8, flexShrink: 0 }}>
+            <motion.a href="/dashboard/certify" className="btn-primary" {...btnPrimary} style={{ fontSize: 14, padding: "13px 28px", whiteSpace: "nowrap" }}>
+              Certify this credential →
+            </motion.a>
+            <a href="/#generator" style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", textDecoration: "none", textAlign: "center", letterSpacing: "0.08em" }}>
+              or generate a new one first →
+            </a>
+          </div>
         </div>
-        <h2 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(22px,3vw,32px)", color: "#fff", marginBottom: 12, letterSpacing: "-0.02em" }}>
-          Now generate a stronger password.
-        </h2>
-        <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#888", marginBottom: 28, maxWidth: 400, margin: "0 auto 28px" }}>
-          Free, client-side, zero storage. Uses your profession to make it memorable.
-        </p>
-        <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ fontSize: 15, padding: "16px 32px" }}>
-          Generate my password →
-        </motion.a>
       </div>
     </section>
   );
@@ -83,10 +92,10 @@ const TOOL_TESTIMONIALS = {
     { name: "Rosa F.", role: "Vet technician", text: "Small clinic, one IT person — me. PassGeni's Policy Generator replaced a consultant invoice. Two minutes and we had a written policy for the auditor." },
     { name: "Mei L.", role: "Nurse practitioner", text: "HIPAA preset gave us exactly the right policy without reading a 40-page document. Works great for the whole clinic team." },
   ],
-  wifi:     [
-    { name: "Layla S.", role: "Marketing manager", text: "Used the WiFi QR Generator to set up the guest network at our agency. Thirty seconds, QR code printed, no one asks for the password at meetings anymore." },
-    { name: "Nora J.", role: "Office manager", text: "WiFi QR Generator is exactly what it sounds like and it just works. Guest network QR code in 20 seconds. Printed it, framed it, problem solved." },
-    { name: "Billie T.", role: "Content creator", text: "QR code for the home office WiFi in under a minute. Guests just scan it. I genuinely don't know why this isn't in every router's setup screen already." },
+  fixer:    [
+    { name: "Ivan C.",  role: "CISO, mid-size company",  text: "Compliance Fixer flagged six service account passwords before migration. Generated certified replacements. Auditor got a cert URL per credential. Clean." },
+    { name: "Jake F.",  role: "Small biz owner",         text: "Thought my passwords were fine. Compliance Fixer showed exactly which standard they failed and why. Fixed and certified in under three minutes." },
+    { name: "Elena V.", role: "HR director",             text: "Policy Generator for the written policy, Compliance Fixer for the machine-verifiable proof. Auditor was satisfied on first review." },
   ],
 };
 

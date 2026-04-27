@@ -1,4 +1,38 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 3333.33 3333.33" shape-rendering="geometricPrecision" fill-rule="evenodd" clip-rule="evenodd">
-  <rect fill="#000000" x="0" y="0" width="3333.33" height="3333.33"/>
-  <path fill="#C8FF00" d="M2117.34 2419.43c126.17,-234.11 81.59,-311.74 103.98,-506.87 131.66,73.53 277.93,132.66 467.96,130.18l1.54 -401.83c-292.03,-15.2 -489.06,-218.02 -491.19,-491.79l-407.22 -3.57c2.43,325.12 -211.01,443.7 -488.84,498.68l0.36 396.06c126.76,16.11 291.09,-37.24 405.65,-95.02 33.3,-16.77 70.7,-46.74 104.95,-55.11 -4.43,123.57 13.77,201.87 -40.54,311.57 -84,169.68 -277.17,252.89 -456.16,196.39 -339.39,-107.13 -267.26,-491.46 -267.39,-766.26l0.25 -701.99 1637.52 0.31 1.32 -403.41 -2046.51 -2.07c13.37,314.7 -18.5,1473.35 16.86,1660.09 143,754.99 1145.12,814.17 1457.46,234.63z"/>
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Creator: CorelDRAW (OEM Version) -->
+<svg xmlns="http://www.w3.org/2000/svg" xml:space="preserve" width="3.336in" height="3.334in" version="1.1" style="shape-rendering:geometricPrecision; text-rendering:geometricPrecision; image-rendering:optimizeQuality; fill-rule:evenodd; clip-rule:evenodd"
+viewBox="0 0 3336 3334"
+ xmlns:xlink="http://www.w3.org/1999/xlink"
+ xmlns:xodm="http://www.corel.com/coreldraw/odm/2003">
+ <defs>
+  <style type="text/css">
+   <![CDATA[
+    .fil0 {fill:#3A4EFB}
+    .fil1 {fill:#E3FF3B}
+   ]]>
+  </style>
+   <clipPath id="id0">
+    <rect x="1.33" y="0.33" width="3333.34" height="3333.33"/>
+   </clipPath>
+    <clipPath id="id1">
+     <rect x="1.33" y="0.33" width="3333.34" height="3333.34"/>
+    </clipPath>
+    <clipPath id="id2">
+     <path d="M438.42 328.3l2455.16 0 0 2724.29 -2455.16 0 0 -2724.29z"/>
+    </clipPath>
+ </defs>
+ <g id="Layer_x0020_1">
+  <metadata id="CorelCorpID_0Corel-Layer"/>
+  <rect class="fil0" x="1.33" y="0.33" width="3333.33" height="3333.33"/>
+  <g style="clip-path:url(#id0)">
+   
+  </g>
+  <g id="_1810658036304">
+   <g style="clip-path:url(#id2)">
+    
+   </g>
+  </g>
+  <path class="fil1" d="M2081.54 2364.06c116.33,-215.86 75.22,-287.43 95.87,-467.34 121.4,67.79 256.26,122.31 431.47,120.03l1.42 -370.5c-269.26,-14.02 -450.92,-201.02 -452.88,-453.43l-375.46 -3.3c2.24,299.77 -194.56,409.1 -450.73,459.8l0.33 365.17c116.87,14.85 268.39,-34.34 374.01,-87.61 30.7,-15.47 65.19,-43.1 96.77,-50.82 -4.09,113.93 12.7,186.12 -37.38,287.28 -77.44,156.44 -255.56,233.17 -420.59,181.07 -312.93,-98.78 -246.41,-453.13 -246.54,-706.51l0.23 -647.25 1137.69 0.22 -0.2 290.37c77.65,112.85 208.62,186.01 372.15,195.22l0.06 -485.52 0.15 0 1.22 -371.94 -1886.93 -1.91c12.33,290.16 -17.06,1358.46 15.55,1530.63 131.85,696.12 1055.82,750.68 1343.81,216.34z"/>
+ </g>
 </svg>

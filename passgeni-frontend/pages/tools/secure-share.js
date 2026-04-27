@@ -11,6 +11,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
+import { IcEye, IcEyeOff, IcCheck, IcLock } from "../../lib/icons.js";
 
 // ─── CRYPTO HELPERS ───────────────────────────────────────────
 
@@ -115,8 +116,8 @@ function ShareForm() {
             onChange={(e) => { setPassword(e.target.value); setShareUrl(""); }}
             style={{ width: "100%", background: "#060608", border: "1px solid #1a1a1a", borderRadius: 8, padding: "14px 48px 14px 18px", fontFamily: "var(--font-mono)", fontSize: 14, color: "#fff", outline: "none", boxSizing: "border-box" }}
           />
-          <button onClick={() => setShowPw((v) => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 18, color: "#555" }}>
-            {showPw ? "🙈" : "👁"}
+          <button onClick={() => setShowPw((v) => !v)} style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: "#555", display: "flex", alignItems: "center" }}>
+            {showPw ? <IcEyeOff size={18} color="#555" /> : <IcEye size={18} color="#555" />}
           </button>
         </div>
 
@@ -138,15 +139,15 @@ function ShareForm() {
 
       {shareUrl && (
         <div style={{ background: "#050f05", border: "1px solid #C8FF0033", borderRadius: 12, padding: "24px 28px", animation: "fadeIn 0.3s ease" }}>
-          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF0088", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12 }}>
-            ✓ Encrypted link ready
+          <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF0088", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+            <IcCheck size={11} color="#C8FF0088" /> Encrypted link ready
           </div>
           <div style={{ background: "#060608", border: "1px solid #1a1a1a", borderRadius: 8, padding: "12px 16px", fontFamily: "var(--font-mono)", fontSize: 11, color: "#aaa", wordBreak: "break-all", marginBottom: 16, lineHeight: 1.7 }}>
             {shareUrl}
           </div>
           <div style={{ display: "flex", gap: 10 }}>
             <motion.button onClick={copy} className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "10px 20px", animation: "none" }}>
-              {copied ? "✓ Copied!" : "Copy link"}
+              {copied ? <><IcCheck size={13} color="#000" /> Copied!</> : "Copy link"}
             </motion.button>
           </div>
           <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -156,7 +157,7 @@ function ShareForm() {
               "Share the link via any channel — only the recipient can decrypt it",
             ].map((text, i) => (
               <div key={i} style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                <span style={{ color: "#C8FF00", fontSize: 11 }}>✦</span>
+                <IcCheck size={11} color="#C8FF00" />
                 <span style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#aaa" }}>{text}</span>
               </div>
             ))}
@@ -212,7 +213,7 @@ function DecryptView({ fragData }) {
   if (expired) {
     return (
       <div style={{ background: "#0a0a0c", border: "1px solid #ff444433", borderRadius: 16, padding: "40px 32px", textAlign: "center" }}>
-        <div style={{ fontSize: 40, marginBottom: 20 }}>🔒</div>
+        <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}><IcLock size={40} color="#ff4444" /></div>
         <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 22, color: "#fff", marginBottom: 12 }}>This link has expired</div>
         <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#888", lineHeight: 1.8, maxWidth: 400, margin: "0 auto 24px" }}>
           For security, secrets can only be viewed once. This link was already opened and the secret has been cleared from memory.
@@ -227,8 +228,8 @@ function DecryptView({ fragData }) {
 
   return (
     <div style={{ background: "#0a0a0c", border: "1px solid #C8FF0033", borderRadius: 16, padding: "32px", animation: "fadeIn 0.3s ease" }}>
-      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF0088", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16 }}>
-        🔐 Encrypted secret received
+      <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#C8FF0088", letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 6 }}>
+        <IcLock size={13} color="#C8FF0088" /> Encrypted secret received
       </div>
       <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#aaa", lineHeight: 1.8, marginBottom: 24 }}>
         Someone shared an encrypted secret with you using PassGeni. Click the button below to decrypt and reveal it.
@@ -254,13 +255,13 @@ function DecryptView({ fragData }) {
                 {secret.password}
               </div>
               <button onClick={copy} className={`copy-btn ${copied ? "copied" : ""}`} style={{ flexShrink: 0 }}>
-                {copied ? "✓ COPIED" : "COPY"}
+                {copied ? <><IcCheck size={12} color="#000" /> COPIED</> : "COPY"}
               </button>
             </div>
           </div>
           <div style={{ padding: "12px 16px", background: "#1a0505", border: "1px solid #ff444422", borderRadius: 8 }}>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#ff8888", margin: 0 }}>
-              ⚠️ Save this password now. Once you click COPY or close this tab, this secret is gone permanently. The link cannot be reopened.
+              Save this password now. Once you click COPY or close this tab, this secret is gone permanently. The link cannot be reopened.
             </p>
           </div>
         </div>

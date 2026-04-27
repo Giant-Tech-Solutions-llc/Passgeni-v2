@@ -19,14 +19,15 @@ export default function Document() {
         {/* ── Font preconnects for performance ── */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        {/* All brand fonts loaded here as <link> for reliable early loading */}
         <link
-          href="https://fonts.googleapis.com/css2?family=Outfit:wght@700;800&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=IBM+Plex+Mono:wght@400;600&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@1,6..72,400;1,6..72,500;1,6..72,600&family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap"
           rel="stylesheet"
         />
 
         {/* ── Base meta ── */}
-        <meta name="theme-color" content="#060608" />
-        <meta name="color-scheme" content="dark" />
+        <meta name="theme-color" content="#F7F8FC" />
+        <meta name="color-scheme" content="light" />
       </Head>
       <body>
         <Main />

@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import Layout from '../../components/Layout';
 import BlogHeroSVG from '../../components/BlogHeroSVG';
 import { BLOG_POSTS } from '../../data/blogPosts';
+import { IcLink, IcCheck, IcCopy, IcShield, IcBarChart, IcArrow, IcBolt } from '../../lib/icons.js';
 
 /* ─── Reading Progress Bar ─── */
 function ReadingProgressBar() {
@@ -89,7 +90,7 @@ function SocialShare({ title, url }) {
     {
       key: 'whatsapp',
       label: 'WhatsApp',
-      icon: '💬',
+      icon: 'wa',
       href: `https://wa.me/?text=${encoded(title + ' ' + url)}`,
     },
     {
@@ -132,7 +133,10 @@ function SocialShare({ title, url }) {
           onClick={copyLink}
           aria-label="Copy link"
         >
-          {copied ? '✓ Copied!' : '🔗 Copy link'}
+          {copied
+            ? <><IcCheck size={14} color="currentColor" />&nbsp;Copied!</>
+            : <><IcLink size={14} color="currentColor" />&nbsp;Copy link</>
+          }
         </button>
       </div>
     </div>
@@ -236,9 +240,9 @@ function ReactionWidget() {
   };
 
   const options = [
-    { key: 'helpful',     emoji: '👍', label: 'Helpful' },
-    { key: 'interesting', emoji: '🔥', label: 'Interesting' },
-    { key: 'shared',      emoji: '📤', label: 'Worth sharing' },
+    { key: 'helpful',     icon: <IcCheck size={15} color="currentColor" />,   label: 'Helpful' },
+    { key: 'interesting', icon: <IcBolt size={15} color="currentColor" />,    label: 'Interesting' },
+    { key: 'shared',      icon: <IcArrow size={15} color="currentColor" />,   label: 'Worth sharing' },
   ];
 
   return (
@@ -247,14 +251,14 @@ function ReactionWidget() {
         Was this post useful?
       </div>
       <div className="reaction-widget">
-        {options.map(({ key, emoji, label }) => (
+        {options.map(({ key, icon, label }) => (
           <button
             key={key}
             className={`reaction-btn${voted[key] ? ' active' : ''}`}
             onClick={() => react(key)}
             disabled={voted[key]}
           >
-            <span>{emoji}</span>
+            <span style={{ display: 'flex' }}>{icon}</span>
             <span>{label}</span>
             {reactions[key] > 0 && (
               <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#C8FF00', marginLeft: 4 }}>

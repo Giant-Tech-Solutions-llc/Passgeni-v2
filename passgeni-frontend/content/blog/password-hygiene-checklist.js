@@ -21,7 +21,7 @@ export const contentHtml = `
 <ol>
   <li>Switch your most-used accounts to passphrases instead of complex passwords for easier recall.</li>
   <li>Review who has access to any shared accounts (streaming services, team tools).</li>
-  <li>Generate your WiFi password properly — use PassGeni's <a href="/tools/wifi-qr">WiFi QR Generator</a> with a strong passphrase and print the QR code.</li>
+  <li>Generate your WiFi password properly — use PassGeni's <a href="/tools/compliance-fixer">Credential Compliance Fixer</a> to verify it meets NIST length and entropy requirements.</li>
   <li>Back up your 2FA backup codes and store them in your password manager.</li>
   <li>Review app permissions on your phone — revoke any apps that have access to more than they need.</li>
 </ol>

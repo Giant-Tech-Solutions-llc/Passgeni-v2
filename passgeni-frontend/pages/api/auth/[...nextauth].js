@@ -17,7 +17,7 @@
 import NextAuth from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import { Resend } from "resend";
-import { findCustomerByEmail } from "../../../lib/db/client.js";
+import { findCustomerByEmail, upsertCustomerByEmail, getDB } from "../../../lib/db/client.js";
 import { SupabaseAdapter } from "../../../lib/auth/adapter.js";
 
 // ─── RESEND EMAIL SENDER ─────────────────────────────────────
@@ -58,7 +58,7 @@ async function sendVerificationRequest({ identifier: email, url }) {
     throw new Error(error.message || "Failed to send sign-in email");
   }
 
-  console.log("[auth] Magic link sent to", email, "id:", data?.id);
+  console.info("[auth] Magic link sent id:", data?.id);
 }
 
 // ─── AUTH OPTIONS ────────────────────────────────────────────
@@ -67,10 +67,8 @@ export const authOptions = {
 
   providers: [
     EmailProvider({
-      // We use a custom sendVerificationRequest instead of SMTP
-      from:                      "hello@passgeni.ai",
+      maxAge: 10 * 60,
       sendVerificationRequest,
-      maxAge:                    10 * 60, // 10 minutes
     }),
   ],
 
@@ -84,21 +82,45 @@ export const authOptions = {
       // On sign-in or explicit refresh, fetch customer from DB
       if (trigger === "signIn" || trigger === "update" || !token.customerId) {
         try {
-          const customer = await findCustomerByEmail(token.email);
-          if (customer) {
-            token.customerId    = customer.id;
-            token.plan          = customer.plan;
-            token.planStatus    = customer.plan_status;
-            token.trialEnd      = customer.trial_end;
-            token.paddleCustomerId = customer.paddle_customer_id;
-          } else {
-            // Email doesn't have a customer record — free/unsubscribed
-            token.customerId  = null;
-            token.plan        = "free";
-            token.planStatus  = "none";
+          let customer = await findCustomerByEmail(token.email);
+          if (!customer) {
+            // First sign-in — auto-provision 14-day Assurance trial (no card required)
+            const trialEnd = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+            customer = await upsertCustomerByEmail({
+              email:       token.email.toLowerCase(),
+              plan:        "assurance",
+              plan_status: "trialing",
+              trial_end:   trialEnd,
+            });
+            console.info("[auth] Provisioned trial");
+          }
+          token.customerId       = customer.id;
+          token.plan             = customer.plan;
+          token.planStatus       = customer.plan_status;
+          token.trialEnd         = customer.trial_end;
+          token.paddleCustomerId = customer.paddle_customer_id;
+          token.teamPolicyStandard = customer.team_policy_standard ?? null;
+
+          // Check if this user is an active member of another team
+          try {
+            const db = getDB();
+            const { data: membership } = await db
+              .from("team_members")
+              .select("customer_id")
+              .eq("email", token.email.toLowerCase())
+              .eq("status", "active")
+              .limit(1)
+              .maybeSingle();
+            token.teamCustomerId = membership?.customer_id ?? null;
+          } catch (e) {
+            console.warn("[auth] team membership lookup failed (non-fatal):", e?.message);
+            token.teamCustomerId = null;
           }
         } catch (e) {
           console.error("JWT callback DB error:", e);
+          // Fallback: don't block sign-in if DB is unavailable
+          token.plan       = "free";
+          token.planStatus = "none";
         }
       }
       return token;
@@ -106,11 +128,13 @@ export const authOptions = {
 
     // Expose token fields to useSession() in the browser
     async session({ session, token }) {
-      session.user.customerId     = token.customerId;
-      session.user.plan           = token.plan;
-      session.user.planStatus     = token.planStatus;
-      session.user.trialEnd       = token.trialEnd;
-      session.user.paddleCustomerId = token.paddleCustomerId;
+      session.user.customerId        = token.customerId;
+      session.user.plan              = token.plan;
+      session.user.planStatus        = token.planStatus;
+      session.user.trialEnd          = token.trialEnd;
+      session.user.paddleCustomerId  = token.paddleCustomerId;
+      session.user.teamCustomerId    = token.teamCustomerId ?? null;
+      session.user.teamPolicyStandard = token.teamPolicyStandard ?? null;
       return session;
     },
   },

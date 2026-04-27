@@ -63,7 +63,7 @@ export default class ErrorBoundary extends React.Component {
 
           {/* Message */}
           <p style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "var(--font-body)",
             fontSize: 15,
             color: '#888',
             maxWidth: 440,
@@ -80,7 +80,7 @@ export default class ErrorBoundary extends React.Component {
               border: '1px solid #ff444422',
               borderRadius: 8,
               padding: '16px 20px',
-              fontFamily: "'IBM Plex Mono', monospace",
+              fontFamily: "var(--font-mono)",
               fontSize: 11,
               color: '#ff6b6b',
               maxWidth: 600,
@@ -120,7 +120,7 @@ export default class ErrorBoundary extends React.Component {
               border: '1px solid #2a2a2a',
               color: '#fff',
               textDecoration: 'none',
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
               fontSize: 14,
             }}>
@@ -134,7 +134,7 @@ export default class ErrorBoundary extends React.Component {
               border: '1px solid #2a2a2a',
               color: '#aaa',
               textDecoration: 'none',
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "var(--font-body)",
               fontWeight: 600,
               fontSize: 14,
             }}>

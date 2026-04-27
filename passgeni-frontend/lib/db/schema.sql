@@ -1,4 +1,11 @@
 -- =============================================================
+-- PassGeni V2 — Complete Database Schema
+-- Run this file for a fresh database setup.
+-- For existing databases, run migration scripts in /scripts/
+-- Last updated: April 2026
+-- =============================================================
+
+-- =============================================================
 -- PASSGENI — SUPABASE DATABASE SCHEMA
 -- =============================================================
 -- Run this in Supabase SQL Editor (supabase.com/dashboard)
@@ -171,3 +178,74 @@ BEGIN
   TRUNCATE usage_logs, usage_daily, api_keys, team_members, customers CASCADE;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- =============================================================
+-- V2 TABLES — added by migration scripts, included here for
+-- complete onboarding. Run all migration scripts OR use this
+-- consolidated schema for a fresh setup.
+-- =============================================================
+
+-- certificates: core product — compliance certificate records
+CREATE TABLE IF NOT EXISTS certificates (
+  id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id             UUID NOT NULL REFERENCES nextauth_users(id) ON DELETE CASCADE,
+  email               TEXT,
+  compliance_standard TEXT NOT NULL,
+  generation_params   JSONB NOT NULL DEFAULT '{}',
+  entropy_bits        NUMERIC(8,2),
+  char_pool_size      INTEGER,
+  standards_met       TEXT[] DEFAULT '{}',
+  jwt_token           TEXT NOT NULL,
+  created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  expires_at          TIMESTAMPTZ NOT NULL,
+  is_revoked          BOOLEAN NOT NULL DEFAULT FALSE,
+  revoked_at          TIMESTAMPTZ
+);
+
+CREATE INDEX IF NOT EXISTS idx_certificates_user_id ON certificates(user_id);
+CREATE INDEX IF NOT EXISTS idx_certificates_created_at ON certificates(created_at DESC);
+
+ALTER TABLE certificates ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Users see own certs" ON certificates
+  FOR ALL USING (user_id = auth.uid());
+
+-- cert_views: analytics — who viewed which cert (no PII)
+CREATE TABLE IF NOT EXISTS cert_views (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  cert_id     UUID NOT NULL REFERENCES certificates(id) ON DELETE CASCADE,
+  viewed_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  viewer_ip_hash TEXT
+);
+
+CREATE INDEX IF NOT EXISTS idx_cert_views_cert_id ON cert_views(cert_id);
+
+-- user_api_keys: developer API keys (Enterprise tier)
+CREATE TABLE IF NOT EXISTS user_api_keys (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID NOT NULL REFERENCES nextauth_users(id) ON DELETE CASCADE,
+  key_hash    TEXT NOT NULL UNIQUE,
+  name        TEXT NOT NULL,
+  scopes      JSONB NOT NULL DEFAULT '["cert:read","cert:write"]',
+  last_used_at TIMESTAMPTZ,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  is_active   BOOLEAN NOT NULL DEFAULT TRUE
+);
+
+ALTER TABLE user_api_keys ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "Users manage own API keys" ON user_api_keys
+  FOR ALL USING (user_id = auth.uid());
+
+-- usage_events: audit trail — cert generated, viewed, rate limit hits, NPS ratings
+CREATE TABLE IF NOT EXISTS usage_events (
+  id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id     UUID REFERENCES nextauth_users(id) ON DELETE SET NULL,
+  event_type  TEXT NOT NULL,
+  metadata    JSONB NOT NULL DEFAULT '{}',
+  ip_hash     TEXT,
+  flagged     BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_events_user_id ON usage_events(user_id);
+CREATE INDEX IF NOT EXISTS idx_usage_events_event_type ON usage_events(event_type);
+CREATE INDEX IF NOT EXISTS idx_usage_events_created_at ON usage_events(created_at DESC);

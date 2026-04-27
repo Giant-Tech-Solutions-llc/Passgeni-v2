@@ -71,7 +71,7 @@ export default function CheckoutPage() {
         alignItems: "center",
         justifyContent: "center",
         padding: "40px 20px",
-        fontFamily: "'DM Sans', Arial, sans-serif",
+        fontFamily: "var(--font-body)",
       }}>
         <a href="/" style={{ fontFamily: "'Outfit', sans-serif", fontWeight: 800, fontSize: 22, color: "#C8FF00", textDecoration: "none", letterSpacing: "-0.02em", marginBottom: 40 }}>
           PassGeni

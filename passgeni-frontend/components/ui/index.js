@@ -5,15 +5,16 @@
 // =============================================================
 
 import { useState } from "react";
+import { IcCheck, IcShield, IcSparkle } from "../../lib/icons.js";
 
 // ─── TRUST CHIP ───────────────────────────────────────────────
 // The small badge chips showing security credentials
 export function TrustChip({ label, type = "shield" }) {
   const icons = {
     dot:    <span className="live-dot" />,
-    check:  <span style={{ fontSize: 8, color: "#C8FF0088" }}>✓</span>,
-    zero:   <span style={{ fontSize: 8, color: "#C8FF0088" }}>◎</span>,
-    shield: <span style={{ fontSize: 8, color: "#C8FF0088" }}>🔒</span>,
+    check:  <IcCheck size={10} color="#C8FF0088" />,
+    zero:   <IcShield size={10} color="#C8FF0088" />,
+    shield: <IcShield size={10} color="#C8FF0088" />,
   };
   return (
     <span className="trust-chip" title={label}>
@@ -43,7 +44,7 @@ export function CopyBtn({ text, pulse = false }) {
       aria-label="Copy to clipboard"
       style={pulse && !copied ? { borderColor: "#C8FF00", color: "#C8FF00", boxShadow: "0 0 12px #C8FF0066", animation: "copyPulse 1s ease infinite" } : {}}
     >
-      {copied ? "✓ COPIED" : "COPY"}
+      {copied ? <><IcCheck size={11} color="#C8FF00" /> COPIED</> : "COPY"}
     </button>
   );
 }
@@ -58,7 +59,7 @@ export function TogglePill({ label, active, onClick, dashed = false }) {
       onClick={onClick}
       aria-pressed={active}
     >
-      {active && !dashed ? "✓ " : ""}{label}
+      {active && !dashed ? <><IcCheck size={11} color="#C8FF00" />{" "}</> : ""}{label}
     </button>
   );
 }
@@ -84,7 +85,7 @@ export function StrengthBar({ password, strength, entropy, crackTime }) {
             className={label === "Unbreakable" ? "unbreakable-label" : ""}
             style={{ fontFamily: "var(--font-mono)", fontSize: 10, color, letterSpacing: "0.08em", fontWeight: 600 }}
           >
-            {label}{label === "Unbreakable" ? " ✦" : ""}
+            {label}{label === "Unbreakable" ? <><span style={{ marginLeft: 3 }}><IcSparkle size={11} color="var(--accent)" /></span></> : ""}
           </span>
         </div>
       </div>

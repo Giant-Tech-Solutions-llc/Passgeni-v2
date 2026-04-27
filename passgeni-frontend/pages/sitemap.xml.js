@@ -8,26 +8,29 @@
 
 import { ALL_GUIDES } from "../content/guides.js";
 import { ALL_POSTS }  from "../content/blog.js";
+import { ALL_GLOSSARY_TERMS } from "../content/glossary.js";
 
 const SITE_URL = "https://passgeni.ai";
 
 const STATIC_PAGES = [
-  { url: "/",                    priority: "1.0",  changefreq: "weekly"  },
-  { url: "/about",               priority: "0.9",  changefreq: "monthly" },
-  { url: "/pricing",             priority: "0.9",  changefreq: "monthly" },
-  { url: "/tools",               priority: "0.9",  changefreq: "weekly"  },
-  { url: "/guides",              priority: "0.9",  changefreq: "weekly"  },
-  { url: "/blog",                priority: "0.8",  changefreq: "daily"   },
-  { url: "/contact",             priority: "0.6",  changefreq: "monthly" },
-  { url: "/tools/breach-checker",    priority: "0.85", changefreq: "monthly" },
-  { url: "/tools/strength-checker",  priority: "0.85", changefreq: "monthly" },
-  { url: "/tools/audit",             priority: "0.8",  changefreq: "monthly" },
-  { url: "/tools/policy-generator",  priority: "0.85", changefreq: "monthly" },
-  { url: "/tools/secure-share",      priority: "0.8",  changefreq: "monthly" },
-  { url: "/tools/wifi-qr",           priority: "0.8",  changefreq: "monthly" },
-  { url: "/refund",                  priority: "0.5",  changefreq: "monthly" },
-  { url: "/privacy",                 priority: "0.5",  changefreq: "monthly" },
-  { url: "/terms",                   priority: "0.5",  changefreq: "monthly" },
+  { url: "/",                                  priority: "1.0",  changefreq: "weekly"  },
+  { url: "/about",                             priority: "0.9",  changefreq: "monthly" },
+  { url: "/pricing",                           priority: "0.9",  changefreq: "monthly" },
+  { url: "/tools",                             priority: "0.9",  changefreq: "weekly"  },
+  { url: "/guides",                            priority: "0.9",  changefreq: "weekly"  },
+  { url: "/blog",                              priority: "0.8",  changefreq: "daily"   },
+  { url: "/contact",                           priority: "0.6",  changefreq: "monthly" },
+  { url: "/glossary",                          priority: "0.85", changefreq: "monthly" },
+  { url: "/password-compliance-certificate",   priority: "0.95", changefreq: "monthly" },
+  { url: "/tools/breach-checker",              priority: "0.85", changefreq: "monthly" },
+  { url: "/tools/strength-checker",            priority: "0.85", changefreq: "monthly" },
+  { url: "/tools/audit",                       priority: "0.8",  changefreq: "monthly" },
+  { url: "/tools/policy-generator",            priority: "0.85", changefreq: "monthly" },
+  { url: "/tools/secure-share",                priority: "0.8",  changefreq: "monthly" },
+  { url: "/tools/compliance-fixer",            priority: "0.9",  changefreq: "monthly" },
+  { url: "/refund",                            priority: "0.5",  changefreq: "monthly" },
+  { url: "/privacy",                           priority: "0.5",  changefreq: "monthly" },
+  { url: "/terms",                             priority: "0.5",  changefreq: "monthly" },
 ];
 
 function buildSitemap() {
@@ -57,10 +60,19 @@ function buildSitemap() {
     <priority>0.75</priority>
   </url>`).join("");
 
+  const glossaryEntries = ALL_GLOSSARY_TERMS.map((t) => `
+  <url>
+    <loc>${SITE_URL}/glossary/${t.slug}</loc>
+    <lastmod>${t.updatedAt}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`).join("");
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${staticEntries}
 ${guideEntries}
+${glossaryEntries}
 ${blogEntries}
 </urlset>`;
 }

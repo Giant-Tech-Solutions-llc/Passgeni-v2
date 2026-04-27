@@ -147,7 +147,7 @@ export function waitlistDay3(email) {
             { name: "Password Audit",     desc: "Batch check up to 10 passwords simultaneously for entropy, breach status, and pattern detection.",              path: "/tools/audit"            },
             { name: "Policy Generator",   desc: "Generate a downloadable password policy document for HIPAA, PCI-DSS, SOC 2, ISO 27001, NIST, or DoD.",         path: "/tools/policy-generator" },
             { name: "Secure Share",       desc: "AES-256-GCM encrypted sharing. Key in URL fragment — never sent to any server, including ours.",                path: "/tools/secure-share"     },
-            { name: "WiFi QR Generator",  desc: "Generate a scannable QR code from WiFi credentials. Entirely client-side.",                                     path: "/tools/wifi-qr"          },
+            { name: "Compliance Fixer",    desc: "Detect compliance gaps in any credential. Generate a certified replacement meeting SOC2/HIPAA/PCI-DSS/NIST.",  path: "/tools/compliance-fixer" },
           ].map((tool) => `
             <div>
               <a href="${BRAND.url}${tool.path}" style="font-weight:700;font-size:14px;color:#fff;text-decoration:none;">${tool.name} →</a>
@@ -306,6 +306,41 @@ export function teamCancellation(email) {
       ${p(`If you cancelled by mistake or want to resubscribe, you can do so any time at <a href="${BRAND.url}/#pricing">${BRAND.url}/#pricing</a>.`)}
       ${divider()}
       ${p(`We'd genuinely appreciate knowing why you cancelled — reply to this email if you have a minute. It directly shapes what we build next.`)}
+    `),
+  };
+}
+
+// ─── CERTIFICATE EXPIRY REMINDER ─────────────────────────────
+
+export function certExpiryReminder(email, { certsExpiring, dashboardUrl }) {
+  const count = certsExpiring.length;
+  const isSingle = count === 1;
+  return {
+    subject: isSingle
+      ? `Your PassGeni certificate expires in ${certsExpiring[0].daysLeft} days`
+      : `${count} PassGeni certificates are expiring soon`,
+    html: wrapper(`
+      ${h1(isSingle
+        ? `Your ${certsExpiring[0].standard} certificate expires in ${certsExpiring[0].daysLeft} days.`
+        : `${count} certificates are expiring soon.`
+      )}
+      ${p("Re-certify now to keep your compliance record current. Expired certificates no longer provide audit evidence.")}
+      ${card(`
+        <p style="font-family:monospace;font-size:10px;color:#888;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 14px;">Expiring certificates</p>
+        ${certsExpiring.map((c) => `
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #141416;">
+            <div>
+              <span style="font-size:14px;font-weight:700;color:#fff;">${c.standard}</span>
+              <span style="font-size:12px;color:#555;margin-left:10px;">Expires ${c.expiresAt}</span>
+            </div>
+            <span style="font-family:monospace;font-size:11px;color:${c.daysLeft <= 7 ? "#ff4444" : "#facc15"};">${c.daysLeft}d left</span>
+          </div>
+        `).join("")}
+      `)}
+      ${cta("Re-certify now →", dashboardUrl ?? `${BRAND.url}/dashboard/certify`)}
+      ${p(`Re-certification takes under 60 seconds. Your new certificate will be valid for another year.`)}
+      ${divider()}
+      ${p(`Certificates that expire are not automatically renewed. Only your active, non-expired certificates count toward your compliance score.`)}
     `),
   };
 }

@@ -11,6 +11,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { btnPrimary } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
+import { IcAlert, IcCheck, IcEye, IcEyeOff } from "../../lib/icons.js";
 
 // ─── SHA-1 HASH (client-side) ────────────────────────────────
 async function sha1(str) {
@@ -59,7 +60,7 @@ function BreachResult({ result, password }) {
     return (
       <div style={{ background: "#1a0505", border: "1px solid #ff444433", borderRadius: 12, padding: "24px 28px", animation: "fadeIn 0.3s ease" }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-          <div style={{ fontSize: 28, flexShrink: 0 }}>🚨</div>
+          <div style={{ flexShrink: 0, marginTop: 2 }}><IcAlert size={28} color="#ff4444" /></div>
           <div>
             <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 20, color: "#ff4444", marginBottom: 8 }}>
               Compromised — Found in {result.count.toLocaleString()} breaches
@@ -81,7 +82,7 @@ function BreachResult({ result, password }) {
   return (
     <div style={{ background: "#050f05", border: "1px solid #C8FF0033", borderRadius: 12, padding: "24px 28px", animation: "fadeIn 0.3s ease" }}>
       <div style={{ display: "flex", alignItems: "flex-start", gap: 16 }}>
-        <div style={{ fontSize: 28, flexShrink: 0 }}>✅</div>
+        <div style={{ flexShrink: 0, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", width: 36, height: 36, borderRadius: "50%", background: "rgba(200,255,0,0.1)" }}><IcCheck size={22} color="#C8FF00" /></div>
         <div>
           <div style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 20, color: "#C8FF00", marginBottom: 8 }}>
             Not found in any known breach
@@ -186,7 +187,7 @@ export default function BreachCheckerPage() {
               style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", fontSize: 16, color: "#555", transition: "color 0.15s" }}
               aria-label={showPw ? "Hide password" : "Show password"}
             >
-              {showPw ? "🙈" : "👁"}
+              {showPw ? <IcEyeOff size={16} color="#555" /> : <IcEye size={16} color="#555" />}
             </button>
           </div>
           <motion.button
@@ -232,12 +233,37 @@ export default function BreachCheckerPage() {
           { q: "What is k-anonymity?", a: "k-anonymity is a privacy technique where a query is designed so the response is identical for k different possible inputs. In this case, thousands of different passwords share the same 5-character hash prefix, so the API cannot determine which specific password you checked." },
           { q: "My password wasn't found — does that mean it's safe?", a: "Not necessarily. A password can be weak without appearing in breach databases. Common patterns like 'P@ssword1' or 'Summer2023!' may not appear in breach lists but would be cracked in seconds by a dictionary attack. Check the strength checker to evaluate quality, not just breach history." },
           { q: "What database does this check against?", a: "The HaveIBeenPwned database maintained by security researcher Troy Hunt. It contains over 900 million compromised passwords from hundreds of data breaches including LinkedIn, Adobe, RockYou, and many others." },
+          { q: "Can breach check results be used as audit evidence?", a: "A breach check confirms a credential is not in known breach databases — a required control under NIST SP 800-63B and recommended under HIPAA and SOC 2. For full audit evidence (including entropy, generation method, and standard compliance), issue a compliance certificate via the Credential Compliance Fixer." },
         ].map(({ q, a }, i) => (
           <div key={i} style={{ borderBottom: "1px solid #111", padding: "20px 0" }}>
             <h3 style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 16, color: "#fff", marginBottom: 10 }}>{q}</h3>
             <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#aaa", lineHeight: 1.8, margin: 0 }}>{a}</p>
           </div>
         ))}
+      </div>
+
+      {/* Compliance linkage */}
+      <div style={{ marginTop: 48, background: "#0a0a0c", border: "1px solid #1e1e22", borderRadius: 14, padding: "24px 28px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14 }}>
+          Breach-free isn't enough for auditors
+        </div>
+        <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#777", lineHeight: 1.8, marginBottom: 18 }}>
+          NIST SP 800-63B §5.1.1 requires checking credentials against known compromised lists — this tool satisfies that requirement. But auditors also need proof of generation method, entropy score, and standard compliance. Get a cryptographically signed{" "}
+          <a href="/password-compliance-certificate" style={{ color: "#C8FF00", textDecoration: "none" }}>compliance certificate</a>{" "}
+          via the{" "}
+          <a href="/tools/compliance-fixer" style={{ color: "#C8FF00", textDecoration: "none" }}>Credential Compliance Fixer</a>.
+        </p>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <a href="/tools/compliance-fixer" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#C8FF00", background: "rgba(200,255,0,0.06)", border: "1px solid rgba(200,255,0,0.2)", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            Compliance Fixer →
+          </a>
+          <a href="/guides/nist-800-63b-password-guidelines" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            NIST 800-63B guide →
+          </a>
+          <a href="/glossary/credential-security" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            Credential security glossary →
+          </a>
+        </div>
       </div>
     </ToolPage>
   );

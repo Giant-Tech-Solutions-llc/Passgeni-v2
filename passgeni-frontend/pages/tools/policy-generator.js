@@ -11,6 +11,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
+import { IcCheck, IcCopy } from "../../lib/icons.js";
 
 const FRAMEWORKS = [
   { id: "hipaa",  label: "HIPAA",        minLen: 12, complexity: true,  rotation: 90,  mfa: true },
@@ -312,11 +313,11 @@ export default function PolicyGeneratorPage() {
               Your password policy
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <motion.button onClick={copy}     className="btn-ghost" {...btnGhost} style={{ fontSize: 13, padding: "10px 18px" }}>
-                {copied ? "✓ Copied" : "Copy text"}
+              <motion.button onClick={copy}     className="btn-ghost" {...btnGhost} style={{ fontSize: 13, padding: "10px 18px", display: "flex", alignItems: "center", gap: 6 }}>
+                {copied ? <><IcCheck size={13} color="#4ade80" /> Copied</> : <><IcCopy size={13} color="currentColor" /> Copy text</>}
               </motion.button>
               <motion.button onClick={download} className="btn-primary" {...btnPrimary} style={{ fontSize: 13, padding: "10px 18px", animation: "none" }}>
-                ↓ Download .txt
+                Download .txt
               </motion.button>
             </div>
           </div>
@@ -328,6 +329,31 @@ export default function PolicyGeneratorPage() {
           </p>
         </div>
       )}
+
+      {/* Compliance linkage */}
+      <div style={{ marginTop: 48, background: "#0a0a0c", border: "1px solid #1e1e22", borderRadius: 14, padding: "24px 28px" }}>
+        <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14 }}>
+          Policy + per-credential proof
+        </div>
+        <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#777", lineHeight: 1.8, marginBottom: 18 }}>
+          A written policy satisfies the documentation requirement. Per-credential{" "}
+          <a href="/password-compliance-certificate" style={{ color: "#C8FF00", textDecoration: "none" }}>compliance certificates</a>{" "}
+          satisfy the execution requirement. Auditors need both: your policy to show intent, certificates to show that each credential was actually generated to standard. Learn more about{" "}
+          <a href="/glossary/authentication-policy" style={{ color: "#C8FF00", textDecoration: "none" }}>authentication policies</a>{" "}
+          and{" "}<a href="/glossary/audit-trail" style={{ color: "#C8FF00", textDecoration: "none" }}>credential audit trails</a>.
+        </p>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <a href="/tools/compliance-fixer" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#C8FF00", background: "rgba(200,255,0,0.06)", border: "1px solid rgba(200,255,0,0.2)", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            Issue certificates →
+          </a>
+          <a href="/guides/hipaa-password-requirements" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            HIPAA guide →
+          </a>
+          <a href="/guides/pci-dss-password-requirements" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+            PCI-DSS guide →
+          </a>
+        </div>
+      </div>
     </ToolPage>
   );
 }

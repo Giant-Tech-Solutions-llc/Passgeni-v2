@@ -11,6 +11,7 @@ import { motion } from "framer-motion";
 import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import ToolPage from "../../components/tools/ToolPage.js";
 import { getStrength, getEntropy, getCrackTime, getDNAScore } from "../../lib/strength.js";
+import { IcCheck, IcX, IcAlert, IcStar, IcEye, IcEyeOff } from "../../lib/icons.js";
 
 const MAX_PASSWORDS = 10;
 
@@ -86,7 +87,7 @@ function AuditRow({ entry, index }) {
         {/* Breach indicator */}
         {breach && (
           <span style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: breach.error ? "#555" : breach.breached ? "#ff4444" : "#C8FF00", flexShrink: 0 }}>
-            {breach.error ? "breach ?" : breach.breached ? `🚨 ${breach.count.toLocaleString()} breaches` : "✓ not breached"}
+            {breach.error ? "breach ?" : breach.breached ? <><IcAlert size={12} color="#ff4444" /> {breach.count.toLocaleString()} breaches</> : <><IcCheck size={12} color="#C8FF00" /> not breached</>}
           </span>
         )}
 
@@ -125,7 +126,7 @@ function AuditRow({ entry, index }) {
             <div>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 9, color: "#888", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 8 }}>Failed checks</div>
               {dna.checks.filter((c) => !c.pass).map((c, i) => (
-                <div key={i} style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#ff6644", marginBottom: 4 }}>✗ {c.label}</div>
+                <div key={i} style={{ fontFamily: "var(--font-body)", fontSize: 12, color: "#ff6644", marginBottom: 4, display: "flex", alignItems: "center", gap: 5 }}><IcX size={12} color="#ff4444" /> {c.label}</div>
               ))}
             </div>
           )}
@@ -280,6 +281,29 @@ export default function AuditToolPage() {
             <motion.a href="/#generator" className="btn-primary" {...btnPrimary} style={{ fontSize: 14, padding: "14px 32px" }}>
               Replace weak passwords →
             </motion.a>
+          </div>
+
+          {/* Compliance linkage */}
+          <div style={{ marginTop: 40, background: "#0a0a0c", border: "1px solid #1e1e22", borderRadius: 14, padding: "24px 28px" }}>
+            <div style={{ fontFamily: "var(--font-mono)", fontSize: 10, color: "#555", letterSpacing: "0.16em", textTransform: "uppercase", marginBottom: 14 }}>
+              Audit found weak credentials?
+            </div>
+            <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#777", lineHeight: 1.8, marginBottom: 18 }}>
+              Use the{" "}
+              <a href="/tools/compliance-fixer" style={{ color: "#C8FF00", textDecoration: "none" }}>Credential Compliance Fixer</a>{" "}
+              to automatically generate compliant replacements and issue{" "}
+              <a href="/password-compliance-certificate" style={{ color: "#C8FF00", textDecoration: "none" }}>ES256-signed compliance certificates</a>{" "}
+              for each one. Give auditors a certificate URL per credential instead of a spreadsheet.
+              {" "}<a href="/glossary/password-compliance" style={{ color: "#888", textDecoration: "none", fontSize: 13 }}>What is password compliance? →</a>
+            </p>
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <a href="/tools/compliance-fixer" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#C8FF00", background: "rgba(200,255,0,0.06)", border: "1px solid rgba(200,255,0,0.2)", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+                Fix & certify →
+              </a>
+              <a href="/tools/policy-generator" style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "#888", background: "#050507", border: "1px solid #1a1a1a", borderRadius: 8, padding: "9px 16px", textDecoration: "none" }}>
+                Generate written policy →
+              </a>
+            </div>
           </div>
         </>
       )}

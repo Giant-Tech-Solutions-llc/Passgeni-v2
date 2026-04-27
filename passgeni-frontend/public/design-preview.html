@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PassGeni — Compliance Certificates for Every Credential</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+/* ─── RESET & TOKENS ──────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #060608;
+  --bg-card:   #0a0a0c;
+  --bg-raised: #0e0e12;
+  --bg-high:   #131318;
+  --accent:    #C8FF00;
+  --accent-dim:#9dc400;
+  --success:   #22C55E;
+  --danger:    #FF4444;
+  --warning:   #FACC15;
+  --purple:    #a78bfa;
+  --teal:      #2DD4BF;
+  --border:    rgba(255,255,255,0.07);
+  --border-acc:rgba(200,255,0,0.25);
+  --text:      #E0E0E0;
+  --muted:     #888;
+  --dim:       #444;
+  --font-head: 'Outfit', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  --font-mono: 'Space Mono', monospace;
+  --r:         12px;
+  --r-lg:      20px;
+  --shadow:    0 0 0 1px var(--border), 0 24px 48px rgba(0,0,0,0.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── UTILITIES ───────────────────────────────────────────────── */
+.container { max-width: 1160px; margin: 0 auto; padding: 0 32px; }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 14px;
+}
+.tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 100px;
+}
+.tag-lime { background: rgba(200,255,0,.1); color: var(--accent); border: 1px solid rgba(200,255,0,.25); }
+.tag-green { background: rgba(34,197,94,.1); color: var(--success); border: 1px solid rgba(34,197,94,.25); }
+.tag-purple { background: rgba(167,139,250,.1); color: var(--purple); border: 1px solid rgba(167,139,250,.25); }
+.tag-teal { background: rgba(45,212,191,.1); color: var(--teal); border: 1px solid rgba(45,212,191,.25); }
+.tag-yellow { background: rgba(250,204,21,.1); color: var(--warning); border: 1px solid rgba(250,204,21,.25); }
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent); color: #000;
+  font-family: var(--font-head); font-weight: 800; font-size: 14px;
+  padding: 13px 28px; border-radius: 10px; border: none;
+  cursor: pointer; text-decoration: none; letter-spacing: -0.01em;
+  transition: transform .15s, box-shadow .15s;
+}
+.btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(200,255,0,.3); }
+
+.btn-ghost {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent; color: var(--text);
+  font-family: var(--font-head); font-weight: 600; font-size: 14px;
+  padding: 12px 24px; border-radius: 10px;
+  border: 1px solid var(--border);
+  cursor: pointer; text-decoration: none;
+  transition: border-color .15s, color .15s;
+}
+.btn-ghost:hover { border-color: rgba(255,255,255,.2); color: #fff; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+}
+
+/* ─── NOISE OVERLAY ──────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 9999;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: .4;
+}
+
+/* ─── NAV ────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(20px) saturate(1.5);
+  background: rgba(6,6,8,.85);
+}
+.nav-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; max-width: 1160px; margin: 0 auto; padding: 0 32px;
+}
+.nav-logo {
+  font-family: var(--font-head); font-weight: 900; font-size: 20px;
+  color: var(--accent); letter-spacing: -0.04em; text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+}
+.nav-logo-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+.nav-links {
+  display: flex; align-items: center; gap: 4px; list-style: none;
+}
+.nav-links a {
+  font-size: 13px; color: var(--muted); text-decoration: none;
+  padding: 6px 14px; border-radius: 8px;
+  transition: color .15s, background .15s;
+}
+.nav-links a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+.nav-cta { display: flex; align-items: center; gap: 10px; }
+
+/* ─── HERO ───────────────────────────────────────────────────── */
+.hero {
+  padding: 100px 0 80px;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: -200px; left: 50%; transform: translateX(-50%);
+  width: 800px; height: 800px; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(200,255,0,.08) 0%, transparent 65%);
+}
+.hero-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 64px; align-items: center;
+  position: relative;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(200,255,0,.06); border: 1px solid rgba(200,255,0,.2);
+  border-radius: 100px; padding: 6px 14px 6px 8px;
+  margin-bottom: 28px;
+}
+.hero-badge-dot {
+  width: 6px; height: 6px; border-radius: 50%; background: var(--accent);
+  box-shadow: 0 0 6px var(--accent); animation: pulse 2s ease-in-out infinite;
+}
+.hero-badge span { font-family: var(--font-mono); font-size: 10px; color: var(--accent); letter-spacing: .1em; }
+
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+.hero h1 {
+  font-family: var(--font-head);
+  font-weight: 900;
+  font-size: clamp(38px, 5vw, 60px);
+  line-height: 1.04;
+  letter-spacing: -0.04em;
+  color: #fff;
+  margin-bottom: 22px;
+}
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--accent) 0%, #a8e063 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero-sub {
+  font-size: 16px; color: var(--muted); line-height: 1.75;
+  max-width: 440px; margin-bottom: 36px;
+}
+.hero-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.hero-note { margin-top: 20px; font-size: 11px; color: var(--dim); font-family: var(--font-mono); }
+
+/* HERO VISUAL */
+.hero-visual {
+  position: relative;
+}
+.cert-window {
+  background: var(--bg-card);
+  border: 1px solid rgba(200,255,0,.2);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(200,255,0,.08), 0 40px 80px rgba(0,0,0,.6);
+}
+.cert-titlebar {
+  display: flex; align-items: center; gap: 6px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+}
+.cert-dot { width: 10px; height: 10px; border-radius: 50%; }
+.cert-url {
+  flex: 1; text-align: center;
+  font-family: var(--font-mono); font-size: 10px; color: var(--dim);
+}
+.cert-body { padding: 24px 24px 20px; }
+
+.cert-header {
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  margin-bottom: 20px;
+}
+.cert-issuer { font-family: var(--font-mono); font-size: 9px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+.cert-title { font-family: var(--font-head); font-weight: 800; font-size: 18px; color: #fff; letter-spacing: -0.02em; }
+.cert-standard-badge {
+  background: rgba(200,255,0,.1); border: 1px solid rgba(200,255,0,.25);
+  border-radius: 8px; padding: 8px 12px; text-align: center; flex-shrink: 0;
+}
+.cert-standard-badge .std-name { font-family: var(--font-mono); font-size: 9px; color: var(--accent); letter-spacing: .1em; display: block; }
+.cert-standard-badge .std-score { font-family: var(--font-head); font-weight: 800; font-size: 20px; color: var(--accent); display: block; }
+
+.cert-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden;
+  margin-bottom: 14px;
+}
+.cert-field {
+  background: var(--bg);
+  padding: 10px 12px;
+}
+.cert-field-label { font-family: var(--font-mono); font-size: 8px; color: var(--dim); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 3px; }
+.cert-field-value { font-family: var(--font-mono); font-size: 11px; color: var(--text); }
+.cert-field-value.accent { color: var(--accent); }
+.cert-field-value.success { color: var(--success); }
+
+.cert-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 14px; border-top: 1px solid var(--border);
+}
+.cert-verified-badge {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(34,197,94,.08); border: 1px solid rgba(34,197,94,.2);
+  border-radius: 8px; padding: 8px 14px;
+}
+.cert-verified-badge .check { font-size: 14px; }
+.cert-verified-badge .vtext { font-family: var(--font-mono); font-size: 9px; color: var(--success); letter-spacing: .1em; }
+.cert-qr {
+  display: grid; grid-template-columns: repeat(5,8px); gap: 2px;
+}
+.cert-qr-cell {
+  width: 8px; height: 8px; border-radius: 1px;
+  background: var(--accent); opacity: 0;
+}
+
+/* Floating cards */
+.hero-float {
+  position: absolute;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: var(--bg-raised);
+  backdrop-filter: blur(20px);
+  font-family: var(--font-mono); font-size: 11px;
+}
+.hero-float-entropy {
+  bottom: -20px; left: -40px;
+  animation: float-a 4s ease-in-out infinite;
+}
+.hero-float-algo {
+  top: -14px; right: -30px;
+  animation: float-b 5s ease-in-out infinite;
+}
+@keyframes float-a { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes float-b { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+
+/* ─── STANDARDS STRIP ────────────────────────────────────────── */
+.standards-strip {
+  padding: 48px 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.standards-label {
+  text-align: center; font-family: var(--font-mono); font-size: 10px;
+  color: var(--dim); letter-spacing: .18em; text-transform: uppercase;
+  margin-bottom: 28px;
+}
+.standards-grid {
+  display: flex; justify-content: center; align-items: center;
+  gap: 12px; flex-wrap: wrap;
+}
+.std-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 18px; border-radius: 100px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+  transition: all .2s;
+  cursor: default;
+}
+.std-pill:hover {
+  border-color: var(--border-acc);
+  background: rgba(200,255,0,.03);
+  transform: translateY(-2px);
+}
+.std-pill-icon {
+  width: 20px; height: 20px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px;
+}
+.std-pill-name { font-family: var(--font-head); font-weight: 700; font-size: 12px; color: var(--text); }
+.std-pill-ver { font-family: var(--font-mono); font-size: 9px; color: var(--dim); margin-left: 2px; }
+
+/* ─── FEATURES GRID ──────────────────────────────────────────── */
+.features-section { padding: 96px 0; }
+.section-header { text-align: center; margin-bottom: 64px; }
+.section-header h2 {
+  font-family: var(--font-head); font-weight: 900;
+  font-size: clamp(28px, 3.5vw, 44px);
+  letter-spacing: -0.035em; color: #fff; margin-bottom: 14px;
+}
+.section-header p { font-size: 16px; color: var(--muted); max-width: 520px; margin: 0 auto; }
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto auto;
+  gap: 16px;
+}
+.feat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  transition: border-color .2s, transform .2s;
+  overflow: hidden;
+  position: relative;
+}
+.feat-card:hover {
+  border-color: rgba(255,255,255,.13);
+  transform: translateY(-2px);
+}
+.feat-card::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(200,255,0,.2), transparent);
+  opacity: 0; transition: opacity .2s;
+}
+.feat-card:hover::before { opacity: 1; }
+
+.feat-card.wide { grid-column: span 5; }
+.feat-card.mid  { grid-column: span 4; }
+.feat-card.slim { grid-column: span 3; }
+.feat-card.full { grid-column: span 7; }
+.feat-card.half { grid-column: span 5; }
+
+.feat-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; margin-bottom: 18px;
+}
+.feat-card h3 {
+  font-family: var(--font-head); font-weight: 800; font-size: 17px;
+  color: #fff; letter-spacing: -0.02em; margin-bottom: 8px;
+}
+.feat-card p { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+/* Feature card mini-visuals */
+.feat-visual { margin-top: 24px; }
+
+/* Mini cert preview in card */
+.mini-cert {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  font-family: var(--font-mono);
+}
+.mini-cert-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 9px; padding: 4px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.mini-cert-row:last-child { border-bottom: none; }
+.mini-cert-key { color: var(--dim); }
+.mini-cert-val { color: var(--text); }
+.mini-cert-val.hi { color: var(--accent); }
+
+/* Mini score ring */
+.mini-score-ring {
+  display: flex; align-items: center; gap: 14px; margin-top: 20px;
+}
+.ring-svg { flex-shrink: 0; }
+.ring-meta { }
+.ring-label { font-family: var(--font-mono); font-size: 9px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; }
+.ring-value { font-family: var(--font-head); font-weight: 800; font-size: 28px; color: var(--accent); letter-spacing: -0.03em; }
+
+/* Mini standards bars */
+.std-bars { margin-top: 20px; }
+.std-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.std-bar-name { font-family: var(--font-mono); font-size: 9px; color: var(--dim); width: 60px; flex-shrink: 0; }
+.std-bar-track { flex: 1; height: 4px; background: rgba(255,255,255,.06); border-radius: 100px; overflow: hidden; }
+.std-bar-fill { height: 100%; border-radius: 100px; }
+.std-bar-pct { font-family: var(--font-mono); font-size: 9px; color: var(--muted); width: 28px; text-align: right; }
+
+/* Mini API code */
+.mini-code {
+  background: #000;
+  border: 1px solid rgba(200,255,0,.12);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-family: var(--font-mono); font-size: 10px;
+  margin-top: 20px;
+  line-height: 1.8;
+  overflow: hidden;
+}
+.code-comment { color: #3d4438; }
+.code-key { color: var(--purple); }
+.code-string { color: var(--accent); }
+.code-brace { color: var(--muted); }
+.code-num { color: var(--teal); }
+
+/* Mini team */
+.mini-team { margin-top: 20px; }
+.team-member-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 12px; border-radius: 8px; margin-bottom: 4px;
+  background: rgba(255,255,255,.02);
+}
+.team-avatar {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head); font-weight: 800; font-size: 11px;
+}
+.team-name { font-size: 12px; color: var(--text); flex: 1; }
+.team-role { font-family: var(--font-mono); font-size: 8px; color: var(--dim); letter-spacing: .08em; text-transform: uppercase; }
+.team-certs { font-family: var(--font-mono); font-size: 10px; color: var(--accent); }
+
+/* ─── ALTERNATING FEATURE SECTIONS ──────────────────────────── */
+.alt-section { padding: 80px 0; border-top: 1px solid var(--border); }
+.alt-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 80px; align-items: center;
+}
+.alt-grid.reverse { direction: rtl; }
+.alt-grid.reverse > * { direction: ltr; }
+.alt-text {}
+.alt-text .eyebrow { margin-bottom: 12px; }
+.alt-text h2 {
+  font-family: var(--font-head); font-weight: 900;
+  font-size: clamp(24px, 3vw, 36px);
+  letter-spacing: -0.035em; color: #fff;
+  margin-bottom: 16px; line-height: 1.1;
+}
+.alt-text p { font-size: 15px; color: var(--muted); line-height: 1.8; margin-bottom: 24px; }
+.feature-list { list-style: none; }
+.feature-list li {
+  display: flex; align-items: flex-start; gap: 10px;
+  font-size: 13px; color: var(--muted); margin-bottom: 10px; line-height: 1.6;
+}
+.feature-list li::before {
+  content: '✓';
+  color: var(--accent); font-weight: 700; flex-shrink: 0; margin-top: 1px;
+  font-family: var(--font-head);
+}
+
+/* Alt section visuals */
+.alt-visual {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.av-header {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255,255,255,.02);
+  display: flex; align-items: center; gap: 10px;
+}
+.av-dots { display: flex; gap: 5px; }
+.av-dot { width: 8px; height: 8px; border-radius: 50%; }
+.av-title { font-family: var(--font-mono); font-size: 10px; color: var(--dim); flex: 1; text-align: center; letter-spacing: .06em; }
+.av-body { padding: 24px; }
+
+/* Dashboard visual */
+.dash-score-row {
+  display: grid; grid-template-columns: auto 1fr 1fr 1fr;
+  gap: 10px; margin-bottom: 16px;
+}
+.dash-stat {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+.dash-stat-label { font-family: var(--font-mono); font-size: 8px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 6px; }
+.dash-stat-val { font-family: var(--font-head); font-weight: 800; font-size: 22px; }
+.dash-stat-sub { font-size: 11px; color: var(--dim); margin-top: 2px; }
+
+.dash-cert-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 8px;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  font-family: var(--font-mono); font-size: 10px;
+}
+.dash-cert-std { color: var(--text); flex: 1; font-size: 11px; }
+.dash-cert-date { color: var(--dim); }
+.dash-cert-ent { color: var(--accent); width: 50px; text-align: right; }
+.dash-status-badge {
+  font-size: 8px; padding: 2px 8px; border-radius: 100px; font-weight: 700;
+  letter-spacing: .07em;
+}
+
+/* Generator visual */
+.gen-visual { }
+.gen-pw-bar {
+  background: rgba(0,0,0,.5);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 16px;
+  font-family: var(--font-mono); font-size: 13px;
+  color: var(--accent); letter-spacing: .04em;
+  word-break: break-all; margin-bottom: 12px;
+}
+.gen-entropy-bar { margin-bottom: 16px; }
+.gen-entropy-label { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 9px; color: var(--dim); margin-bottom: 5px; }
+.gen-entropy-track { height: 4px; background: rgba(255,255,255,.06); border-radius: 100px; overflow: hidden; }
+.gen-entropy-fill { height: 100%; border-radius: 100px; background: var(--accent); width: 87%; }
+.gen-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.gen-badge {
+  font-family: var(--font-mono); font-size: 9px; padding: 3px 9px;
+  border-radius: 100px; border: 1px solid; font-weight: 700; letter-spacing: .08em;
+}
+.gen-controls { display: flex; gap: 8px; }
+.gen-btn {
+  flex: 1; padding: 9px; border-radius: 7px; border: none; cursor: pointer;
+  font-family: var(--font-head); font-weight: 700; font-size: 12px;
+}
+.gen-btn-primary { background: var(--accent); color: #000; }
+.gen-btn-ghost { background: rgba(255,255,255,.05); color: var(--muted); border: 1px solid var(--border); }
+
+/* Cert verification visual */
+.verify-visual { }
+.verify-top {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+  padding-bottom: 20px; border-bottom: 1px solid var(--border);
+}
+.verify-stamp {
+  width: 64px; height: 64px; border-radius: 14px; flex-shrink: 0;
+  background: rgba(34,197,94,.1); border: 2px solid rgba(34,197,94,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 28px;
+}
+.verify-heading { font-family: var(--font-head); font-weight: 800; font-size: 18px; color: #fff; margin-bottom: 4px; }
+.verify-sub { font-family: var(--font-mono); font-size: 10px; color: var(--success); letter-spacing: .08em; }
+.verify-meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.verify-meta-item { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.verify-meta-label { font-family: var(--font-mono); font-size: 8px; color: var(--dim); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 3px; }
+.verify-meta-val { font-size: 12px; font-weight: 600; color: var(--text); }
+.verify-fingerprint {
+  background: #000; border: 1px solid rgba(200,255,0,.1); border-radius: 8px;
+  padding: 10px 14px; font-family: var(--font-mono); font-size: 9px; color: var(--dim);
+  word-break: break-all; line-height: 1.6;
+}
+.verify-fingerprint span { color: var(--accent); }
+
+/* ─── CTA SECTION ─────────────────────────────────────────────── */
+.cta-section {
+  padding: 100px 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  position: relative; overflow: hidden;
+}
+.cta-glow {
+  position: absolute; bottom: -200px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 600px; pointer-events: none;
+  background: radial-gradient(ellipse at center, rgba(200,255,0,.1) 0%, transparent 60%);
+}
+.cta-inner { text-align: center; position: relative; }
+.cta-inner h2 {
+  font-family: var(--font-head); font-weight: 900;
+  font-size: clamp(30px, 4vw, 52px);
+  letter-spacing: -0.04em; color: #fff;
+  margin-bottom: 16px; line-height: 1.08;
+}
+.cta-inner h2 em {
+  font-style: normal; color: var(--accent);
+}
+.cta-inner p { font-size: 16px; color: var(--muted); max-width: 480px; margin: 0 auto 40px; line-height: 1.7; }
+.cta-actions { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.cta-note { margin-top: 20px; font-size: 11px; color: var(--dim); font-family: var(--font-mono); letter-spacing: .04em; }
+
+/* ─── FOOTER ─────────────────────────────────────────────────── */
+footer {
+  padding: 48px 0;
+  border-top: 1px solid var(--border);
+}
+.footer-inner {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 20px;
+}
+.footer-logo {
+  font-family: var(--font-head); font-weight: 900; font-size: 16px;
+  color: var(--accent); letter-spacing: -0.04em;
+}
+.footer-links {
+  display: flex; gap: 24px; list-style: none;
+}
+.footer-links a { font-size: 12px; color: var(--dim); text-decoration: none; transition: color .15s; }
+.footer-links a:hover { color: var(--muted); }
+.footer-copy { font-family: var(--font-mono); font-size: 10px; color: var(--dim); letter-spacing: .04em; }
+
+/* ─── ANIMATIONS ─────────────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-in {
+  opacity: 0;
+  animation: fadeUp .6s cubic-bezier(.22,1,.36,1) forwards;
+}
+.delay-1 { animation-delay: .1s; }
+.delay-2 { animation-delay: .2s; }
+.delay-3 { animation-delay: .3s; }
+.delay-4 { animation-delay: .4s; }
+.delay-5 { animation-delay: .55s; }
+
+@keyframes shimmer-slide {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1);
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hero-grid, .alt-grid { grid-template-columns: 1fr; gap: 40px; }
+  .alt-grid.reverse { direction: ltr; }
+  .hero-visual { order: -1; }
+  .feat-card.wide, .feat-card.mid, .feat-card.slim,
+  .feat-card.full, .feat-card.half { grid-column: span 12; }
+  .dash-score-row { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ─── NAV ──────────────────────────────────────────────────── -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <span class="nav-logo-dot"></span>
+      PassGeni
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#standards">Standards</a></li>
+      <li><a href="#verify">Verification</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="/pricing">Pricing</a></li>
+    </ul>
+    <div class="nav-cta">
+      <a href="/auth/signin" class="btn-ghost" style="font-size:13px;padding:9px 18px;">Sign in</a>
+      <a href="/auth/signin" class="btn-primary" style="font-size:13px;padding:9px 20px;">Get Started Free →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ─── HERO ──────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="container">
+    <div class="hero-grid">
+
+      <!-- Left: Copy -->
+      <div>
+        <div class="hero-badge animate-in">
+          <span class="hero-badge-dot"></span>
+          <span>ES256 · Zero-knowledge · Auditor-ready</span>
+        </div>
+        <h1 class="animate-in delay-1">
+          Compliance certificates<br>for <em>every credential</em>
+        </h1>
+        <p class="hero-sub animate-in delay-2">
+          PassGeni generates cryptographically signed compliance certificates for HIPAA, SOC 2, PCI-DSS, and more — proving your passwords meet policy without ever storing them.
+        </p>
+        <div class="hero-actions animate-in delay-3">
+          <a href="/auth/signin" class="btn-primary">
+            Get your first certificate free →
+          </a>
+          <a href="#how-it-works" class="btn-ghost">See how it works</a>
+        </div>
+        <p class="hero-note animate-in delay-4">
+          No credit card · No password stored · Magic link sign-in
+        </p>
+      </div>
+
+      <!-- Right: Certificate Visual -->
+      <div class="hero-visual animate-in delay-3">
+
+        <!-- Floating entropy chip -->
+        <div class="hero-float hero-float-entropy">
+          <div style="font-size:8px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px;">Entropy</div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent);font-family:var(--font-head);">112 bits</div>
+          <div style="font-size:9px;color:var(--success);margin-top:1px;">↑ Exceeds HIPAA</div>
+        </div>
+
+        <div class="cert-window">
+          <div class="cert-titlebar">
+            <div class="cert-dot" style="background:#FF5F57;"></div>
+            <div class="cert-dot" style="background:#FFBD2E;"></div>
+            <div class="cert-dot" style="background:#28CA41;"></div>
+            <div class="cert-url">passgeni.ai/cert/a4f9c2d1…</div>
+          </div>
+          <div class="cert-body">
+            <div class="cert-header">
+              <div>
+                <div class="cert-issuer">PassGeni Authority · ES256</div>
+                <div class="cert-title">Compliance Certificate</div>
+              </div>
+              <div class="cert-standard-badge">
+                <span class="std-name">HIPAA</span>
+                <span class="std-score">✓</span>
+              </div>
+            </div>
+
+            <div class="cert-row">
+              <div class="cert-field">
+                <div class="cert-field-label">Standard</div>
+                <div class="cert-field-value accent">HIPAA §164.312(d)</div>
+              </div>
+              <div class="cert-field">
+                <div class="cert-field-label">Entropy</div>
+                <div class="cert-field-value accent">112.4 bits</div>
+              </div>
+              <div class="cert-field">
+                <div class="cert-field-label">Issued</div>
+                <div class="cert-field-value">Apr 21, 2026</div>
+              </div>
+              <div class="cert-field">
+                <div class="cert-field-label">Expires</div>
+                <div class="cert-field-value">Apr 21, 2027</div>
+              </div>
+              <div class="cert-field">
+                <div class="cert-field-label">Char Pool</div>
+                <div class="cert-field-value">90 chars</div>
+              </div>
+              <div class="cert-field">
+                <div class="cert-field-label">Algorithm</div>
+                <div class="cert-field-value">ES256 P-256</div>
+              </div>
+            </div>
+
+            <div class="cert-row" style="grid-template-columns:1fr;">
+              <div class="cert-field">
+                <div class="cert-field-label">Also satisfies</div>
+                <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                  <span class="tag tag-lime">NIST</span>
+                  <span class="tag tag-purple">PCI-DSS</span>
+                  <span class="tag tag-teal">SOC 2</span>
+                  <span class="tag tag-yellow">ISO 27001</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="cert-footer">
+              <div class="cert-verified-badge">
+                <span class="check">✅</span>
+                <span class="vtext">SIGNATURE VERIFIED</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(6,6px);gap:2px;">
+                <!-- QR code dots (decorative) -->
+                <script>
+                  const qrPattern = [1,1,1,0,1,1,1,0,1,0,1,0,1,1,1,0,0,0,1,0,1,0,0,0,1,1,1,0,1,1,1,0,1,0,1,0];
+                  document.currentScript.insertAdjacentHTML('afterend',
+                    qrPattern.map(v=>`<div style="width:6px;height:6px;border-radius:1px;background:${v?'var(--accent)':'transparent'};opacity:${v?0.8:0}"></div>`).join('')
+                  );
+                </script>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floating algo chip -->
+        <div class="hero-float hero-float-algo">
+          <div style="font-size:8px;color:var(--dim);letter-spacing:.1em;margin-bottom:3px;">Signature</div>
+          <div style="font-size:10px;color:var(--accent);word-break:break-all;max-width:130px;line-height:1.5;">eyJhbGciOiJFUzI1NiJ9…</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STANDARDS STRIP ───────────────────────────────────────── -->
+<section class="standards-strip" id="standards">
+  <div class="container">
+    <p class="standards-label">Compliance-ready from day one — all major standards built in</p>
+    <div class="standards-grid">
+      <div class="std-pill">
+        <div class="std-pill-icon" style="background:rgba(239,68,68,.15);color:#f87171;">🏥</div>
+        <span class="std-pill-name">HIPAA</span><span class="std-pill-ver">§164.312</span>
+      </div>
+      <div class="std-pill">
+        <div class="std-pill-icon" style="background:rgba(167,139,250,.15);color:#a78bfa;">💳</div>
+        <span class="std-pill-name">PCI-DSS</span><span class="std-pill-ver">v4.0</span>
+      </div>
+      <div class="std-pill">
+        <div class="std-pill-icon" style="background:rgba(45,212,191,.15);color:#2dd4bf;">☁️</div>
+        <span class="std-pill-name">SOC 2</span><span class="std-pill-ver">CC6.1</span>
+      </div>
+      <div class="std-pill">
+        <div class="std-pill-icon" style="background:rgba(251,146,60,.15);color:#fb923c;">🌍</div>
+        <span class="std-pill-name">ISO 27001</span><span class="std-pill-ver">:2022</span>
+      </div>
+      <div class="std-pill">
+        <div class="std-pill-icon" style="background:rgba(34,197,94,.15);color:#22c55e;">🇺🇸</div>
+        <span class="std-pill-name">NIST</span><span class="std-pill-ver">800-63B</span>
+      </div>
+      <div class="std-pill">
+        <div class="std-pill-icon" style="background:rgba(200,255,0,.15);color:var(--accent);">🔐</div>
+        <span class="std-pill-name">FIPS</span><span class="std-pill-ver">140-3</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FEATURES GRID ──────────────────────────────────────────── -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="eyebrow">What PassGeni does</div>
+      <h2>Everything your auditor<br>needs to see</h2>
+      <p>From generation to certificate to public verification — the complete compliance credential stack.</p>
+    </div>
+
+    <div class="features-grid">
+
+      <!-- Card 1: Generator (wide) -->
+      <div class="feat-card wide reveal">
+        <div class="feat-icon" style="background:rgba(200,255,0,.1);">⚡</div>
+        <h3>Compliance-preset generation</h3>
+        <p>Select HIPAA, PCI-DSS, or any standard. PassGeni generates a cryptographically strong password that meets every requirement — entropy, length, character pool, dictionary exclusion.</p>
+        <div class="feat-visual">
+          <div class="gen-pw-bar">X#k9$mQpLzR!2vWn@J4&amp;</div>
+          <div class="gen-entropy-bar">
+            <div class="gen-entropy-label"><span>Entropy</span><span style="color:var(--accent);">112 bits</span></div>
+            <div class="gen-entropy-track"><div class="gen-entropy-fill"></div></div>
+          </div>
+          <div class="gen-badges">
+            <span class="gen-badge" style="color:var(--success);border-color:rgba(34,197,94,.3);">✓ HIPAA</span>
+            <span class="gen-badge" style="color:var(--accent);border-color:rgba(200,255,0,.3);">✓ NIST</span>
+            <span class="gen-badge" style="color:var(--purple);border-color:rgba(167,139,250,.3);">✓ PCI-DSS</span>
+          </div>
+          <div class="gen-controls">
+            <button class="gen-btn gen-btn-primary">Generate Password</button>
+            <button class="gen-btn gen-btn-ghost">Copy</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: Certificate (mid) -->
+      <div class="feat-card mid reveal">
+        <div class="feat-icon" style="background:rgba(34,197,94,.1);">📜</div>
+        <h3>ES256 signed certificates</h3>
+        <p>Every certificate is a tamper-evident ES256 JWT. Independently verifiable offline using PassGeni's published public key — no API call required.</p>
+        <div class="feat-visual">
+          <div class="mini-cert">
+            <div class="mini-cert-row"><span class="mini-cert-key">standard</span><span class="mini-cert-val hi">HIPAA §164.312</span></div>
+            <div class="mini-cert-row"><span class="mini-cert-key">entropy_bits</span><span class="mini-cert-val hi">112.4</span></div>
+            <div class="mini-cert-row"><span class="mini-cert-key">char_pool</span><span class="mini-cert-val">90</span></div>
+            <div class="mini-cert-row"><span class="mini-cert-key">algorithm</span><span class="mini-cert-val">ES256 P-256</span></div>
+            <div class="mini-cert-row"><span class="mini-cert-key">issuer</span><span class="mini-cert-val">passgeni.ai</span></div>
+            <div class="mini-cert-row"><span class="mini-cert-key">signature</span><span class="mini-cert-val" style="color:var(--success);">✓ valid</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: Dashboard (slim) -->
+      <div class="feat-card slim reveal">
+        <div class="feat-icon" style="background:rgba(167,139,250,.1);">📊</div>
+        <h3>Compliance score dashboard</h3>
+        <p>Monitor your credential health. See compliance score per standard, expiry risks, and re-certification triggers in one view.</p>
+        <div class="feat-visual">
+          <div class="mini-score-ring">
+            <svg class="ring-svg" width="72" height="72" viewBox="0 0 72 72">
+              <circle cx="36" cy="36" r="28" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+              <circle cx="36" cy="36" r="28" fill="none" stroke="#C8FF00" stroke-width="7"
+                stroke-dasharray="175.9" stroke-dashoffset="26.4"
+                stroke-linecap="round" transform="rotate(-90 36 36)"
+                style="transition:stroke-dashoffset 1.2s ease"/>
+              <text x="36" y="40" text-anchor="middle" fill="#C8FF00" style="font-family:var(--font-head);font-weight:800;font-size:14px;">85%</text>
+            </svg>
+            <div class="ring-meta">
+              <div class="ring-label">Score</div>
+              <div style="font-size:11px;color:var(--success);margin-top:2px;">On track ↑</div>
+              <div style="font-size:10px;color:var(--dim);margin-top:4px;">NIST primary</div>
+            </div>
+          </div>
+          <div class="std-bars">
+            <div class="std-bar-row">
+              <span class="std-bar-name">NIST</span>
+              <div class="std-bar-track"><div class="std-bar-fill" style="width:100%;background:var(--success);"></div></div>
+              <span class="std-bar-pct">100%</span>
+            </div>
+            <div class="std-bar-row">
+              <span class="std-bar-name">HIPAA</span>
+              <div class="std-bar-track"><div class="std-bar-fill" style="width:75%;background:var(--accent);"></div></div>
+              <span class="std-bar-pct">75%</span>
+            </div>
+            <div class="std-bar-row">
+              <span class="std-bar-name">SOC 2</span>
+              <div class="std-bar-track"><div class="std-bar-fill" style="width:50%;background:var(--warning);"></div></div>
+              <span class="std-bar-pct">50%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 4: API (full) -->
+      <div class="feat-card full reveal">
+        <div class="feat-icon" style="background:rgba(45,212,191,.1);">🔌</div>
+        <h3>Developer API — ship compliance in one request</h3>
+        <p>POST to generate and certify programmatically. The same endpoints the dashboard uses, available to your application. Available on Authority plan.</p>
+        <div class="feat-visual">
+          <div class="mini-code">
+            <div><span class="code-comment"># Generate a HIPAA-compliant credential + certificate</span></div>
+            <div>curl <span class="code-string">https://passgeni.ai/api/v1/generate</span> \</div>
+            <div>&nbsp;&nbsp;-H <span class="code-string">"X-API-Key: pgk_live_••••••••••"</span> \</div>
+            <div>&nbsp;&nbsp;-d <span class="code-brace">'{"compliance":"hipaa","certify":true}'</span></div>
+            <br>
+            <div style="color:var(--dim);">→ <span class="code-brace">{</span></div>
+            <div>&nbsp;&nbsp;<span class="code-key">"cert_id"</span>: <span class="code-string">"a4f9c2d1-..."</span>,</div>
+            <div>&nbsp;&nbsp;<span class="code-key">"cert_url"</span>: <span class="code-string">"passgeni.ai/cert/a4f9c2d1"</span>,</div>
+            <div>&nbsp;&nbsp;<span class="code-key">"entropy_bits"</span>: <span class="code-num">112.4</span>,</div>
+            <div>&nbsp;&nbsp;<span class="code-key">"standards_met"</span>: <span class="code-brace">["HIPAA","NIST","PCI-DSS"]</span></div>
+            <div><span class="code-brace">}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 5: Team (half) -->
+      <div class="feat-card half reveal">
+        <div class="feat-icon" style="background:rgba(251,146,60,.1);">👥</div>
+        <h3>Team compliance management</h3>
+        <p>Invite your security team, enforce org-wide compliance standards, and track every certificate across every seat — shared audit log included.</p>
+        <div class="feat-visual">
+          <div class="mini-team">
+            <div class="team-member-row">
+              <div class="team-avatar" style="background:rgba(200,255,0,.15);color:var(--accent);">A</div>
+              <span class="team-name">alice@corp.com</span>
+              <span class="team-role">Owner</span>
+              <span class="team-certs">12 certs</span>
+            </div>
+            <div class="team-member-row">
+              <div class="team-avatar" style="background:rgba(167,139,250,.15);color:var(--purple);">B</div>
+              <span class="team-name">bob@corp.com</span>
+              <span class="team-role">Member</span>
+              <span class="team-certs">8 certs</span>
+            </div>
+            <div class="team-member-row">
+              <div class="team-avatar" style="background:rgba(45,212,191,.15);color:var(--teal);">C</div>
+              <span class="team-name">carol@corp.com</span>
+              <span class="team-role">Member</span>
+              <span class="team-certs">5 certs</span>
+            </div>
+            <div class="team-member-row" style="opacity:.4;border:1px dashed var(--border);border-radius:8px;">
+              <div class="team-avatar" style="background:transparent;color:var(--dim);border:1px dashed var(--border);">+</div>
+              <span class="team-name" style="color:var(--dim);">Invite team member…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ─── ALT SECTION 1: The Core Loop ─────────────────────────── -->
+<section class="alt-section" id="how-it-works">
+  <div class="container">
+    <div class="alt-grid">
+      <div class="alt-text reveal">
+        <div class="eyebrow">The core loop</div>
+        <h2>Generate → Certify →<br>Share in 60 seconds</h2>
+        <p>The entire product is built around one repeatable action. Generate a compliance-preset password, certify it with a cryptographic signature, and share the verification URL with your auditor.</p>
+        <ul class="feature-list">
+          <li>Client-side generation using <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">crypto.getRandomValues</code> — passwords never leave your browser</li>
+          <li>One-click certification — a 60-second generation session token prevents certifying external passwords</li>
+          <li>Shareable <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">/cert/[id]</code> URL — your auditor can verify the signature without logging in</li>
+          <li>Re-certify when standards update or passwords rotate — history kept forever</li>
+        </ul>
+        <a href="/dashboard/certify" class="btn-primary" style="margin-top:8px;">Try the certify flow →</a>
+      </div>
+      <div class="reveal">
+        <div class="alt-visual">
+          <div class="av-header">
+            <div class="av-dots">
+              <div class="av-dot" style="background:#FF5F57;"></div>
+              <div class="av-dot" style="background:#FFBD2E;"></div>
+              <div class="av-dot" style="background:#28CA41;"></div>
+            </div>
+            <div class="av-title">passgeni.ai / Issue Certificate</div>
+          </div>
+          <div class="av-body">
+            <!-- 3-step indicator -->
+            <div style="display:flex;align-items:center;gap:0;margin-bottom:28px;">
+              <div style="display:flex;align-items:center;flex:1;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;color:#000;flex-shrink:0;">✓</div>
+                <div style="flex:1;height:1px;background:rgba(200,255,0,.4);"></div>
+              </div>
+              <div style="display:flex;align-items:center;flex:1;">
+                <div style="width:32px;height:32px;border-radius:50%;background:rgba(200,255,0,.12);border:1px solid rgba(200,255,0,.5);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;color:var(--accent);flex-shrink:0;">2</div>
+                <div style="flex:1;height:1px;background:rgba(255,255,255,.06);"></div>
+              </div>
+              <div style="width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-family:var(--font-mono);font-size:12px;font-weight:700;color:#555;flex-shrink:0;">3</div>
+            </div>
+
+            <!-- Step 2 UI: parameters -->
+            <div style="font-family:var(--font-head);font-weight:800;font-size:18px;color:#fff;margin-bottom:6px;">Configure parameters</div>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:20px;">Set length, character types, and entropy target for your compliance standard.</div>
+
+            <div style="margin-bottom:14px;">
+              <div style="display:flex;justify-content:space-between;font-family:var(--font-mono);font-size:10px;color:var(--dim);margin-bottom:8px;">
+                <span>Length</span><span style="color:var(--accent);">20 characters</span>
+              </div>
+              <div style="height:6px;background:rgba(255,255,255,.06);border-radius:100px;overflow:hidden;">
+                <div style="height:100%;width:70%;border-radius:100px;background:var(--accent);"></div>
+              </div>
+            </div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;">
+              <div style="padding:10px 14px;border-radius:8px;border:1px solid rgba(200,255,0,.3);background:rgba(200,255,0,.06);display:flex;align-items:center;gap:8px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">✓</div>
+                <span style="font-size:12px;color:#fff;">Uppercase A–Z</span>
+              </div>
+              <div style="padding:10px 14px;border-radius:8px;border:1px solid rgba(200,255,0,.3);background:rgba(200,255,0,.06);display:flex;align-items:center;gap:8px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">✓</div>
+                <span style="font-size:12px;color:#fff;">Numbers 0–9</span>
+              </div>
+              <div style="padding:10px 14px;border-radius:8px;border:1px solid rgba(200,255,0,.3);background:rgba(200,255,0,.06);display:flex;align-items:center;gap:8px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">✓</div>
+                <span style="font-size:12px;color:#fff;">Special !@#$</span>
+              </div>
+              <div style="padding:10px 14px;border-radius:8px;border:1px solid rgba(200,255,0,.3);background:rgba(200,255,0,.06);display:flex;align-items:center;gap:8px;">
+                <div style="width:16px;height:16px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:900;color:#000;">✓</div>
+                <span style="font-size:12px;color:#fff;">No dictionary words</span>
+              </div>
+            </div>
+
+            <button class="btn-primary" style="width:100%;justify-content:center;">Generate & Certify →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ALT SECTION 2: Dashboard ─────────────────────────────── -->
+<section class="alt-section">
+  <div class="container">
+    <div class="alt-grid reverse">
+      <div class="alt-text reveal">
+        <div class="eyebrow">Compliance monitoring</div>
+        <h2>Your credential health,<br>at a glance</h2>
+        <p>The compliance dashboard is a monitoring system, not a viewer. See your score, active risks, expiring certificates, and standards coverage — all in one place.</p>
+        <ul class="feature-list">
+          <li>Compliance score calculated per your primary standard — color-coded green / amber / red</li>
+          <li>Active Risks panel shows exactly which certs are expiring or revoked, with one-click re-certify</li>
+          <li>Monthly usage bar — free tier shows 3-cert limit with upgrade prompt at 2/3 used</li>
+          <li>Standards coverage badges show which of the 6 standards you're certified against</li>
+        </ul>
+        <a href="/dashboard" class="btn-ghost" style="margin-top:8px;">View your dashboard →</a>
+      </div>
+      <div class="reveal">
+        <div class="alt-visual">
+          <div class="av-header">
+            <div class="av-dots">
+              <div class="av-dot" style="background:#FF5F57;"></div>
+              <div class="av-dot" style="background:#FFBD2E;"></div>
+              <div class="av-dot" style="background:#28CA41;"></div>
+            </div>
+            <div class="av-title">passgeni.ai / dashboard</div>
+          </div>
+          <div class="av-body">
+            <!-- Stats row -->
+            <div class="dash-score-row">
+              <div class="dash-stat" style="border-color:rgba(200,255,0,.2);display:flex;align-items:center;justify-content:center;">
+                <svg width="68" height="68" viewBox="0 0 68 68">
+                  <circle cx="34" cy="34" r="26" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="7"/>
+                  <circle cx="34" cy="34" r="26" fill="none" stroke="#C8FF00" stroke-width="7"
+                    stroke-dasharray="163.4" stroke-dashoffset="24.5"
+                    stroke-linecap="round" transform="rotate(-90 34 34)"/>
+                  <text x="34" y="38" text-anchor="middle" fill="#C8FF00" style="font-family:var(--font-head);font-weight:800;font-size:13px;">85%</text>
+                </svg>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">Active Certs</div>
+                <div class="dash-stat-val" style="color:var(--success);">12</div>
+                <div class="dash-stat-sub">non-expired</div>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">Expiring Soon</div>
+                <div class="dash-stat-val" style="color:var(--warning);">2</div>
+                <div class="dash-stat-sub">within 30d</div>
+              </div>
+              <div class="dash-stat">
+                <div class="dash-stat-label">Revoked</div>
+                <div class="dash-stat-val" style="color:var(--dim);">0</div>
+                <div class="dash-stat-sub">all clear</div>
+              </div>
+            </div>
+
+            <!-- Active risks banner -->
+            <div style="padding:12px 16px;background:rgba(255,68,68,.05);border:1px solid rgba(255,68,68,.2);border-radius:10px;margin-bottom:12px;">
+              <div style="font-family:var(--font-mono);font-size:8px;color:rgba(255,68,68,.5);letter-spacing:.14em;text-transform:uppercase;margin-bottom:6px;">Active Risks</div>
+              <div style="font-family:var(--font-head);font-weight:700;font-size:12px;color:#ff9999;">🚨 2 certificates need attention</div>
+            </div>
+
+            <!-- Cert table rows -->
+            <div style="background:var(--bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;">
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:10px;font-family:var(--font-mono);font-size:8px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;">
+                <span style="flex:1;">Standard</span><span style="width:60px;text-align:right;">Entropy</span><span style="width:80px;text-align:right;">Expires</span><span style="width:52px;text-align:right;">Status</span>
+              </div>
+              <div class="dash-cert-row">
+                <span class="dash-cert-std">HIPAA §164.312</span>
+                <span class="dash-cert-ent">112b</span>
+                <span class="dash-cert-date">Apr 2027</span>
+                <span class="dash-status-badge" style="background:rgba(34,197,94,.1);color:var(--success);">VALID</span>
+              </div>
+              <div class="dash-cert-row">
+                <span class="dash-cert-std">NIST SP 800-63B</span>
+                <span class="dash-cert-ent">98b</span>
+                <span class="dash-cert-date">May 2026</span>
+                <span class="dash-status-badge" style="background:rgba(250,204,21,.1);color:var(--warning);">EXP SOON</span>
+              </div>
+              <div class="dash-cert-row">
+                <span class="dash-cert-std">PCI-DSS v4.0</span>
+                <span class="dash-cert-ent">128b</span>
+                <span class="dash-cert-date">Mar 2027</span>
+                <span class="dash-status-badge" style="background:rgba(34,197,94,.1);color:var(--success);">VALID</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ALT SECTION 3: Public Verification ───────────────────── -->
+<section class="alt-section" id="verify">
+  <div class="container">
+    <div class="alt-grid">
+      <div class="alt-text reveal">
+        <div class="eyebrow">Auditor-ready verification</div>
+        <h2>Share a URL.<br>Your auditor does the rest.</h2>
+        <p>Every certificate has a public, no-login verification page at <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent);background:rgba(200,255,0,.05);padding:2px 6px;border-radius:4px;">/cert/[id]</code>. Auditors can verify the ES256 signature against PassGeni's published public key — entirely offline.</p>
+        <ul class="feature-list">
+          <li>No account required to verify — just open the URL</li>
+          <li>Status badge shows VERIFIED / REVOKED / EXPIRED at a glance</li>
+          <li>QR code embedded — scannable for mobile auditor workflows</li>
+          <li>JWT fingerprint (SHA-256) for offline verification without calling PassGeni servers</li>
+          <li>Offline verification via <code style="font-family:var(--font-mono);font-size:11px;color:var(--accent);">passgeni.ai/.well-known/jwks.json</code></li>
+        </ul>
+        <a href="/cert/example" class="btn-primary" style="margin-top:8px;">See a live certificate →</a>
+      </div>
+      <div class="reveal">
+        <div class="alt-visual">
+          <div class="av-header">
+            <div class="av-dots">
+              <div class="av-dot" style="background:#FF5F57;"></div>
+              <div class="av-dot" style="background:#FFBD2E;"></div>
+              <div class="av-dot" style="background:#28CA41;"></div>
+            </div>
+            <div class="av-title">passgeni.ai/cert/a4f9c2d1</div>
+          </div>
+          <div class="av-body">
+            <div class="verify-top">
+              <div class="verify-stamp">✅</div>
+              <div>
+                <div class="verify-heading">Certificate Verified</div>
+                <div class="verify-sub">SIGNATURE VALID · ES256 P-256</div>
+              </div>
+            </div>
+            <div class="verify-meta-grid">
+              <div class="verify-meta-item">
+                <div class="verify-meta-label">Standard</div>
+                <div class="verify-meta-val" style="color:var(--accent);">HIPAA §164.312</div>
+              </div>
+              <div class="verify-meta-item">
+                <div class="verify-meta-label">Entropy</div>
+                <div class="verify-meta-val">112.4 bits</div>
+              </div>
+              <div class="verify-meta-item">
+                <div class="verify-meta-label">Issued</div>
+                <div class="verify-meta-val">Apr 21, 2026</div>
+              </div>
+              <div class="verify-meta-item">
+                <div class="verify-meta-label">Expires</div>
+                <div class="verify-meta-val">Apr 21, 2027</div>
+              </div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <div style="font-size:11px;color:var(--dim);margin-bottom:8px;font-family:var(--font-mono);font-size:9px;letter-spacing:.08em;text-transform:uppercase;">Also satisfies</div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <span class="tag tag-lime">NIST 800-63B</span>
+                <span class="tag tag-purple">PCI-DSS v4</span>
+                <span class="tag tag-teal">SOC 2</span>
+                <span class="tag tag-yellow">ISO 27001</span>
+              </div>
+            </div>
+            <div class="verify-fingerprint">
+              <div style="font-size:8px;color:var(--dim);margin-bottom:5px;letter-spacing:.1em;text-transform:uppercase;">SHA-256 Fingerprint</div>
+              <span>3a:f8:</span><span>9c:2d:</span><span style="color:var(--accent);">1b:4e:</span><span>7f:a0:</span><span>5c:11:</span><span style="color:var(--accent);">8d:3e:</span><span>92:ff</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── ALT SECTION 4: Zero Knowledge ───────────────────────── -->
+<section class="alt-section">
+  <div class="container">
+    <div class="alt-grid reverse">
+      <div class="alt-text reveal">
+        <div class="eyebrow">Zero-knowledge by architecture</div>
+        <h2>PassGeni never sees<br>your password. Ever.</h2>
+        <p>This is not a privacy policy promise. It is a technical impossibility. Passwords are generated entirely in your browser using <code style="font-family:var(--font-mono);font-size:12px;color:var(--accent);">crypto.getRandomValues</code>. The server only receives generation parameters — never the password itself.</p>
+        <ul class="feature-list">
+          <li>Zero-Knowledge Mode: password generated entirely client-side, nothing transmitted</li>
+          <li>Certified Mode: only parameters (length, standard, entropy target) go to the server</li>
+          <li>Certificate signs the parameters — not the password — so the proof is valid without the secret</li>
+          <li>Even PassGeni cannot recover the original password after certification</li>
+        </ul>
+        <a href="/security" class="btn-ghost" style="margin-top:8px;">Read the security model →</a>
+      </div>
+      <div class="reveal">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:20px;overflow:hidden;box-shadow:var(--shadow);">
+          <div style="padding:28px;">
+            <!-- Two modes diagram -->
+            <div style="font-family:var(--font-mono);font-size:9px;color:var(--dim);letter-spacing:.12em;text-transform:uppercase;margin-bottom:20px;">Two modes, same guarantee</div>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px;">
+              <div style="background:var(--bg);border:1px solid rgba(200,255,0,.15);border-radius:12px;padding:18px;">
+                <div style="font-family:var(--font-mono);font-size:9px;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">Zero-Knowledge Mode</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="padding:6px 10px;background:rgba(200,255,0,.05);border-radius:6px;font-size:11px;color:var(--muted);">🔒 Generate in browser</div>
+                  <div style="padding:6px 10px;background:rgba(200,255,0,.05);border-radius:6px;font-size:11px;color:var(--muted);">🚫 No server call</div>
+                  <div style="padding:6px 10px;background:rgba(200,255,0,.05);border-radius:6px;font-size:11px;color:var(--muted);">🗑 No record created</div>
+                </div>
+              </div>
+              <div style="background:var(--bg);border:1px solid rgba(34,197,94,.15);border-radius:12px;padding:18px;">
+                <div style="font-family:var(--font-mono);font-size:9px;color:var(--success);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">Certified Mode</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">
+                  <div style="padding:6px 10px;background:rgba(34,197,94,.05);border-radius:6px;font-size:11px;color:var(--muted);">📤 Send parameters only</div>
+                  <div style="padding:6px 10px;background:rgba(34,197,94,.05);border-radius:6px;font-size:11px;color:var(--muted);">✍️ Server signs JWT</div>
+                  <div style="padding:6px 10px;background:rgba(34,197,94,.05);border-radius:6px;font-size:11px;color:var(--muted);">🔗 Certificate stored</div>
+                </div>
+              </div>
+            </div>
+
+            <div style="border-top:1px solid var(--border);padding-top:18px;">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(255,68,68,.04);border:1px solid rgba(255,68,68,.15);border-radius:10px;">
+                <span style="font-size:18px;">🔐</span>
+                <div>
+                  <div style="font-family:var(--font-head);font-weight:700;font-size:13px;color:#fff;margin-bottom:2px;">Both modes: password never transmitted</div>
+                  <div style="font-size:11px;color:var(--dim);">Not a policy — a technical impossibility by architecture</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA SECTION ────────────────────────────────────────────── -->
+<section class="cta-section">
+  <div class="cta-glow"></div>
+  <div class="container">
+    <div class="cta-inner reveal">
+      <div class="eyebrow" style="justify-content:center;display:flex;">Start your compliance journey</div>
+      <h2>
+        Will you have <em>evidence</em>,<br>
+        or just good intentions?
+      </h2>
+      <p>Auditors don't take your word for it. PassGeni gives you signed, verifiable proof that every password meets the standard — ready to hand over in seconds.</p>
+      <div class="cta-actions">
+        <a href="/auth/signin" class="btn-primary" style="font-size:15px;padding:15px 32px;">
+          Get your first certificate free →
+        </a>
+        <a href="/pricing" class="btn-ghost" style="font-size:15px;padding:14px 28px;">
+          See pricing
+        </a>
+      </div>
+      <p class="cta-note">No credit card · 14-day Assurance trial · Magic link sign-in · No password stored</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-logo">PassGeni</div>
+      <ul class="footer-links">
+        <li><a href="/security">Security</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+        <li><a href="/terms">Terms</a></li>
+        <li><a href="/api-docs">API Docs</a></li>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="mailto:hello@passgeni.ai">Contact</a></li>
+      </ul>
+      <div class="footer-copy">© 2026 Giant Tech Solutions, LLC · passgeni.ai</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Scroll reveal ────────────────────────────────────────────
+const reveals = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      // Stagger children within sections
+      setTimeout(() => {
+        entry.target.classList.add('visible');
+      }, 60);
+      io.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -60px 0px' });
+reveals.forEach(el => io.observe(el));
+
+// ── Std pill hover glow ──────────────────────────────────────
+document.querySelectorAll('.std-pill').forEach(pill => {
+  pill.addEventListener('mouseenter', () => {
+    pill.style.boxShadow = '0 0 20px rgba(200,255,0,0.08)';
+  });
+  pill.addEventListener('mouseleave', () => {
+    pill.style.boxShadow = 'none';
+  });
+});
+
+// ── Animate score rings on scroll ──────────────────────────
+const rings = document.querySelectorAll('circle[stroke="#C8FF00"]');
+const ringObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const circle = entry.target;
+      const dasharray = parseFloat(circle.getAttribute('stroke-dasharray'));
+      const dashoffset = parseFloat(circle.getAttribute('stroke-dashoffset'));
+      circle.style.strokeDashoffset = dasharray;
+      setTimeout(() => {
+        circle.style.transition = 'stroke-dashoffset 1.2s cubic-bezier(.22,1,.36,1)';
+        circle.style.strokeDashoffset = dashoffset;
+      }, 100);
+      ringObserver.unobserve(circle);
+    }
+  });
+}, { threshold: 0.5 });
+rings.forEach(r => ringObserver.observe(r));
+
+// ── Typewriter on hero password ─────────────────────────────
+const pw = document.querySelector('.gen-pw-bar');
+if (pw) {
+  const passwords = [
+    'X#k9$mQpLzR!2vWn@J4&',
+    'H8@pJmK#2qR$vXnL!9wZ',
+    'Q7$rNzPk!4mW#xJ9@cV2',
+  ];
+  let idx = 0;
+  setInterval(() => {
+    idx = (idx + 1) % passwords.length;
+    pw.style.opacity = '0';
+    pw.style.transition = 'opacity .2s';
+    setTimeout(() => {
+      pw.textContent = passwords[idx];
+      pw.style.opacity = '1';
+    }, 200);
+  }, 3000);
+}
+</script>
+
+</body>
+</html>

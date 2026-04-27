@@ -23,10 +23,10 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { email, plan = "team", billing = "monthly" } = req.body || {};
+  const { email, plan = "assurance", billing = "monthly" } = req.body || {};
 
   const priceKey = `${plan}_${billing}`;
-  const priceId  = PADDLE_PRICE_IDS[priceKey] || PADDLE_PRICE_IDS.team_monthly;
+  const priceId  = PADDLE_PRICE_IDS[priceKey] || PADDLE_PRICE_IDS.assurance_monthly;
   const apiKey   = process.env.PADDLE_API_KEY;
 
   if (!priceId || !apiKey) {

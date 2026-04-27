@@ -2,9 +2,9 @@ import{FOOTER}from"../../content/copy.js";
 import PassGeniLogo from"./Logo.js";
 
 const COLS=[
-  {h:"Product",links:[{l:"Generator",href:"#generator"},{l:"Tools",href:"/tools"},{l:"Guides",href:"/guides"},{l:"Blog",href:"/blog"},{l:"Changelog",href:"/changelog"}]},
-  {h:"Compliance",links:[{l:"HIPAA",href:"/guides/hipaa-password-requirements"},{l:"PCI-DSS",href:"/guides/pci-dss-password-requirements"},{l:"SOC 2",href:"/guides/soc2-password-requirements"},{l:"Post-Quantum",href:"/guides/post-quantum-password-security"},{l:"NIST SP 800-63B",href:"/guides/nist-800-63b-password-guidelines"}]},
-  {h:"Company",links:[{l:"About",href:"/about"},{l:"Pricing",href:"/pricing"},{l:"API",href:"/api-docs"},{l:"Privacy",href:"/privacy"},{l:"Terms",href:"/terms"},{l:"Refund",href:"/refund"},{l:"Contact",href:"/contact"}]},
+  {h:"Product",links:[{l:"Generator",href:"/#generator"},{l:"Tools",href:"/tools"},{l:"Guides",href:"/guides"},{l:"Blog",href:"/blog"},{l:"Changelog",href:"/changelog"},{l:"Glossary",href:"/glossary"}]},
+  {h:"Compliance",links:[{l:"Compliance Certificates",href:"/password-compliance-certificate"},{l:"HIPAA",href:"/guides/hipaa-password-requirements"},{l:"PCI-DSS",href:"/guides/pci-dss-password-requirements"},{l:"SOC 2",href:"/guides/soc2-password-requirements"},{l:"NIST SP 800-63B",href:"/guides/nist-800-63b-password-guidelines"},{l:"FIPS 140-3",href:"/guides/fips-140-3-password-requirements"}]},
+  {h:"Company",links:[{l:"About",href:"/about"},{l:"Pricing",href:"/pricing"},{l:"API",href:"/api-docs"},{l:"Security",href:"/security"},{l:"Settings",href:"/settings"},{l:"Privacy",href:"/privacy"},{l:"Terms",href:"/terms"},{l:"Refund",href:"/refund"},{l:"Contact",href:"/contact"}]},
 ];
 
 export default function Footer(){
@@ -18,7 +18,7 @@ export default function Footer(){
           <div>
             <PassGeniLogo height="26px"/>
             <p style={{fontFamily:"var(--font-body)",fontSize:"var(--text-base)",color:"var(--muted)",maxWidth:240,lineHeight:1.75,marginTop:14}}>
-              {FOOTER?.description||"AI-powered password generation. Zero storage. Client-side only."}
+              {FOOTER?.description||"Compliance-grade password certificates. Zero-knowledge architecture. Built for teams that get audited."}
             </p>
             <div style={{display:"flex",gap:6,marginTop:16,flexWrap:"wrap"}}>
               {["NIST","FIPS","SOC 2","HIPAA","PCI-DSS"].map(b=>(
@@ -59,10 +59,10 @@ export default function Footer(){
           <div style={{display:"flex",gap:"clamp(10px,2vw,16px)",alignItems:"center",flexWrap:"wrap"}}>
             <span style={{fontFamily:"var(--font-body)",fontSize:"clamp(9px,1.5vw,11px)",color:"var(--muted-2)",display:"flex",alignItems:"center",gap:5}}>
               Made with{" "}
-              <span style={{color:"#ff3b3b",animation:"heartBlink 1.2s ease-in-out infinite",display:"inline-block",fontSize:13}}>♥</span>
+              <span style={{color:"#ff3b3b",animation:"none",display:"inline-block",fontSize:13}}>♥</span>
               {" "}for security
             </span>
-            {[{l:"X",href:"https://x.com/passgeni_ai"},{l:"GH",href:"https://github.com/passgeni"}].map(s=>(
+            {[{l:"X",href:"https://x.com/passgeni_ai"},{l:"GH",href:"https://github.com/Giant-Tech-Solutions-llc"}].map(s=>(
               <a key={s.l} href={s.href} target="_blank" rel="noopener noreferrer"
                 style={{fontFamily:"var(--font-body)",fontSize:11,fontWeight:600,color:"var(--muted-2)",width:30,height:30,display:"flex",alignItems:"center",justifyContent:"center",border:"1px solid rgba(200,255,0,0.1)",borderRadius:7,transition:"color .15s,border-color .15s"}}
                 aria-label={s.l}

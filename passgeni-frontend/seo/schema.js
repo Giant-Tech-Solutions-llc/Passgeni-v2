@@ -38,7 +38,7 @@ export function getPageMeta(page) {
     },
     tools: {
       title:       `Free Security Tools — ${SITE.name}`,
-      description: "Free password security tools: breach checker, strength checker, password audit, policy generator, secure sharing, and WiFi QR generator.",
+      description: "Free password security tools: compliance fixer, breach checker, strength checker, password audit, policy generator, and secure credential sharing.",
       canonical:   `${SITE.url}/tools`,
     },
     api: {
@@ -154,6 +154,49 @@ export function getFAQSchema(faqItems) {
         "text":  item.a || item.answer || "",
       },
     })),
+  };
+}
+
+export function getBlogPostSchema(post) {
+  return {
+    "@context": "https://schema.org",
+    "@type":    "BlogPosting",
+    "headline": post.title,
+    "description": post.metaDescription || post.excerpt || "",
+    "url":      `${SITE.url}/blog/${post.slug}`,
+    "datePublished": post.publishedAt,
+    "dateModified":  post.updatedAt || post.publishedAt,
+    "author": {
+      "@type": "Organization",
+      "name":  SITE.name,
+      "url":   SITE.url,
+    },
+    "publisher": {
+      "@type": "Organization",
+      "name":  SITE.name,
+      "logo": {
+        "@type": "ImageObject",
+        "url":   `${SITE.url}/logo.png`,
+      },
+    },
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id":   `${SITE.url}/blog/${post.slug}`,
+    },
+  };
+}
+
+export function getToolSchema(tool) {
+  return {
+    "@context": "https://schema.org",
+    "@type":    "SoftwareApplication",
+    "name":     tool.name,
+    "description": tool.description,
+    "url":      `${SITE.url}/tools/${tool.slug}`,
+    "applicationCategory": "SecurityApplication",
+    "operatingSystem": "Web Browser",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "author": { "@type": "Organization", "name": SITE.name, "url": SITE.url },
   };
 }
 

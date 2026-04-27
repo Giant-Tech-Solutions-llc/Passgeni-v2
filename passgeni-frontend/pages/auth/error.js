@@ -7,6 +7,7 @@ import { useRouter } from "next/router";
 import { motion } from "framer-motion";
 import { btnPrimary, btnGhost } from "../../lib/motion.js";
 import PageLayout from "../../components/layout/PageLayout.js";
+import { IcAlert } from "../../lib/icons.js";
 
 const ERROR_MESSAGES = {
   Configuration:  "Server configuration error. Please contact hello@passgeni.ai.",
@@ -23,7 +24,7 @@ export default function AuthErrorPage() {
   return (
     <PageLayout title="Sign In Error — PassGeni" description="">
       <main style={{ maxWidth: 440, margin: "0 auto", padding: "100px var(--page-pad) 120px", textAlign: "center" }}>
-        <div style={{ fontSize: 40, marginBottom: 20 }}>⚠️</div>
+        <div style={{ marginBottom: 20 }}><IcAlert size={40} /></div>
         <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: 24, color: "#fff", marginBottom: 12, letterSpacing: "-0.02em" }}>
           Sign in failed.
         </h1>

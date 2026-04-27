@@ -2,6 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { btnPrimary } from "../lib/motion.js";
 import PageLayout from "../components/layout/PageLayout.js";
+import { IcUser, IcKey, IcLock, IcAlert, IcCheck } from "../lib/icons.js";
 
 const LINK = { color: "#C8FF00", textDecoration: "none" };
 
@@ -26,6 +27,13 @@ export default function ContactPage() {
     outline: "none", boxSizing: "border-box", marginBottom: 16,
   };
 
+  const CONTACT_CARDS = [
+    { Icon: IcUser,  label: "General questions",     email: "hello@passgeni.ai" },
+    { Icon: IcKey,   label: "API & Team plan",        email: "api@passgeni.ai" },
+    { Icon: IcKey,   label: "Billing & refunds",      email: "billing@passgeni.ai" },
+    { Icon: IcLock,  label: "Security disclosures",   email: "security@passgeni.ai" },
+  ];
+
   return (
     <PageLayout
       title="Contact PassGeni — Get in Touch"
@@ -41,18 +49,13 @@ export default function ContactPage() {
           <div className="eyebrow">Get in touch</div>
           <h1 style={{ fontFamily: "var(--font-heading)", fontWeight: 800, fontSize: "clamp(32px,4.5vw,52px)", color: "#fff", letterSpacing: "-0.025em", lineHeight: 1.1, marginBottom: 18 }}>Contact us</h1>
           <p style={{ fontFamily: "var(--font-body)", fontSize: "clamp(16px,1.6vw,18px)", color: "var(--muted)", lineHeight: 1.9, marginBottom: 52 }}>
-            We're a small team and we read every email. Usually respond within 1 business day.
+            We&apos;re a small team and we read every email. Usually respond within 1 business day.
           </p>
         </motion.div>
 
         {/* Contact options */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14, marginBottom: 52 }}>
-          {[
-            { icon: "💬", label: "General questions",     email: "hello@passgeni.ai" },
-            { icon: "🔧", label: "API & Team plan",       email: "api@passgeni.ai" },
-            { icon: "💳", label: "Billing & refunds",     email: "billing@passgeni.ai" },
-            { icon: "🔒", label: "Security disclosures",  email: "security@passgeni.ai" },
-          ].map(({ icon, label, email }, i) => (
+          {CONTACT_CARDS.map(({ Icon, label, email }, i) => (
             <motion.a
               key={email}
               href={`mailto:${email}`}
@@ -64,7 +67,9 @@ export default function ContactPage() {
               style={{ textDecoration: "none", display: "block" }}
             >
               <div className="bc-line" />
-              <div style={{ fontSize: 22, marginBottom: 10 }}>{icon}</div>
+              <div style={{ marginBottom: 12, color: "var(--accent)" }}>
+                <Icon size={22} color="var(--accent)" />
+              </div>
               <div style={{ fontFamily: "var(--font-body)", fontSize: 13, color: "var(--muted)", marginBottom: 6 }}>{label}</div>
               <div style={{ fontFamily: "var(--font-mono)", fontSize: 11, color: "var(--accent)" }}>{email}</div>
             </motion.a>
@@ -86,7 +91,16 @@ export default function ContactPage() {
           </div>
           {sent ? (
             <div style={{ textAlign: "center", padding: "32px 0" }}>
-              <div style={{ fontSize: 48, marginBottom: 16 }}>✓</div>
+              <div style={{ marginBottom: 16, display: "flex", justifyContent: "center" }}>
+                <div style={{
+                  width: 52, height: 52, borderRadius: "50%",
+                  background: "rgba(200,255,0,0.08)",
+                  border: "1px solid rgba(200,255,0,0.2)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                }}>
+                  <IcCheck size={22} color="var(--accent)" />
+                </div>
+              </div>
               <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 20, color: "#C8FF00", marginBottom: 8 }}>Message sent</div>
               <p style={{ fontFamily: "var(--font-body)", fontSize: 14, color: "#888" }}>Your email client should have opened. If not, email us directly at <a href="mailto:hello@passgeni.ai" style={LINK}>hello@passgeni.ai</a>.</p>
             </div>

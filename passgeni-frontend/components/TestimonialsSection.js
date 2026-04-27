@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { IcStar } from '../lib/icons.js';
 
 /**
  * TestimonialsSection — drop-in replacement for the homepage proof section.
@@ -29,8 +30,8 @@ const TESTIMONIALS = [
 function StarRating({ count }) {
   return (
     <div style={{ display: 'flex', gap: 2, marginBottom: 14 }}>
-      {Array(count).fill('★').map((s, i) => (
-        <span key={i} style={{ color: '#C8FF00', fontSize: 13 }}>{s}</span>
+      {Array(count).fill(null).map((_, i) => (
+        <IcStar key={i} size={12} color="#C8FF00" />
       ))}
     </div>
   );

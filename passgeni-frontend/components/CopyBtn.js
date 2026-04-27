@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { IcCheck } from '../lib/icons.js';
 
 /**
  * CopyBtn — unified copy button used globally.
@@ -12,10 +13,12 @@ import { useState, useCallback } from 'react';
  *   <CopyBtn text="text to copy" />
  *   <CopyBtn text="text" label="COPY KEY" copiedLabel="✓ KEY COPIED" />
  */
+const DEFAULT_COPIED_LABEL = <><IcCheck size={11} color="#C8FF00" /> COPIED</>;
+
 export default function CopyBtn({
   text,
   label = 'COPY',
-  copiedLabel = '✓ COPIED',
+  copiedLabel = DEFAULT_COPIED_LABEL,
   style = {},
 }) {
   const [copied, setCopied] = useState(false);
