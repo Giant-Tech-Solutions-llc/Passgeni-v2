@@ -176,7 +176,7 @@ function Hero() {
 
           <FI d={0.12}>
             <p style={{
-              fontSize:"clamp(15px,1.5vw,17px)",lineHeight:1.85,
+              fontSize:"clamp(16px,1.6vw,18px)",lineHeight:1.85,
               color:C.textSub,marginBottom:36,maxWidth:480,
             }}>
               PassGeni generates cryptographically strong, profession-aware passwords—client-side, zero storage, NIST SP 800-63B aligned. Built for teams that get audited.
@@ -207,7 +207,7 @@ function Hero() {
 
         {/* ── Right: layered product cards ── */}
         <FI d={0.1} className="hero-cards-col">
-          <div style={{ position:"relative", height:520, paddingRight:8 }}>
+          <div style={{ position:"relative", height:560, paddingRight:8 }}>
 
             {/* Card 1 — Certificate (back, rotated) */}
             <div style={{
@@ -391,7 +391,8 @@ function HowItWorks() {
             </h2>
           </div>
         </FI>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))", gap:20 }}>
+        {/* Asymmetric: 1.15fr · 1fr · 0.85fr — deliberately unequal */}
+        <div className="hiw-grid" style={{ display:"grid", gridTemplateColumns:"1.15fr 1fr 0.85fr", gap:20 }}>
           {steps.map((s,i)=>(
             <FI key={s.label} d={i*0.09}>
               <Card label={s.label} title={s.title} body={s.body} metric={s.metric} metricSub={s.metricSub} style={{ height:"100%" }}>
@@ -718,7 +719,84 @@ function ValueGrid() {
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
-   §6  DASHBOARD PREVIEW
+   §6  FEATURE BLOCKS  (asymmetric: 2 wide + 2 narrow, not equal)
+═══════════════════════════════════════════════════════════════════════ */
+function FeatureBlocks() {
+  return (
+    <section style={{ background:C.surf1, padding:"96px clamp(16px,4vw,48px)" }}>
+      <div style={{ maxWidth:1200, margin:"0 auto" }}>
+        <FI>
+          <div style={{ marginBottom:48 }}>
+            <Eyebrow>Capabilities</Eyebrow>
+            <h2 style={{ fontFamily:"'Bricolage Grotesque',sans-serif",fontWeight:800,fontSize:"clamp(36px,4.2vw,48px)",letterSpacing:"-0.04em",color:C.text,lineHeight:1.06,maxWidth:560 }}>
+              Everything a security-first team needs.
+            </h2>
+          </div>
+        </FI>
+
+        {/* Row A: wide (60%) + narrow (40%) */}
+        <FI d={0.05}>
+          <div className="vg-row" style={{ display:"grid",gridTemplateColumns:"1.5fr 1fr",gap:16,marginBottom:16 }}>
+            <Card label="Post-Quantum · NIST 2024" title="256-bit entropy. Grover-resistant by design."
+              body="Aligned with NIST 2024 post-quantum recommendations. Generates passwords resistant to Grover's algorithm using extended 128-char pools. Targets 256-bit entropy floor. Ready before quantum computing makes today's credentials obsolete."
+              metric="256-bit" metricSub="post-quantum entropy target">
+              <div style={{ background:C.surf2,borderRadius:8,padding:"10px 14px",fontFamily:C.mono,fontSize:10,color:C.textSub,lineHeight:1.9 }}>
+                <div><span style={{color:C.blue}}>mode</span>    → post_quantum</div>
+                <div><span style={{color:C.blue}}>pool</span>    → 128 chars</div>
+                <div><span style={{color:C.blue}}>entropy</span> → 256 bits</div>
+                <div><span style={{color:C.blue}}>standard</span>→ NIST SP 800-208</div>
+              </div>
+            </Card>
+            <Card label="Breach Detection · k-Anonymity" title="850M+ compromised credentials checked."
+              body="k-Anonymity HIBP API — only a 5-char SHA-1 prefix is sent. Your full password never leaves your device."
+              metric="0" metricSub="chars of your password transmitted">
+              <div style={{ display:"flex",flexDirection:"column",gap:5,marginTop:4 }}>
+                {[
+                  {l:"SHA-1 prefix sent",v:"5 chars only"},
+                  {l:"API endpoint",v:"api.pwnedpasswords.com"},
+                  {l:"Match result",v:"0 found ✓"},
+                ].map(r=>(
+                  <div key={r.l} style={{ display:"flex",justifyContent:"space-between",alignItems:"center",padding:"5px 0",borderBottom:`1px solid ${C.surf3}` }}>
+                    <span style={{ fontSize:10,color:C.textMut }}>{r.l}</span>
+                    <span style={{ fontSize:10,fontWeight:700,color:C.text,fontFamily:C.mono }}>{r.v}</span>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          </div>
+        </FI>
+
+        {/* Row B: narrow (40%) + wide (60%) */}
+        <FI d={0.1}>
+          <div className="vg-row" style={{ display:"grid",gridTemplateColumns:"1fr 1.5fr",gap:16 }}>
+            <Card label="Bulk Generation · Team plan" title="500 passwords per batch."
+              body="Uniform compliance settings across the batch. Export as CSV for onboarding and team provisioning."
+              metric="500" metricSub="passwords per generation batch">
+              <div style={{ display:"flex",flexWrap:"wrap",gap:6,marginTop:4 }}>
+                {["10","50","100","250","500"].map(n=>(
+                  <span key={n} style={{ fontSize:10,fontWeight:700,padding:"3px 12px",borderRadius:40,background:n==="100"?C.blue:"#fff",color:n==="100"?"#fff":C.textSub,border:`1.5px solid ${n==="100"?C.blue:C.border}` }}>{n}</span>
+                ))}
+              </div>
+            </Card>
+            <Card label="Open Audit · Full transparency" title="See exactly how your password was built."
+              body="Inspect every parameter: RNG source, character pool composition, entropy calculation method, seed word injection mechanism, compliance threshold check. Nothing is a black box — every parameter is auditable and loggable."
+              metric="7" metricSub="audit parameters exposed per generation">
+              <div style={{ background:C.surf2,borderRadius:8,padding:"10px 14px",fontFamily:C.mono,fontSize:10,color:C.textSub,lineHeight:1.9 }}>
+                <div>rng     → <span style={{color:C.blue}}>crypto.getRandomValues</span></div>
+                <div>pool    → <span style={{color:C.blue}}>upper+lower+sym+num (94)</span></div>
+                <div>seed    → <span style={{color:C.blue}}>"cortex" injected</span></div>
+                <div>entropy → <span style={{color:C.blue}}>128.4 bits (verified)</span></div>
+              </div>
+            </Card>
+          </div>
+        </FI>
+      </div>
+    </section>
+  );
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   §7  DASHBOARD PREVIEW
 ═══════════════════════════════════════════════════════════════════════ */
 function Dashboard() {
   const certs = [
@@ -760,20 +838,26 @@ function Dashboard() {
 
             <div className="db-grid" style={{ display:"grid",gridTemplateColumns:"1fr 340px" }}>
               {/* cert table */}
-              <div style={{ padding:"28px 32px",borderRight:`1px solid ${C.border}` }}>
-                <div style={{ fontSize:12,fontWeight:700,color:C.text,marginBottom:16 }}>Certificate Log</div>
-                <div style={{ display:"grid",gridTemplateColumns:"70px 88px 1fr 48px 48px 64px",gap:8,paddingBottom:10,borderBottom:`1px solid ${C.border}`,marginBottom:8 }}>
+              <div style={{ padding:"28px 32px",borderRight:`1px solid ${C.border}`,overflowX:"auto" }}>
+                <div style={{ display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:16 }}>
+                  <div style={{ fontSize:13,fontWeight:700,color:C.text }}>Certificate Log</div>
+                  <div style={{ display:"flex",gap:6 }}>
+                    <span style={{ fontSize:10,fontWeight:700,color:C.green,background:C.greenBg,padding:"2px 9px",borderRadius:20 }}>3 active</span>
+                    <span style={{ fontSize:10,fontWeight:700,color:"#9CA3AF",background:"rgba(156,163,175,0.12)",padding:"2px 9px",borderRadius:20 }}>1 expired</span>
+                  </div>
+                </div>
+                <div style={{ display:"grid",gridTemplateColumns:"70px 88px 1fr 48px 48px 64px",gap:8,paddingBottom:10,borderBottom:`1px solid ${C.border}`,marginBottom:8,minWidth:480 }}>
                   {["ID","Date","Framework","Entropy","Score","Status"].map(h=>(
                     <div key={h} style={{ fontSize:9,fontWeight:700,color:C.textMut,letterSpacing:"0.07em",textTransform:"uppercase" }}>{h}</div>
                   ))}
                 </div>
                 {certs.map(c=>(
-                  <div key={c.id} style={{ display:"grid",gridTemplateColumns:"70px 88px 1fr 48px 48px 64px",gap:8,padding:"10px 0",borderBottom:`1px solid ${C.surf2}` }}>
+                  <div key={c.id} style={{ display:"grid",gridTemplateColumns:"70px 88px 1fr 48px 48px 64px",gap:8,padding:"11px 0",borderBottom:`1px solid ${C.surf2}`,minWidth:480 }}>
                     <div style={{ fontSize:11,fontWeight:700,color:C.blue,fontFamily:C.mono }}>{c.id}</div>
                     <div style={{ fontSize:11,color:C.textMut }}>{c.date}</div>
-                    <div style={{ fontSize:11,fontWeight:600,color:C.text }}>{c.frame}</div>
-                    <div style={{ fontSize:11,color:C.textSub,fontFamily:C.mono }}>{c.bits}</div>
-                    <div style={{ fontSize:11,fontWeight:700,color:C.green }}>{c.score}</div>
+                    <div style={{ fontSize:12,fontWeight:600,color:C.text }}>{c.frame}</div>
+                    <div style={{ fontSize:11,color:C.textSub,fontFamily:C.mono,fontWeight:700 }}>{c.bits}</div>
+                    <div style={{ fontSize:12,fontWeight:800,color:C.green,fontFamily:"'Bricolage Grotesque',sans-serif" }}>{c.score}</div>
                     <div>
                       <span style={{ fontSize:9,fontWeight:700,color:c.status==="active"?C.green:"#9CA3AF",background:c.status==="active"?C.greenBg:"rgba(156,163,175,0.12)",padding:"2px 8px",borderRadius:20 }}>
                         {c.status}
@@ -785,22 +869,34 @@ function Dashboard() {
 
               {/* scores sidebar */}
               <div style={{ padding:"28px",background:C.surf2 }}>
-                <div style={{ fontSize:12,fontWeight:700,color:C.text,marginBottom:20 }}>Compliance Scores</div>
+                <div style={{ fontSize:13,fontWeight:700,color:C.text,marginBottom:20 }}>Compliance Scores</div>
                 {scores.map(s=>(
-                  <div key={s.l} style={{ marginBottom:18 }}>
-                    <div style={{ display:"flex",justifyContent:"space-between",marginBottom:6 }}>
-                      <span style={{ fontSize:11,fontWeight:600,color:C.textSub }}>{s.l}</span>
-                      <span style={{ fontSize:11,fontWeight:700,color:C.text }}>{s.v}%</span>
+                  <div key={s.l} style={{ marginBottom:20 }}>
+                    <div style={{ display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:7 }}>
+                      <span style={{ fontSize:12,fontWeight:600,color:C.textSub }}>{s.l}</span>
+                      <span style={{ fontSize:14,fontWeight:800,color:s.v===100?C.green:C.text,fontFamily:"'Bricolage Grotesque',sans-serif" }}>{s.v}%</span>
                     </div>
-                    <div style={{ height:4,borderRadius:2,background:C.surf3,overflow:"hidden" }}>
+                    <div style={{ height:5,borderRadius:3,background:C.surf3,overflow:"hidden" }}>
                       <div style={{ height:"100%",width:`${s.v}%`,borderRadius:2,background:`linear-gradient(90deg,${C.blue},#33A4FA)` }}/>
                     </div>
                   </div>
                 ))}
-                <div style={{ marginTop:24,padding:"16px",borderRadius:12,background:C.elevated,border:`1px solid ${C.border}` }}>
-                  <div style={{ fontSize:10,fontWeight:600,color:C.textMut,marginBottom:4 }}>Overall grade</div>
-                  <div style={{ fontSize:40,fontWeight:900,color:C.blue,fontFamily:"'Bricolage Grotesque',sans-serif",letterSpacing:"-0.05em",lineHeight:1 }}>A<span style={{color:C.text}}>+</span></div>
-                  <div style={{ fontSize:10,color:C.textMut,marginTop:4 }}>4/4 frameworks passing</div>
+                <div style={{ marginTop:20,padding:"18px",borderRadius:12,background:C.elevated,border:`1px solid ${C.border}` }}>
+                  <div style={{ display:"flex",justifyContent:"space-between",alignItems:"flex-start" }}>
+                    <div>
+                      <div style={{ fontSize:10,fontWeight:700,color:C.textMut,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:6 }}>Overall Grade</div>
+                      <div style={{ fontSize:44,fontWeight:900,color:C.blue,fontFamily:"'Bricolage Grotesque',sans-serif",letterSpacing:"-0.05em",lineHeight:1 }}>A<span style={{color:C.text}}>+</span></div>
+                    </div>
+                    <span style={{ fontSize:9,fontWeight:700,color:C.green,background:C.greenBg,padding:"3px 10px",borderRadius:20,marginTop:4 }}>COMPLIANT</span>
+                  </div>
+                  <div style={{ marginTop:12,display:"flex",flexDirection:"column",gap:4 }}>
+                    {["NIST SP 800-63B · 98%","HIPAA §164.312 · 100%","PCI-DSS v4.0 · 94%","SOC 2 Type II · 97%"].map(r=>(
+                      <div key={r} style={{ display:"flex",alignItems:"center",gap:6 }}>
+                        <Chk size={9}/>
+                        <span style={{ fontSize:10,color:C.textSub }}>{r}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -888,6 +984,8 @@ export default function HomePage() {
           @media(max-width:860px){
             .split-grid{grid-template-columns:1fr!important;gap:40px!important}
           }
+          .hiw-grid{display:grid;grid-template-columns:1.15fr 1fr 0.85fr;gap:20px}
+          @media(max-width:700px){.hiw-grid{grid-template-columns:1fr!important}}
           .vg-row{display:grid;gap:16px}
           .vg-row3{display:grid;gap:16px}
           @media(max-width:720px){
@@ -909,6 +1007,7 @@ export default function HomePage() {
         <HowItWorks/>
         <ProductSplit/>
         <ValueGrid/>
+        <FeatureBlocks/>
         <Dashboard/>
         <Cta/>
       </main>
