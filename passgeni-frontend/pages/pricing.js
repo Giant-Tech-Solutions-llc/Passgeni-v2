@@ -51,8 +51,8 @@ const PLANS = [
   },
   {
     name: "Team",
-    monthly: "$29",
-    annual: "$249",
+    monthly: "$45",
+    annual: "$540",
     period: "/month",
     annualPeriod: "/year",
     annualNote: "Save 28%",
