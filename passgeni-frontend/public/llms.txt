@@ -1,0 +1,30 @@
+# PassGeni
+
+> PassGeni is credential compliance infrastructure. It generates passwords and
+> passphrases locally in the browser with the Web Crypto API, validates them
+> against NIST SP 800-63B, SOC 2, HIPAA, and PCI DSS v4.0, and produces
+> verifiable audit evidence (signed certificates containing a salted hash
+> commitment and validation verdicts — never the credential).
+
+PassGeni is not a password manager and not a vault. No credential is ever
+stored, transmitted, or seen by PassGeni's servers.
+
+## Key facts
+
+- Generation: crypto.getRandomValues (CSPRNG), entirely client-side
+- Passphrases: EFF large wordlist (7,776 words, 12.9 bits/word), three
+  structures (Easy to Remember, Balanced, High Entropy)
+- Validation: live, local, per-control, with citations (NIST SP 800-63B
+  §5.1.1.2 and Appendix A, SOC 2 CC6.1, 45 CFR §164.308(a)(5)(ii)(D),
+  PCI DSS v4.0 Req 8.3.6)
+- Evidence: Ed25519-signed certificates, publicly verifiable at /cert/[id]
+- Pricing: Free (NIST), Pro $19/mo (SOC 2, HIPAA, PCI detail + ledger),
+  Team $59/mo (seats, shared policy, API)
+
+## Pages
+
+- [Homepage](https://passgeni.ai/): live generator with compliance validation
+- [Compliance Studio](https://passgeni.ai/generator): full generator, password and passphrase modes
+- [Standards library](https://passgeni.ai/compliance): every control PassGeni checks, with citations
+- [Tools](https://passgeni.ai/tools): breach checker, strength checker, audit, policy generator, secure sharing, certificate verifier
+- [Pricing](https://passgeni.ai/pricing)

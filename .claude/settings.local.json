@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(git -C /f/GitHub/Passgeni-v2 log --oneline -10)"
-    ]
-  }
-}

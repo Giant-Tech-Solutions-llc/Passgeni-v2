@@ -1,28 +1,30 @@
 {
-  "name": "passgeni",
-  "version": "2.1.0",
+  "name": "passgeni-frontend",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
-    "db:push": "node scripts/db-push.js"
+    "lint": "eslint"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.43.4",
-    "bcryptjs": "^2.4.3",
-    "framer-motion": "^12.38.0",
-    "next": "^16.2.4",
-    "next-auth": "^4.24.7",
-    "nodemailer": "^7.0.13",
-    "qrcode": "^1.5.3",
-    "react": "^18",
-    "react-dom": "^18",
-    "resend": "^3.2.0"
+    "@fontsource-variable/jetbrains-mono": "^5.2.8",
+    "@fontsource-variable/outfit": "^5.2.8",
+    "@fontsource/newsreader": "^5.2.10",
+    "motion": "^12.42.2",
+    "next": "16.2.10",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "eslint": "^8",
-    "eslint-config-next": "14.2.5"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.10",
+    "tailwindcss": "^4",
+    "typescript": "^5"
   }
 }

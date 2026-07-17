@@ -3,3 +3,4 @@ passgeni-frontend/.env.local
 passgeni-frontend/.env.production
 
 .vercel
+.claude/

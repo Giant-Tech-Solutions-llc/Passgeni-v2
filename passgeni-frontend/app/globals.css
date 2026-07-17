@@ -1,0 +1,344 @@
+@import "tailwindcss";
+
+/* ---- PassGeni V3.1 design tokens (docs/V3-BUILD-PLAN.md) ---- */
+:root {
+  /* blue ramp */
+  --pg-blue-050: #eef1ff;
+  --pg-blue-100: #dce2ff;
+  --pg-blue-500: #0320ff;
+  --pg-blue-600: #0218cc;
+  --pg-blue-700: #0113a0;
+
+  --pg-primary: var(--pg-blue-500);
+  --pg-primary-hov: var(--pg-blue-600);
+  --pg-primary-down: var(--pg-blue-700);
+  --pg-primary-soft: rgba(3, 32, 255, 0.07);
+  --pg-secondary: #0010a3;
+  --pg-accent: #0ff280;
+  --pg-accent-ink: #067a42;
+
+  /* elevation ramp (light act) */
+  --pg-canvas: #f2f4fa; /* L0 page */
+  --pg-band: #f8fafd; /* L1 section band */
+  --pg-surface-1: #ffffff; /* L2 card */
+  --pg-surface-2: #f1f3f9;
+  --pg-surface-3: #e7ebf5;
+  --pg-inset: #edf0f8; /* recessed surfaces */
+  --pg-border: rgba(11, 13, 23, 0.09);
+  --pg-border-soft: rgba(11, 13, 23, 0.05);
+
+  --pg-ink: #0b0d17;
+  --pg-sub: #3d4257;
+  --pg-muted: #667085;
+  --pg-fail: #d92d20;
+  --pg-warn: #b54708;
+
+  /* dark act anchors */
+  --pg-deep-0: #0a102e;
+  --pg-deep-1: #101740;
+  --pg-deep-2: #161f52;
+
+  /* layered shadows: tight ambient + wide diffuse, never one blurry drop */
+  --pg-sh-1: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --pg-sh-card:
+    0 0 0 1px rgba(11, 13, 23, 0.04), 0 1px 2px rgba(16, 24, 40, 0.05),
+    0 6px 16px -4px rgba(16, 24, 40, 0.07);
+  --pg-sh-raised:
+    0 0 0 1px rgba(3, 32, 255, 0.06), 0 2px 4px rgba(16, 24, 40, 0.05),
+    0 12px 28px -6px rgba(16, 24, 40, 0.12), 0 36px 72px -18px rgba(16, 24, 40, 0.18);
+  --pg-sh-raised-bloom:
+    0 0 0 1px rgba(3, 32, 255, 0.09), 0 2px 4px rgba(16, 24, 40, 0.05),
+    0 16px 36px -6px rgba(16, 24, 40, 0.14), 0 44px 88px -18px rgba(16, 24, 40, 0.22);
+  --pg-sh-inset:
+    inset 0 1px 2px rgba(16, 24, 40, 0.07), inset 0 0 0 1px rgba(11, 13, 23, 0.04);
+  --pg-sh-deep:
+    0 0 0 1px rgba(255, 255, 255, 0.07), 0 12px 32px -8px rgba(0, 0, 0, 0.5);
+
+  /* motion */
+  --pg-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Dark act: remap the same semantic tokens so every component works in both acts */
+.act-dark {
+  --pg-canvas: var(--pg-deep-0);
+  --pg-band: var(--pg-deep-0);
+  --pg-surface-1: var(--pg-deep-1);
+  --pg-surface-2: #0d1338;
+  --pg-surface-3: var(--pg-deep-2);
+  --pg-inset: #080d26;
+  --pg-border: rgba(255, 255, 255, 0.09);
+  --pg-border-soft: rgba(255, 255, 255, 0.05);
+  --pg-ink: #edf0fb;
+  --pg-sub: #b4bcdd;
+  --pg-muted: #8891b8;
+  --pg-fail: #f97066;
+  --pg-accent-ink: #34d399;
+  --pg-primary-soft: rgba(97, 114, 255, 0.14);
+  --pg-sh-card: var(--pg-sh-deep);
+  --pg-sh-raised: var(--pg-sh-deep);
+  --pg-sh-inset: inset 0 1px 2px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+@theme inline {
+  --color-canvas: var(--pg-canvas);
+  --color-band: var(--pg-band);
+  --color-surface-1: var(--pg-surface-1);
+  --color-surface-2: var(--pg-surface-2);
+  --color-surface-3: var(--pg-surface-3);
+  --color-inset: var(--pg-inset);
+  --color-line: var(--pg-border);
+  --color-line-soft: var(--pg-border-soft);
+  --color-ink: var(--pg-ink);
+  --color-sub: var(--pg-sub);
+  --color-muted: var(--pg-muted);
+  --color-primary: var(--pg-primary);
+  --color-primary-hov: var(--pg-primary-hov);
+  --color-primary-down: var(--pg-primary-down);
+  --color-primary-soft: var(--pg-primary-soft);
+  --color-blue-tint: var(--pg-blue-050);
+  --color-secondary: var(--pg-secondary);
+  --color-accent: var(--pg-accent);
+  --color-accent-ink: var(--pg-accent-ink);
+  --color-fail: var(--pg-fail);
+  --color-warn: var(--pg-warn);
+  --color-deep-0: var(--pg-deep-0);
+  --color-deep-1: var(--pg-deep-1);
+  --font-sans: "Outfit Variable", "Outfit", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace;
+  --font-serif: "Newsreader", Georgia, serif;
+  --shadow-s1: var(--pg-sh-1);
+  --shadow-card: var(--pg-sh-card);
+  --shadow-raised: var(--pg-sh-raised);
+  --shadow-inset: var(--pg-sh-inset);
+  --radius-chip: 6px;
+  --radius-card: 10px;
+  --radius-frame: 14px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--pg-canvas);
+  color: var(--pg-ink);
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: var(--pg-blue-500);
+  color: #fff;
+}
+
+/* Branded focus — visible everywhere, WCAG 2.4.7 */
+:focus-visible {
+  outline: 2px solid var(--pg-primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+  box-shadow: 0 0 0 5px var(--pg-primary-soft);
+}
+
+/* Desktop scrollbar, quiet and branded */
+@media (pointer: fine) {
+  ::-webkit-scrollbar {
+    width: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--pg-canvas);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c3cadf;
+    border-radius: 8px;
+    border: 3px solid var(--pg-canvas);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #9aa4c6;
+  }
+}
+
+/* The rare accent voice */
+.voice {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* Dark-act typography: optical compensation */
+.act-dark .voice {
+  font-weight: 400;
+}
+.act-dark h1,
+.act-dark h2,
+.act-dark h3 {
+  letter-spacing: -0.015em;
+  font-weight: 650;
+}
+
+/* Caps micro-labels */
+.microlabel {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+@media (max-width: 420px) {
+  .microlabel {
+    font-size: 10.5px;
+  }
+}
+
+/* Grain: feTurbulence at ~2.5%, hero + dark bands only */
+.grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---- range sliders as instrument controls ---- */
+input[type="range"] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  height: 28px;
+  background: transparent;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    var(--pg-primary) 0%,
+    var(--pg-primary) var(--fill, 50%),
+    var(--pg-surface-3) var(--fill, 50%),
+    var(--pg-surface-3) 100%
+  );
+}
+input[type="range"]::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pg-surface-3);
+}
+input[type="range"]::-moz-range-progress {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--pg-primary);
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -8px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--pg-primary);
+  box-shadow: var(--pg-sh-1);
+  transition: transform 150ms var(--pg-ease);
+}
+input[type="range"]:active::-webkit-slider-thumb {
+  transform: scale(1.15);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid var(--pg-primary);
+  box-shadow: var(--pg-sh-1);
+}
+
+/* Blurred locked evidence rows — screen readers get real text instead */
+.evidence-locked {
+  filter: blur(5px);
+  user-select: none;
+}
+
+/* Locked standards: one shimmer pass on hover — sell the upgrade with motion */
+.locked-row {
+  position: relative;
+  overflow: hidden;
+}
+.locked-row::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(
+    105deg,
+    transparent 30%,
+    rgba(3, 32, 255, 0.08) 48%,
+    rgba(255, 255, 255, 0.5) 52%,
+    transparent 70%
+  );
+  background-size: 300% 100%;
+  background-position: 110% 0;
+  opacity: 0;
+}
+.locked-row:hover::after {
+  animation: shimmer-once 850ms var(--pg-ease) 1;
+}
+@keyframes shimmer-once {
+  0% {
+    opacity: 1;
+    background-position: 110% 0;
+  }
+  100% {
+    opacity: 1;
+    background-position: -60% 0;
+  }
+}
+
+/* Certify CTA: the single permitted ambient loop — shadow only */
+.certify-breathe {
+  animation: certify-breathe 4.5s var(--pg-ease) infinite;
+}
+@keyframes certify-breathe {
+  0%,
+  70%,
+  100% {
+    box-shadow: 0 1px 2px rgba(16, 24, 40, 0.1), 0 0 0 0 rgba(3, 32, 255, 0);
+  }
+  35% {
+    box-shadow: 0 2px 8px rgba(3, 32, 255, 0.25), 0 0 0 6px rgba(3, 32, 255, 0.06);
+  }
+}
+
+/* Segmented meters: cells stamp in on remount */
+.seg-in {
+  animation: seg-in 260ms var(--pg-ease) both;
+}
+@keyframes seg-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0.4);
+  }
+  to {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .certify-breathe {
+    animation: none;
+  }
+}
